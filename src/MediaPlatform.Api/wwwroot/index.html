@@ -352,6 +352,26 @@
   .toast.show { transform: translateY(0); opacity: 1; }
   .toast.error { background: rgba(255,51,102,0.15); border: 1px solid var(--accent); color: var(--accent); }
   .toast.success { background: rgba(0,230,118,0.1); border: 1px solid var(--green); color: var(--green); }
+
+  /* YouTube Player */
+  .player-wrap {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%;
+    margin-bottom: 32px;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: #000;
+    border: 1px solid var(--border);
+  }
+
+  .player-wrap.hidden { display: none; }
+
+  .player-wrap iframe {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+  }
 </style>
 </head>
 <body>
@@ -362,6 +382,11 @@
     <h1><span>media</span>::platform</h1>
     <div class="status-dot" id="statusDot" title="API status"></div>
   </header>
+
+  <!-- YouTube Player -->
+  <div class="player-wrap hidden" id="playerWrap">
+    <div id="ytPlayer"></div>
+  </div>
 
   <!-- Now Playing -->
   <div class="now-playing" id="nowPlaying">
@@ -395,9 +420,81 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="https://www.youtube.com/iframe_api"></script>
 <script>
 const API = location.origin;
 let polling = null;
+let ytPlayer = null;
+let ytReady = false;
+let currentVideoId = null;
+let lastApiState = null;
+
+// YouTube IFrame API callback
+function onYouTubeIframeAPIReady() {
+  ytPlayer = new YT.Player('ytPlayer', {
+    height: '100%',
+    width: '100%',
+    playerVars: {
+      autoplay: 0,
+      controls: 1,
+      modestbranding: 1,
+      rel: 0
+    },
+    events: {
+      onReady: () => { ytReady = true; },
+      onStateChange: onPlayerStateChange
+    }
+  });
+}
+
+function onPlayerStateChange(event) {
+  // YT.PlayerState.ENDED === 0
+  if (event.data === YT.PlayerState.ENDED) {
+    // Auto-skip to next track
+    cmd('skip').then(() => {
+      // If queue had more items, auto-play next
+      setTimeout(() => cmd('play'), 300);
+    });
+  }
+}
+
+function extractVideoId(url) {
+  try {
+    const u = new URL(url);
+    if (u.hostname === 'youtu.be') return u.pathname.slice(1);
+    if (u.searchParams.has('v')) return u.searchParams.get('v');
+  } catch {}
+  return null;
+}
+
+function syncPlayer(state) {
+  if (!ytReady || !ytPlayer) return;
+  const wrap = document.getElementById('playerWrap');
+  const s = state.state.toLowerCase();
+
+  if (state.currentItem) {
+    const vid = extractVideoId(state.currentItem.url);
+    if (vid && vid !== currentVideoId) {
+      currentVideoId = vid;
+      ytPlayer.loadVideoById(vid);
+      wrap.classList.remove('hidden');
+      return; // loadVideoById auto-plays
+    }
+    wrap.classList.remove('hidden');
+  }
+
+  if (s === 'playing' && ytPlayer.getPlayerState && ytPlayer.getPlayerState() === YT.PlayerState.PAUSED) {
+    ytPlayer.playVideo();
+  } else if (s === 'paused' && ytPlayer.getPlayerState && ytPlayer.getPlayerState() === YT.PlayerState.PLAYING) {
+    ytPlayer.pauseVideo();
+  } else if (s === 'idle' || s === 'stopped') {
+    if (currentVideoId) {
+      ytPlayer.stopVideo();
+      currentVideoId = null;
+      wrap.classList.add('hidden');
+    }
+  }
+}
 
 async function api(path, opts = {}) {
   const res = await fetch(`${API}${path}`, {
@@ -423,6 +520,7 @@ function toast(msg, type = 'error') {
 async function refreshState() {
   try {
     const state = await api('/now-playing');
+    lastApiState = state;
     const badge = document.getElementById('stateBadge');
     const title = document.getElementById('npTitle');
     const card = document.getElementById('nowPlaying');
@@ -441,6 +539,7 @@ async function refreshState() {
       card.classList.remove('active');
     }
 
+    syncPlayer(state);
     document.getElementById('statusDot').className = 'status-dot connected';
   } catch {
     document.getElementById('statusDot').className = 'status-dot error';
@@ -504,8 +603,8 @@ async function removeItem(id) {
 
 async function cmd(action) {
   try {
-    await api(`/player/${action}`, { method: 'POST' });
-    refreshState();
+    const result = await api(`/player/${action}`, { method: 'POST' });
+    await refreshState();
     refreshQueue();
   } catch (err) {
     toast(err.message);

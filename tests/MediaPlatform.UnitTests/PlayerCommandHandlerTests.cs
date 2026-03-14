@@ -20,7 +20,7 @@ public class PlayerCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_Play_WhenIdle_DequeuesAndTransitionsToBuffering()
+    public async Task Handle_Play_WhenIdle_DequeuesAndTransitionsToPlaying()
     {
         var item = new QueueItem("q1", VideoUrl.Create("https://youtu.be/abc"), "Test");
         _repository.GetPlaybackStateAsync(Arg.Any<CancellationToken>()).Returns(new PlaybackState());
@@ -28,7 +28,7 @@ public class PlayerCommandHandlerTests
 
         var result = await _sut.HandleAsync(new PlayerCommand(CommandType.Play), TestContext.Current.CancellationToken);
 
-        result.State.Should().Be(PlayerState.Buffering);
+        result.State.Should().Be(PlayerState.Playing);
         result.CurrentItem.Should().Be(item);
         await _repository.Received(1).SavePlaybackStateAsync(Arg.Any<PlaybackState>(), Arg.Any<CancellationToken>());
     }

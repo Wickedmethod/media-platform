@@ -32,6 +32,11 @@ public sealed class PlayerCommandHandler(IQueueRepository repository)
         }
 
         PlaybackStateMachine.Apply(state, playerEvent, nextItem);
+
+        // Auto-transition Buffering → Playing (no real buffering delay in this service)
+        if (state.State is PlayerState.Buffering)
+            PlaybackStateMachine.Apply(state, PlayerEvent.PlaybackStarted);
+
         await repository.SavePlaybackStateAsync(state, ct);
 
         return state;
