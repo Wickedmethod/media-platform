@@ -5,7 +5,7 @@ namespace MediaPlatform.Api.Endpoints;
 
 public static class WorkerEndpoints
 {
-    public static void MapWorkerEndpoints(this WebApplication app)
+    public static void MapWorkerEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/worker").WithTags("Worker").RequireAuthorization(AuthPolicies.WorkerOnly);
 

@@ -5,7 +5,7 @@ namespace MediaPlatform.Api.Endpoints;
 
 public static class AnalyticsEndpoints
 {
-    public static void MapAnalyticsEndpoints(this WebApplication app)
+    public static void MapAnalyticsEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/analytics").WithTags("Analytics").RequireAuthorization(AuthPolicies.AdminOnly);
 

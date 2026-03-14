@@ -5,7 +5,7 @@ namespace MediaPlatform.Api.Endpoints;
 
 public static class NotificationEndpoints
 {
-    public static void MapNotificationEndpoints(this WebApplication app)
+    public static void MapNotificationEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/webhooks").WithTags("Notifications").RequireAuthorization(AuthPolicies.AdminOnly);
 

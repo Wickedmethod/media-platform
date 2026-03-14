@@ -5,7 +5,7 @@ namespace MediaPlatform.Api.Endpoints;
 
 public static class SyncEndpoints
 {
-    public static void MapSyncEndpoints(this WebApplication app)
+    public static void MapSyncEndpoints(this IEndpointRouteBuilder app)
     {
         app.MapGet("/sync", async (
             IQueueRepository repo,

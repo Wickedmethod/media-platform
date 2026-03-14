@@ -5,7 +5,7 @@ namespace MediaPlatform.Api.Endpoints;
 
 public static class DiagnosticsEndpoints
 {
-    public static void MapDiagnosticsEndpoints(this WebApplication app)
+    public static void MapDiagnosticsEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/diagnostics").WithTags("Diagnostics").RequireAuthorization(AuthPolicies.WorkerOnly);
 

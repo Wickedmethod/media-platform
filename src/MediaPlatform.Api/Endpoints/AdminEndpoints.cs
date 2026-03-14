@@ -7,7 +7,7 @@ namespace MediaPlatform.Api.Endpoints;
 
 public static class AdminEndpoints
 {
-    public static void MapAdminEndpoints(this WebApplication app)
+    public static void MapAdminEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/admin").WithTags("Admin").RequireAuthorization(AuthPolicies.AdminOnly);
 

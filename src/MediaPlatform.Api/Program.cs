@@ -240,16 +240,17 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
-app.MapQueueEndpoints();
-app.MapPlayerEndpoints();
-app.MapSyncEndpoints();
-app.MapEventStreamEndpoints();
-app.MapNotificationEndpoints();
-app.MapAnalyticsEndpoints();
-app.MapAdminEndpoints();
-app.MapPolicyEndpoints();
-app.MapWorkerEndpoints();
-app.MapDiagnosticsEndpoints();
+var api = app.MapGroup("/api");
+api.MapQueueEndpoints();
+api.MapPlayerEndpoints();
+api.MapSyncEndpoints();
+api.MapEventStreamEndpoints();
+api.MapNotificationEndpoints();
+api.MapAnalyticsEndpoints();
+api.MapAdminEndpoints();
+api.MapPolicyEndpoints();
+api.MapWorkerEndpoints();
+api.MapDiagnosticsEndpoints();
 app.MapMetrics();
 
 app.Run();

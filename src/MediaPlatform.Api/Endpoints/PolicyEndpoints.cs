@@ -5,7 +5,7 @@ namespace MediaPlatform.Api.Endpoints;
 
 public static class PolicyEndpoints
 {
-    public static void MapPolicyEndpoints(this WebApplication app)
+    public static void MapPolicyEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/policies").WithTags("Policies").RequireAuthorization(AuthPolicies.AdminOnly);
 

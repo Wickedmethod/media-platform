@@ -7,7 +7,7 @@ public static class EventStreamEndpoints
 {
     private static readonly TimeSpan HeartbeatInterval = TimeSpan.FromSeconds(30);
 
-    public static void MapEventStreamEndpoints(this WebApplication app)
+    public static void MapEventStreamEndpoints(this IEndpointRouteBuilder app)
     {
         app.MapGet("/events", async (IEventBroadcaster broadcaster, HttpContext ctx, CancellationToken ct) =>
         {

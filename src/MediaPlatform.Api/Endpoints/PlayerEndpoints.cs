@@ -11,7 +11,7 @@ namespace MediaPlatform.Api.Endpoints;
 
 public static class PlayerEndpoints
 {
-    public static void MapPlayerEndpoints(this WebApplication app)
+    public static void MapPlayerEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/player").WithTags("Player").RequireRateLimiting("commands");
 

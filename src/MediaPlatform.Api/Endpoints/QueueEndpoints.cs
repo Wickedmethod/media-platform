@@ -11,7 +11,7 @@ namespace MediaPlatform.Api.Endpoints;
 
 public static class QueueEndpoints
 {
-    public static void MapQueueEndpoints(this WebApplication app)
+    public static void MapQueueEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/queue").WithTags("Queue").RequireRateLimiting("general");
 
