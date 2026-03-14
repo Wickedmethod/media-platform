@@ -583,38 +583,8 @@ async function refreshState() {
   try {
     const state = await api('/now-playing');
     lastApiState = state;
-    const badge = document.getElementById('stateBadge');
-    const title = document.getElementById('npTitle');
-    const card = document.getElementById('nowPlaying');
-    const meta = document.getElementById('npMeta');
-
-    const s = state.state.toLowerCase();
-    badge.textContent = state.state;
-    badge.className = `badge ${s}`;
-
-    if (state.currentItem) {
-      title.textContent = state.currentItem.title;
-      title.className = 'np-title';
-      card.classList.add('active');
-    } else {
-      title.textContent = 'Nothing queued';
-      title.className = 'np-title empty';
-      card.classList.remove('active');
-    }
-
-    // Position + retry meta
-    let metaParts = [];
-    if (state.positionSeconds > 0) {
-      const m = Math.floor(state.positionSeconds / 60);
-      const sec = Math.floor(state.positionSeconds % 60);
-      metaParts.push(`⏱ ${m}:${sec.toString().padStart(2,'0')}`);
-    }
-    if (state.retryCount > 0) metaParts.push(`⚠ Retry ${state.retryCount}/3`);
-    if (state.lastError) metaParts.push(`<span class="error-info">❌ ${esc(state.lastError)}</span>`);
-    meta.innerHTML = metaParts.join(' &nbsp;·&nbsp; ');
-
+    renderState(state);
     syncPlayer(state);
-    document.getElementById('statusDot').className = 'status-dot connected';
   } catch {
     document.getElementById('statusDot').className = 'status-dot error';
   }
@@ -719,16 +689,90 @@ async function reportError(reason) {
   refreshState();
 }
 
-// Poll every 2s
+// SSE realtime connection
+let eventSource = null;
+function connectSSE() {
+  if (eventSource) { eventSource.close(); }
+  eventSource = new EventSource(`${API}/events`);
+  document.getElementById('statusDot').className = 'status-dot connected';
+
+  eventSource.addEventListener('playback-state', (e) => {
+    try {
+      const state = JSON.parse(e.data);
+      lastApiState = state;
+      renderState(state);
+      syncPlayer(state);
+    } catch {}
+  });
+
+  eventSource.addEventListener('playback-error', (e) => {
+    try {
+      const state = JSON.parse(e.data);
+      lastApiState = state;
+      renderState(state);
+    } catch {}
+  });
+
+  eventSource.addEventListener('queue-updated', () => { refreshQueue(); });
+  eventSource.addEventListener('queue-mode', (e) => {
+    try {
+      const res = JSON.parse(e.data);
+      document.querySelectorAll('.mode-btn').forEach(b =>
+        b.classList.toggle('active', b.dataset.mode === res.mode));
+    } catch {}
+  });
+
+  eventSource.onerror = () => {
+    document.getElementById('statusDot').className = 'status-dot error';
+    eventSource.close();
+    // Reconnect after 3s
+    setTimeout(connectSSE, 3000);
+  };
+}
+
+function renderState(state) {
+  const badge = document.getElementById('stateBadge');
+  const title = document.getElementById('npTitle');
+  const card = document.getElementById('nowPlaying');
+  const meta = document.getElementById('npMeta');
+
+  const s = state.state.toLowerCase();
+  badge.textContent = state.state;
+  badge.className = `badge ${s}`;
+
+  if (state.currentItem) {
+    title.textContent = state.currentItem.title;
+    title.className = 'np-title';
+    card.classList.add('active');
+  } else {
+    title.textContent = 'Nothing queued';
+    title.className = 'np-title empty';
+    card.classList.remove('active');
+  }
+
+  let metaParts = [];
+  if (state.positionSeconds > 0) {
+    const m = Math.floor(state.positionSeconds / 60);
+    const sec = Math.floor(state.positionSeconds % 60);
+    metaParts.push(`⏱ ${m}:${sec.toString().padStart(2,'0')}`);
+  }
+  if (state.retryCount > 0) metaParts.push(`⚠ Retry ${state.retryCount}/3`);
+  if (state.lastError) metaParts.push(`<span class="error-info">❌ ${esc(state.lastError)}</span>`);
+  meta.innerHTML = metaParts.join(' &nbsp;·&nbsp; ');
+
+  document.getElementById('statusDot').className = 'status-dot connected';
+}
+
+// Polling fallback (less frequent - SSE handles realtime)
 function startPolling() {
   refreshState();
   refreshQueue();
   loadMode();
-  polling = setInterval(() => { refreshState(); refreshQueue(); }, 2000);
-  // Report position every 5s
+  polling = setInterval(() => { refreshState(); refreshQueue(); }, 10000);
   setInterval(reportPosition, 5000);
 }
 
+connectSSE();
 startPolling();
 </script>
 </body>

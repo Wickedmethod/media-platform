@@ -18,12 +18,13 @@ public static class QueueEndpoints
             return Results.Ok(items.Select(MapItem));
         });
 
-        group.MapPost("/add", async (AddToQueueRequest request, AddToQueueHandler handler, CancellationToken ct) =>
+        group.MapPost("/add", async (AddToQueueRequest request, AddToQueueHandler handler, IEventBroadcaster events, CancellationToken ct) =>
         {
             try
             {
                 var command = new AddToQueueCommand(request.Url, request.Title, request.StartAtSeconds);
                 var item = await handler.HandleAsync(command, ct);
+                events.Broadcast("queue-updated", new { action = "added", item = MapItem(item) });
                 return Results.Created($"/queue/{item.Id}", MapItem(item));
             }
             catch (ArgumentException ex)
@@ -32,25 +33,27 @@ public static class QueueEndpoints
             }
         });
 
-        group.MapDelete("/{id}", async (string id, RemoveFromQueueHandler handler, CancellationToken ct) =>
+        group.MapDelete("/{id}", async (string id, RemoveFromQueueHandler handler, IEventBroadcaster events, CancellationToken ct) =>
         {
             var command = new RemoveFromQueueCommand(id);
             await handler.HandleAsync(command, ct);
+            events.Broadcast("queue-updated", new { action = "removed", itemId = id });
             return Results.NoContent();
         });
 
-        group.MapGet("/mode", async (SetQueueModeHandler handler, IQueueRepository repo, CancellationToken ct) =>
+        group.MapGet("/mode", async (IQueueRepository repo, CancellationToken ct) =>
         {
             var mode = await repo.GetQueueModeAsync(ct);
             return Results.Ok(new QueueModeResponse(mode.ToString()));
         });
 
-        group.MapPost("/mode", async (SetQueueModeRequest request, SetQueueModeHandler handler, CancellationToken ct) =>
+        group.MapPost("/mode", async (SetQueueModeRequest request, SetQueueModeHandler handler, IEventBroadcaster events, CancellationToken ct) =>
         {
             if (!Enum.TryParse<QueueMode>(request.Mode, true, out var mode))
                 return Results.BadRequest(new ApiError($"Invalid queue mode: {request.Mode}. Valid modes: Normal, Shuffle, PlayNext"));
 
             await handler.HandleAsync(new SetQueueModeCommand(mode), ct);
+            events.Broadcast("queue-mode", new QueueModeResponse(mode.ToString()));
             return Results.Ok(new QueueModeResponse(mode.ToString()));
         });
     }

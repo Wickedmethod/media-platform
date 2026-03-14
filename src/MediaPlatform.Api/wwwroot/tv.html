@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Media Platform — TV Overlay</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: rgba(18,18,26,0.85);
+    --border: #2a2a3a;
+    --text: #e8e8f0;
+    --text-dim: #7a7a8e;
+    --accent: #ff3366;
+    --accent-glow: rgba(255,51,102,0.3);
+    --green: #00e676;
+    --blue: #448aff;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:'Outfit',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    height:100vh;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+  }
+  body::before {
+    content:'';
+    position:fixed; inset:0;
+    background:radial-gradient(ellipse at 30% 80%, rgba(255,51,102,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 20%, rgba(68,138,255,0.05) 0%, transparent 50%);
+    pointer-events:none;
+  }
+
+  /* Overlay bar at bottom */
+  .overlay {
+    position:relative;
+    z-index:10;
+    backdrop-filter:blur(20px);
+    background:var(--surface);
+    border-top:1px solid var(--border);
+    padding:28px 48px;
+    display:flex;
+    align-items:center;
+    gap:40px;
+    transition:transform 0.5s cubic-bezier(.4,0,.2,1), opacity 0.5s;
+  }
+  .overlay.hidden {
+    transform:translateY(100%);
+    opacity:0;
+  }
+
+  /* Now playing section */
+  .now-playing {
+    flex:1;
+    min-width:0;
+  }
+  .label {
+    font-size:13px;
+    font-family:'JetBrains Mono',monospace;
+    color:var(--text-dim);
+    text-transform:uppercase;
+    letter-spacing:2px;
+    margin-bottom:8px;
+  }
+  .track-title {
+    font-size:32px;
+    font-weight:700;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    line-height:1.2;
+  }
+  .track-meta {
+    font-size:14px;
+    color:var(--text-dim);
+    margin-top:4px;
+    font-family:'JetBrains Mono',monospace;
+  }
+
+  /* State badge */
+  .state {
+    display:inline-block;
+    padding:6px 16px;
+    border-radius:20px;
+    font-size:13px;
+    font-weight:700;
+    font-family:'JetBrains Mono',monospace;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    flex-shrink:0;
+  }
+  .state.playing { background:rgba(0,230,118,0.15); color:var(--green); box-shadow:0 0 20px rgba(0,230,118,0.2); }
+  .state.paused  { background:rgba(255,193,7,0.15);  color:#ffc107; }
+  .state.buffering { background:rgba(68,138,255,0.15); color:var(--blue); animation:pulse 1.5s infinite; }
+  .state.idle, .state.stopped { background:rgba(122,122,142,0.15); color:var(--text-dim); }
+  .state.error { background:rgba(255,51,102,0.15); color:var(--accent); }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+  /* Divider */
+  .divider {
+    width:1px;
+    height:60px;
+    background:var(--border);
+    flex-shrink:0;
+  }
+
+  /* Next up */
+  .next-up {
+    flex-shrink:0;
+    min-width:200px;
+    max-width:300px;
+  }
+  .next-title {
+    font-size:18px;
+    font-weight:500;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    opacity:0.7;
+  }
+
+  /* Progress bar */
+  .progress-bar {
+    position:absolute;
+    top:0; left:0; right:0;
+    height:3px;
+    background:var(--border);
+  }
+  .progress-fill {
+    height:100%;
+    background:var(--accent);
+    box-shadow:0 0 10px var(--accent-glow);
+    transition:width 1s linear;
+    width:0%;
+  }
+
+  /* Connection indicator */
+  .connection {
+    position:fixed;
+    top:16px; right:16px;
+    z-index:20;
+    width:10px; height:10px;
+    border-radius:50%;
+    background:var(--green);
+    box-shadow:0 0 8px rgba(0,230,118,0.5);
+    transition:background 0.3s, box-shadow 0.3s;
+  }
+  .connection.disconnected {
+    background:var(--accent);
+    box-shadow:0 0 8px var(--accent-glow);
+  }
+
+  /* Idle screen */
+  .idle-screen {
+    position:fixed; inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:5;
+    transition:opacity 0.5s;
+  }
+  .idle-screen.hidden { opacity:0; pointer-events:none; }
+  .idle-text {
+    font-size:48px;
+    font-weight:300;
+    color:var(--text-dim);
+    letter-spacing:4px;
+  }
+
+  /* Toggle hint */
+  .hint {
+    position:fixed;
+    top:16px; left:16px;
+    font-size:11px;
+    color:var(--text-dim);
+    font-family:'JetBrains Mono',monospace;
+    opacity:0.4;
+    z-index:20;
+  }
+</style>
+</head>
+<body>
+
+<div class="connection" id="connDot"></div>
+<div class="hint">Press [H] to toggle overlay</div>
+
+<div class="idle-screen" id="idleScreen">
+  <div class="idle-text">♫ MEDIA PLATFORM</div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+  <span class="state idle" id="stateBadge">Idle</span>
+
+  <div class="now-playing">
+    <div class="label">Now Playing</div>
+    <div class="track-title" id="trackTitle">Nothing queued</div>
+    <div class="track-meta" id="trackMeta"></div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="next-up">
+    <div class="label">Next Up</div>
+    <div class="next-title" id="nextTitle">—</div>
+  </div>
+</div>
+
+<script>
+const API = location.origin;
+let overlayVisible = true;
+let lastState = null;
+
+// Toggle overlay with H key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'h' || e.key === 'H') {
+    overlayVisible = !overlayVisible;
+    document.getElementById('overlay').classList.toggle('hidden', !overlayVisible);
+  }
+});
+
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function renderState(state) {
+  lastState = state;
+  const badge = document.getElementById('stateBadge');
+  const title = document.getElementById('trackTitle');
+  const meta = document.getElementById('trackMeta');
+  const idle = document.getElementById('idleScreen');
+
+  const s = state.state.toLowerCase();
+  badge.textContent = state.state;
+  badge.className = `state ${s}`;
+
+  if (state.currentItem) {
+    title.textContent = state.currentItem.title;
+    idle.classList.add('hidden');
+
+    let parts = [];
+    if (state.positionSeconds > 0) {
+      const m = Math.floor(state.positionSeconds / 60);
+      const sec = Math.floor(state.positionSeconds % 60);
+      parts.push(`${m}:${sec.toString().padStart(2,'0')}`);
+    }
+    if (state.retryCount > 0) parts.push(`Retry ${state.retryCount}/3`);
+    meta.textContent = parts.join(' · ');
+  } else {
+    title.textContent = 'Nothing queued';
+    meta.textContent = '';
+    if (s === 'idle' || s === 'stopped') idle.classList.remove('hidden');
+  }
+}
+
+async function refreshQueue() {
+  try {
+    const items = await (await fetch(`${API}/queue`)).json();
+    const nextEl = document.getElementById('nextTitle');
+    if (items.length > 0) {
+      nextEl.textContent = items[0].title;
+    } else {
+      nextEl.textContent = '—';
+    }
+  } catch {}
+}
+
+async function refreshState() {
+  try {
+    const state = await (await fetch(`${API}/now-playing`)).json();
+    renderState(state);
+  } catch {}
+}
+
+// SSE connection
+let eventSource = null;
+function connectSSE() {
+  if (eventSource) eventSource.close();
+  eventSource = new EventSource(`${API}/events`);
+  document.getElementById('connDot').classList.remove('disconnected');
+
+  eventSource.addEventListener('playback-state', (e) => {
+    try { renderState(JSON.parse(e.data)); } catch {}
+  });
+  eventSource.addEventListener('playback-error', (e) => {
+    try { renderState(JSON.parse(e.data)); } catch {}
+  });
+  eventSource.addEventListener('queue-updated', () => { refreshQueue(); });
+
+  eventSource.onerror = () => {
+    document.getElementById('connDot').classList.add('disconnected');
+    eventSource.close();
+    setTimeout(connectSSE, 3000);
+  };
+}
+
+// Init
+connectSSE();
+refreshState();
+refreshQueue();
+// Slow fallback poll
+setInterval(() => { refreshState(); refreshQueue(); }, 15000);
+</script>
+</body>
+</html>

@@ -2,6 +2,9 @@ using MediaPlatform.Api.Endpoints;
 using MediaPlatform.Application.Abstractions;
 using MediaPlatform.Application.Commands;
 using MediaPlatform.Application.Queries;
+using MediaPlatform.Infrastructure.Analytics;
+using MediaPlatform.Infrastructure.Events;
+using MediaPlatform.Infrastructure.Notifications;
 using MediaPlatform.Infrastructure.Redis;
 using StackExchange.Redis;
 
@@ -24,6 +27,10 @@ builder.Services.AddHealthChecks()
 
 // Infrastructure
 builder.Services.AddScoped<IQueueRepository, RedisQueueRepository>();
+builder.Services.AddSingleton<IEventBroadcaster, InMemoryEventBroadcaster>();
+builder.Services.AddSingleton<INotificationService, WebhookNotificationService>();
+builder.Services.AddSingleton<IAnalyticsTracker, InMemoryAnalyticsTracker>();
+builder.Services.AddHttpClient("webhooks");
 
 // Application handlers
 builder.Services.AddScoped<AddToQueueHandler>();
@@ -54,5 +61,8 @@ app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));
 
 app.MapQueueEndpoints();
 app.MapPlayerEndpoints();
+app.MapEventStreamEndpoints();
+app.MapNotificationEndpoints();
+app.MapAnalyticsEndpoints();
 
 app.Run();
