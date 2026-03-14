@@ -2,12 +2,11 @@
 import { Play, Pause, SkipForward, Square, Loader2 } from "lucide-vue-next";
 import { usePlayerStore } from "@/stores/player";
 import { Button } from "@/shared/components/ui/button";
+import type { PlayerCommand } from "@/composables/usePlayerCommands";
 
 defineProps<{
-  playLoading?: boolean;
-  pauseLoading?: boolean;
-  skipLoading?: boolean;
-  stopLoading?: boolean;
+  pendingCommand?: PlayerCommand | null;
+  isDisabled?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -27,10 +26,10 @@ const player = usePlayerStore();
       v-if="player.isPlaying"
       variant="outline"
       size="sm"
-      :disabled="pauseLoading"
+      :disabled="isDisabled"
       @click="emit('pause')"
     >
-      <Loader2 v-if="pauseLoading" class="mr-1 h-4 w-4 animate-spin" />
+      <Loader2 v-if="pendingCommand === 'pause'" class="mr-1 h-4 w-4 animate-spin" />
       <Pause v-else class="mr-1 h-4 w-4" />
       Pause
     </Button>
@@ -38,10 +37,10 @@ const player = usePlayerStore();
       v-else
       variant="outline"
       size="sm"
-      :disabled="playLoading"
+      :disabled="isDisabled"
       @click="emit('play')"
     >
-      <Loader2 v-if="playLoading" class="mr-1 h-4 w-4 animate-spin" />
+      <Loader2 v-if="pendingCommand === 'play'" class="mr-1 h-4 w-4 animate-spin" />
       <Play v-else class="mr-1 h-4 w-4" />
       Play
     </Button>
@@ -50,10 +49,10 @@ const player = usePlayerStore();
     <Button
       variant="outline"
       size="sm"
-      :disabled="skipLoading"
+      :disabled="isDisabled"
       @click="emit('skip')"
     >
-      <Loader2 v-if="skipLoading" class="mr-1 h-4 w-4 animate-spin" />
+      <Loader2 v-if="pendingCommand === 'skip'" class="mr-1 h-4 w-4 animate-spin" />
       <SkipForward v-else class="mr-1 h-4 w-4" />
       Skip
     </Button>
@@ -62,10 +61,10 @@ const player = usePlayerStore();
     <Button
       variant="outline"
       size="sm"
-      :disabled="stopLoading"
+      :disabled="isDisabled"
       @click="emit('stop')"
     >
-      <Loader2 v-if="stopLoading" class="mr-1 h-4 w-4 animate-spin" />
+      <Loader2 v-if="pendingCommand === 'stop'" class="mr-1 h-4 w-4 animate-spin" />
       <Square v-else class="mr-1 h-4 w-4" />
       Stop
     </Button>

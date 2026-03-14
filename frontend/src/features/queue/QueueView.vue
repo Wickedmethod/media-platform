@@ -2,10 +2,10 @@
 import { useQueryClient } from "@tanstack/vue-query";
 import { onUnmounted } from "vue";
 import { useGetQueue, useAddToQueue, useRemoveFromQueue, useGetQueueMode, useSetQueueMode, getGetQueueQueryKey, getGetQueueModeQueryKey } from "@/generated/queue/queue";
-import { usePlay, usePause, useSkip, useStop } from "@/generated/player/player";
 import { usePlayerStore, type QueueMode } from "@/stores/player";
 import { useAuthStore } from "@/stores/auth";
 import { useToast } from "@/composables/useToast";
+import { usePlayerCommands } from "@/composables/usePlayerCommands";
 import type { QueueItemResponse } from "@/generated/models";
 import NowPlaying from "./NowPlaying.vue";
 import QueueList from "./QueueList.vue";
@@ -51,10 +51,7 @@ const setModeMutation = useSetQueueMode({
   },
 });
 
-const playMutation = usePlay();
-const pauseMutation = usePause();
-const skipMutation = useSkip();
-const stopMutation = useStop();
+const commands = usePlayerCommands();
 
 // --- SSE-driven query invalidation ---
 const unsubscribe = player.onSSEEvent((event) => {
@@ -86,14 +83,12 @@ function handleModeChange(mode: QueueMode) {
     <!-- Admin controls -->
     <div v-if="auth.isAdmin" class="flex flex-wrap items-center gap-3">
       <PlayerControls
-        :play-loading="playMutation.isPending.value"
-        :pause-loading="pauseMutation.isPending.value"
-        :skip-loading="skipMutation.isPending.value"
-        :stop-loading="stopMutation.isPending.value"
-        @play="playMutation.mutate()"
-        @pause="pauseMutation.mutate()"
-        @skip="skipMutation.mutate()"
-        @stop="stopMutation.mutate()"
+        :pending-command="commands.pendingCommand.value"
+        :is-disabled="commands.isDisabled.value"
+        @play="commands.play()"
+        @pause="commands.pause()"
+        @skip="commands.skip()"
+        @stop="commands.stop()"
       />
       <QueueModeSelector
         :current-mode="queueMode?.mode ?? 'Sequential'"
