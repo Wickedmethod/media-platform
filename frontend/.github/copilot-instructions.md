@@ -14,19 +14,19 @@ Media Platform Frontend is the user interface for the media-platform project. It
 
 ## Tech Stack
 
-| Tool               | Version | Purpose                        |
-| ------------------- | ------- | ------------------------------ |
-| Vue 3               | 3.5+    | UI framework                   |
-| Vite                | 6+      | Build tool (multi-page)        |
-| TypeScript          | 5.5+    | Type safety                    |
-| TailwindCSS v4      | 4+      | Utility CSS (@tailwindcss/vite)|
-| shadcn-vue          | latest  | Component library (new-york)   |
-| Pinia               | 3+      | Client state                   |
-| TanStack Vue Query  | 5+      | Server state / caching         |
-| Vue Router          | 4+      | Client-side routing (SPA only) |
-| Orval               | latest  | OpenAPI → typed API client     |
-| keycloak-js         | 26+     | Auth (SPA only)                |
-| pnpm                | 10+     | Package manager                |
+| Tool               | Version | Purpose                         |
+| ------------------ | ------- | ------------------------------- |
+| Vue 3              | 3.5+    | UI framework                    |
+| Vite               | 6+      | Build tool (multi-page)         |
+| TypeScript         | 5.5+    | Type safety                     |
+| TailwindCSS v4     | 4+      | Utility CSS (@tailwindcss/vite) |
+| shadcn-vue         | latest  | Component library (new-york)    |
+| Pinia              | 3+      | Client state                    |
+| TanStack Vue Query | 5+      | Server state / caching          |
+| Vue Router         | 4+      | Client-side routing (SPA only)  |
+| Orval              | latest  | OpenAPI → typed API client      |
+| keycloak-js        | 26+     | Auth (SPA only)                 |
+| pnpm               | 10+     | Package manager                 |
 
 ---
 
@@ -35,6 +35,7 @@ Media Platform Frontend is the user interface for the media-platform project. It
 ### Feature-Based Organization
 
 Code is organized by business domain under `src/features/`:
+
 - `queue/` — Queue management views + components (SPA)
 - `player/` — Playback controls (SPA)
 - `admin/` — Admin-only views (SPA)
@@ -97,22 +98,26 @@ src/
 ## Conventions
 
 ### Components
+
 - Use `<script setup lang="ts">` for all components
 - shadcn-vue (new-york style, slate base) for UI primitives
 - Mobile-first responsive design
 - Dark mode as default (`.dark` class on `<html>`)
 
 ### Styling
+
 - TailwindCSS v4 with `@tailwindcss/vite` plugin (no `tailwind.config.ts`)
 - CSS variables defined in `@theme` block in `main.css`
 - Use `cn()` helper from `@shared/utils/cn` for conditional classes
 
 ### API
+
 - All API calls through Orval-generated hooks or `apiFetch` from `useApi.ts`
 - Proxy `/api` → `http://localhost:5000` in dev
 - SSE endpoint at `/events` with worker-key query param for TV
 
 ### Auth
+
 - SPA: keycloak-js initializes in `main.ts`, token stored in `useAuthStore`
 - TV: No auth — uses worker-key query param for SSE access
 - API calls include `Authorization: Bearer <token>` via `useApi.ts`

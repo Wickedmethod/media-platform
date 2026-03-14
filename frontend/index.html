@@ -5,27 +5,32 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Media Platform — Queue, playback & admin control" />
+    <meta
+      name="description"
+      content="Media Platform — Queue, playback & admin control"
+    />
     <meta name="theme-color" content="#0a0a0f" />
 
     <!-- Prevent flash of wrong theme -->
     <script>
-      ;(function () {
-        const stored = localStorage.getItem('media-theme')
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+      (function () {
+        const stored = localStorage.getItem("media-theme");
+        const prefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)",
+        ).matches;
 
-        if (stored === 'light') {
-          document.documentElement.classList.remove('dark')
+        if (stored === "light") {
+          document.documentElement.classList.remove("dark");
         } else if (
-          stored === 'dark' ||
+          stored === "dark" ||
           (!stored && prefersDark) ||
-          (stored === 'system' && prefersDark)
+          (stored === "system" && prefersDark)
         ) {
-          document.documentElement.classList.add('dark')
+          document.documentElement.classList.add("dark");
         } else if (!stored) {
-          document.documentElement.classList.add('dark')
+          document.documentElement.classList.add("dark");
         }
-      })()
+      })();
     </script>
 
     <!-- PWA meta tags -->
