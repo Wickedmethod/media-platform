@@ -15,7 +15,7 @@
 - **23 stories done** (all tested, committed)
 - **123 tests** (93 unit + 30 integration), 0 failures
 - **22 stories blocked** by external dependencies
-- **12 new frontend stories** planned across 4 epics
+- **21 new frontend/integration stories** planned across 4 epics
 
 ---
 
@@ -175,7 +175,12 @@ To unlock the remaining 22 blocked stories, set up in this order:
 | MEDIA-705 | PWA Configuration | 2 pts | ⏳ Planned | MEDIA-700 |
 | MEDIA-706 | Frontend Docker & Deployment | 2 pts | ⏳ Planned | MEDIA-700 |
 | MEDIA-707 | Mobile Navigation & App Layout | 2 pts | ⏳ Planned | MEDIA-700, MEDIA-701 |
+| MEDIA-708 | Orval Client Generation Pipeline | 2 pts | ⏳ Planned | MEDIA-700, MEDIA-712 |
+| MEDIA-709 | Error Handling & Toast Notification System | 2 pts | ⏳ Planned | MEDIA-700 |
 | MEDIA-710 | YouTube Search Integration (Invidious) | 3 pts | ⏳ Planned | MEDIA-700, MEDIA-701 |
+| MEDIA-714 | Loading States & Skeleton Screens | 2 pts | ⏳ Planned | MEDIA-700 |
+| MEDIA-715 | E2E Testing with Playwright | 3 pts | ⏳ Planned | MEDIA-700, MEDIA-701, MEDIA-702 |
+| MEDIA-716 | Invidious Search Resilience & Failover | 2 pts | ⏳ Planned | MEDIA-710 |
 
 ## Epic: MEDIA-FE-TV — TV Frontend (Pi Kiosk)
 
@@ -187,6 +192,7 @@ To unlock the remaining 22 blocked stories, set up in this order:
 | MEDIA-720 | TV Frontend — Pi Kiosk Application | 5 pts | ⏳ Planned | MEDIA-704 (pattern) |
 | MEDIA-721 | CEC Remote Control Integration | 3 pts | ⏳ Planned | MEDIA-720 |
 | MEDIA-722 | TV On-Screen Keyboard & Search | 3 pts | ⏳ Planned | MEDIA-720, MEDIA-721, MEDIA-710 |
+| MEDIA-723 | Pi Provisioning & Setup Automation | 3 pts | ⏳ Planned | MEDIA-720, MEDIA-721 |
 
 ## Epic: MEDIA-BE-MULTI — Multi-User Backend Support
 
@@ -196,6 +202,7 @@ To unlock the remaining 22 blocked stories, set up in this order:
 |-------|-------|--------|--------|------------|
 | MEDIA-711 | Track "Added By" User on Queue Items | 2 pts | ⏳ Planned | MEDIA-604 (JWT) |
 | MEDIA-712 | OpenAPI Spec Generation | 1 pt | ⏳ Planned | — |
+| MEDIA-713 | Guest Access Model (TV Anonymous + SPA Auth) | 3 pts | ⏳ Planned | MEDIA-604, MEDIA-622, MEDIA-711 |
 
 ## Epic: MEDIA-MULTI — Multi-Device Audio (v2)
 
@@ -209,27 +216,36 @@ To unlock the remaining 22 blocked stories, set up in this order:
 
 ## Recommended Build Order
 
-### Phase 1: Foundation
-1. **MEDIA-712** — OpenAPI spec (enables Orval client gen)
-2. **MEDIA-700** — Project setup (scaffold + tooling)
-3. **MEDIA-711** — Track added-by user (backend)
+### Phase 1: Foundation (Backend + Scaffold)
+1. **MEDIA-712** — OpenAPI spec generation
+2. **MEDIA-711** — Track added-by user (backend)
+3. **MEDIA-713** — Guest access model + CORS (backend)
+4. **MEDIA-700** — Frontend project setup (scaffold + tooling)
+5. **MEDIA-708** — Orval client generation pipeline
 
 ### Phase 2: Core SPA
-4. **MEDIA-701** — Keycloak auth flow
-5. **MEDIA-704** — SSE composable + player store
-6. **MEDIA-707** — Nav + layout shell
-7. **MEDIA-702** — Queue management view
+6. **MEDIA-709** — Error handling & toast system
+7. **MEDIA-714** — Loading states & skeleton screens
+8. **MEDIA-701** — Keycloak auth flow
+9. **MEDIA-704** — SSE composable + player store
+10. **MEDIA-707** — Nav + layout shell
+11. **MEDIA-702** — Queue management view
 
 ### Phase 3: Features
-8. **MEDIA-710** — YouTube search (Invidious)
-9. **MEDIA-703** — Admin dashboard
-10. **MEDIA-705** — PWA config
-11. **MEDIA-706** — Docker deployment
+12. **MEDIA-710** — YouTube search (Invidious)
+13. **MEDIA-716** — Invidious search resilience & failover
+14. **MEDIA-703** — Admin dashboard
+15. **MEDIA-705** — PWA config
+16. **MEDIA-706** — Docker deployment
 
 ### Phase 4: TV Experience
-12. **MEDIA-720** — TV kiosk app
-13. **MEDIA-721** — CEC remote
-14. **MEDIA-722** — TV on-screen keyboard
+17. **MEDIA-720** — TV kiosk app
+18. **MEDIA-721** — CEC remote
+19. **MEDIA-722** — TV on-screen keyboard
+20. **MEDIA-723** — Pi provisioning script
 
-### Phase 5: Multi-Device (v2)
-15. **MEDIA-730** — Personal playback sessions
+### Phase 5: Quality & Testing
+21. **MEDIA-715** — E2E testing with Playwright
+
+### Phase 6: Multi-Device (v2)
+22. **MEDIA-730** — Personal playback sessions
