@@ -1,8 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="xunit.v3" Version="*" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="*" />
     <PackageReference Include="NSubstitute" Version="*" />
     <PackageReference Include="FluentAssertions" Version="*" />
   </ItemGroup>
