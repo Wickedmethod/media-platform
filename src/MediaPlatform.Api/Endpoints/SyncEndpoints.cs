@@ -1,3 +1,4 @@
+using MediaPlatform.Api.Authorization;
 using MediaPlatform.Application.Abstractions;
 
 namespace MediaPlatform.Api.Endpoints;
@@ -53,6 +54,7 @@ public static class SyncEndpoints
         .Produces<SyncSnapshot>()
         .Produces(StatusCodes.Status304NotModified)
         .RequireRateLimiting("general")
+        .RequireAuthorization(AuthPolicies.ReadAccess)
         .WithDescription("Atomic snapshot of all client-relevant state for fast sync");
     }
 }

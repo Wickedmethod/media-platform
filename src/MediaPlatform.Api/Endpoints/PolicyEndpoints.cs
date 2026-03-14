@@ -1,3 +1,4 @@
+using MediaPlatform.Api.Authorization;
 using MediaPlatform.Application.Abstractions;
 
 namespace MediaPlatform.Api.Endpoints;
@@ -6,7 +7,7 @@ public static class PolicyEndpoints
 {
     public static void MapPolicyEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("/policies").WithTags("Policies");
+        var group = app.MapGroup("/policies").WithTags("Policies").RequireAuthorization(AuthPolicies.AdminOnly);
 
         group.MapGet("/", (IPolicyEngine engine) =>
         {

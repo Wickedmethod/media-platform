@@ -1,3 +1,4 @@
+using MediaPlatform.Api.Authorization;
 using MediaPlatform.Application.Abstractions;
 
 namespace MediaPlatform.Api.Endpoints;
@@ -6,7 +7,7 @@ public static class NotificationEndpoints
 {
     public static void MapNotificationEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("/webhooks").WithTags("Notifications");
+        var group = app.MapGroup("/webhooks").WithTags("Notifications").RequireAuthorization(AuthPolicies.AdminOnly);
 
         group.MapGet("/", (INotificationService svc) =>
         {

@@ -246,7 +246,7 @@ To unlock the remaining 22 blocked stories, set up in this order:
 |-------|-------|--------|--------|------------|
 | MEDIA-711 | Track "Added By" User on Queue Items | 2 pts | ✅ Done | MEDIA-604 (JWT) |
 | MEDIA-712 | OpenAPI Spec Generation & SSE Event Contract | 2 pts | ✅ Done | — |
-| MEDIA-713 | Guest Access Model & SSE Authorization | 3 pts | ⏳ Planned | MEDIA-604, MEDIA-622, MEDIA-711 |
+| MEDIA-713 | Guest Access Model & SSE Authorization | 3 pts | ✅ Done | MEDIA-604, MEDIA-622, MEDIA-711 |
 | MEDIA-747 | Queue Item Metadata Enrichment (YouTube Fetch) | 3 pts | ⏳ Planned | MEDIA-710 |
 | MEDIA-749 | Queue Item Validation & Sanitization | 2 pts | ✅ Done | — |
 | MEDIA-759 | API Versioning Strategy | 3 pts | ⏳ Planned | MEDIA-712 |

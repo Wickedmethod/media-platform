@@ -32,7 +32,7 @@ public sealed class AlertDispatcher(
                     case "Discord":
                         await SendDiscordAlertAsync(channel, alert, ct);
                         break;
-                    // Email and other channels can be added later
+                        // Email and other channels can be added later
                 }
             }
             catch (Exception ex)

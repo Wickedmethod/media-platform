@@ -1,3 +1,4 @@
+using MediaPlatform.Api.Authorization;
 using MediaPlatform.Application.Abstractions;
 
 namespace MediaPlatform.Api.Endpoints;
@@ -6,7 +7,7 @@ public static class DiagnosticsEndpoints
 {
     public static void MapDiagnosticsEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("/diagnostics").WithTags("Diagnostics");
+        var group = app.MapGroup("/diagnostics").WithTags("Diagnostics").RequireAuthorization(AuthPolicies.WorkerOnly);
 
         group.MapPost("/logs", async (SubmitLogsRequest request, IPlayerLogStore logStore, CancellationToken ct) =>
         {

@@ -12,4 +12,8 @@ public static class AuthPolicies
     public const string AdminOnly = nameof(AdminOnly);
     public const string OperatorOrAdmin = nameof(OperatorOrAdmin);
     public const string ViewerOrAbove = nameof(ViewerOrAbove);
+    public const string ReadAccess = nameof(ReadAccess);
+    public const string QueueAdd = nameof(QueueAdd);
+    public const string QueueOwner = nameof(QueueOwner);
+    public const string WorkerOnly = nameof(WorkerOnly);
 }

@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using MediaPlatform.Api.Authorization;
 using MediaPlatform.Application.Abstractions;
 using MediaPlatform.Application.Commands;
 using MediaPlatform.Application.Queries;
@@ -40,6 +41,7 @@ public static class PlayerEndpoints
         })
         .WithName("PlayerHeartbeat")
         .Produces(StatusCodes.Status204NoContent)
+        .RequireAuthorization(AuthPolicies.WorkerOnly)
         .WithDescription("Report player liveness heartbeat");
 
         group.MapPost("/play", async (PlayerCommandHandler handler, IEventBroadcaster events, IAnalyticsTracker analytics, INotificationService notifications, IQueueRepository repo, CancellationToken ct) =>
@@ -51,6 +53,7 @@ public static class PlayerEndpoints
         .WithName("Play")
         .Produces<PlaybackStateResponse>()
         .Produces<ApiError>(StatusCodes.Status409Conflict)
+        .RequireAuthorization(AuthPolicies.AdminOnly)
         .WithDescription("Start or resume playback");
 
         group.MapPost("/pause", async (PlayerCommandHandler handler, IEventBroadcaster events, IAnalyticsTracker analytics, INotificationService notifications, CancellationToken ct) =>
@@ -60,6 +63,7 @@ public static class PlayerEndpoints
         .WithName("Pause")
         .Produces<PlaybackStateResponse>()
         .Produces<ApiError>(StatusCodes.Status409Conflict)
+        .RequireAuthorization(AuthPolicies.AdminOnly)
         .WithDescription("Pause playback");
 
         group.MapPost("/skip", async (PlayerCommandHandler handler, IEventBroadcaster events, IAnalyticsTracker analytics, INotificationService notifications, IQueueRepository repo, CancellationToken ct) =>
@@ -71,6 +75,7 @@ public static class PlayerEndpoints
         .WithName("Skip")
         .Produces<PlaybackStateResponse>()
         .Produces<ApiError>(StatusCodes.Status409Conflict)
+        .RequireAuthorization(AuthPolicies.AdminOnly)
         .WithDescription("Skip to the next track");
 
         group.MapPost("/stop", async (PlayerCommandHandler handler, IEventBroadcaster events, IAnalyticsTracker analytics, INotificationService notifications, CancellationToken ct) =>
@@ -80,6 +85,7 @@ public static class PlayerEndpoints
         .WithName("Stop")
         .Produces<PlaybackStateResponse>()
         .Produces<ApiError>(StatusCodes.Status409Conflict)
+        .RequireAuthorization(AuthPolicies.AdminOnly)
         .WithDescription("Stop playback");
 
         group.MapPost("/position", async (ReportPositionRequest request, ReportPositionHandler handler, CancellationToken ct) =>
@@ -89,6 +95,7 @@ public static class PlayerEndpoints
         })
         .WithName("ReportPosition")
         .Produces<PlaybackStateResponse>()
+        .RequireAuthorization(AuthPolicies.WorkerOnly)
         .WithDescription("Report current playback position");
 
         group.MapPost("/error", async (ReportErrorRequest request, ReportErrorHandler handler, IEventBroadcaster events, IAnalyticsTracker analytics, INotificationService notifications, CancellationToken ct) =>
@@ -101,6 +108,7 @@ public static class PlayerEndpoints
         })
         .WithName("ReportError")
         .Produces<PlaybackStateResponse>()
+        .RequireAuthorization(AuthPolicies.WorkerOnly)
         .WithDescription("Report a playback error");
 
         app.MapGet("/now-playing", async (GetPlaybackStateHandler handler, CancellationToken ct) =>
@@ -111,6 +119,7 @@ public static class PlayerEndpoints
         .WithTags("Player")
         .WithName("GetNowPlaying")
         .Produces<PlaybackStateResponse>()
+        .RequireAuthorization(AuthPolicies.ReadAccess)
         .WithDescription("Get current playback state");
     }
 

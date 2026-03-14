@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using MediaPlatform.Api.Authorization;
 using MediaPlatform.Application.Abstractions;
 using MediaPlatform.Application.Commands;
 using MediaPlatform.Application.Queries;
@@ -21,6 +22,7 @@ public static class QueueEndpoints
         })
         .WithName("GetQueue")
         .Produces<IEnumerable<QueueItemResponse>>()
+        .RequireAuthorization(AuthPolicies.ReadAccess)
         .WithDescription("List all pending queue items");
 
         group.MapPost("/add", async (AddToQueueRequest request, AddToQueueHandler handler, IEventBroadcaster events, IPolicyEngine policyEngine, IAuditLog auditLog, IQueueRepository repo, HttpContext http, CancellationToken ct) =>
@@ -75,6 +77,7 @@ public static class QueueEndpoints
         .Produces<ApiError>(StatusCodes.Status400BadRequest)
         .Produces<ApiError>(StatusCodes.Status403Forbidden)
         .Produces<ApiError>(StatusCodes.Status409Conflict)
+        .RequireAuthorization(AuthPolicies.QueueAdd)
         .WithDescription("Add a media item to the queue");
 
         group.MapDelete("/{id}", async (string id, RemoveFromQueueHandler handler, IQueueRepository repo, IEventBroadcaster events, HttpContext http, CancellationToken ct) =>
@@ -107,6 +110,7 @@ public static class QueueEndpoints
         .Produces(StatusCodes.Status204NoContent)
         .Produces<ApiError>(StatusCodes.Status403Forbidden)
         .Produces<ApiError>(StatusCodes.Status409Conflict)
+        .RequireAuthorization(AuthPolicies.QueueOwner)
         .WithDescription("Remove an item from the queue");
 
         group.MapGet("/mode", async (IQueueRepository repo, CancellationToken ct) =>
@@ -116,6 +120,7 @@ public static class QueueEndpoints
         })
         .WithName("GetQueueMode")
         .Produces<QueueModeResponse>()
+        .RequireAuthorization(AuthPolicies.ReadAccess)
         .WithDescription("Get the current queue mode");
 
         group.MapPost("/mode", async (SetQueueModeRequest request, SetQueueModeHandler handler, IEventBroadcaster events, IQueueRepository repo, HttpContext http, CancellationToken ct) =>
@@ -135,6 +140,7 @@ public static class QueueEndpoints
         .Produces<QueueModeResponse>()
         .Produces<ApiError>(StatusCodes.Status400BadRequest)
         .Produces<ApiError>(StatusCodes.Status409Conflict)
+        .RequireAuthorization(AuthPolicies.AdminOnly)
         .WithDescription("Set queue mode (Normal, Shuffle, PlayNext)");
     }
 

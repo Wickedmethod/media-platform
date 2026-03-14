@@ -21,10 +21,10 @@ Redis Container (media-redis)
 
 ## Backup Schedule
 
-| Frequency | Retention | Method       | Storage             |
-|-----------|-----------|--------------|---------------------|
-| Hourly    | 24 files  | Copy RDB     | Local backup volume |
-| Daily     | 30 files  | Copy + gzip  | Local backup volume |
+| Frequency | Retention | Method      | Storage             |
+| --------- | --------- | ----------- | ------------------- |
+| Hourly    | 24 files  | Copy RDB    | Local backup volume |
+| Daily     | 30 files  | Copy + gzip | Local backup volume |
 
 ## Setup
 
@@ -53,15 +53,15 @@ volumes:
 Or use a container-native cron (supercronic):
 
 ```yaml
-  redis-backup:
-    image: alpine:3
-    volumes:
-      - redis-data:/data:ro
-      - redis-backups:/backups/redis
-      - ./scripts/backup-redis.sh:/backup.sh:ro
-    entrypoint: ["crond", "-f"]
-    depends_on:
-      - redis
+redis-backup:
+  image: alpine:3
+  volumes:
+    - redis-data:/data:ro
+    - redis-backups:/backups/redis
+    - ./scripts/backup-redis.sh:/backup.sh:ro
+  entrypoint: ["crond", "-f"]
+  depends_on:
+    - redis
 ```
 
 ### 3. Verify backups are running
@@ -118,11 +118,11 @@ docker exec media-redis redis-cli DBSIZE
 
 ## Backup Health Monitoring
 
-| Check       | Alert Threshold            | How to Verify                          |
-|-------------|----------------------------|----------------------------------------|
-| Backup age  | No backup in 2 hours       | `ls -lt /backups/redis/hourly/ | head` |
-| Backup size | Size < 1 KB (empty/corrupt)| `stat /backups/redis/hourly/latest`    |
-| Disk space  | Backup volume > 90% full   | `df -h /backups/redis`                 |
+| Check       | Alert Threshold             | How to Verify                       |
+| ----------- | --------------------------- | ----------------------------------- | ----- |
+| Backup age  | No backup in 2 hours        | `ls -lt /backups/redis/hourly/      | head` |
+| Backup size | Size < 1 KB (empty/corrupt) | `stat /backups/redis/hourly/latest` |
+| Disk space  | Backup volume > 90% full    | `df -h /backups/redis`              |
 
 ## What Gets Restored
 

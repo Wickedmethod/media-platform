@@ -1,3 +1,4 @@
+using MediaPlatform.Api.Authorization;
 using MediaPlatform.Application.Abstractions;
 
 namespace MediaPlatform.Api.Endpoints;
@@ -6,7 +7,7 @@ public static class AnalyticsEndpoints
 {
     public static void MapAnalyticsEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("/analytics").WithTags("Analytics");
+        var group = app.MapGroup("/analytics").WithTags("Analytics").RequireAuthorization(AuthPolicies.AdminOnly);
 
         group.MapGet("/", (IAnalyticsTracker tracker, DateTimeOffset? from, DateTimeOffset? to) =>
         {

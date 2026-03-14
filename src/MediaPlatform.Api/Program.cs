@@ -30,11 +30,24 @@ builder.Host.UseSerilog((context, config) => config
     .WriteTo.Console(outputTemplate:
         "[{Timestamp:HH:mm:ss} {Level:u3}] {CorrelationId} {Message:lj}{NewLine}{Exception}"));
 
-// CORS for local development
+// CORS (MEDIA-713)
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(policy =>
-        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+    options.AddPolicy("MediaPlatform", policy =>
+    {
+        var origins = new List<string> { "http://localhost:5173", "http://localhost:3000" };
+        var configOrigins = builder.Configuration.GetValue<string>("Cors:AllowedOrigins");
+        if (!string.IsNullOrWhiteSpace(configOrigins))
+        {
+            origins.AddRange(configOrigins.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+        }
+
+        policy
+            .WithOrigins(origins.ToArray())
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
 });
 
 // Redis
@@ -45,7 +58,7 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer
 builder.Services.AddHealthChecks()
     .AddRedis(redisConnection, name: "redis", tags: ["ready"]);
 
-// Authentication — Keycloak JWT Bearer (active when Authority is configured)
+// Authentication — dual scheme: JWT Bearer + Worker Key (MEDIA-713)
 var keycloakAuthority = builder.Configuration.GetValue<string>("Keycloak:Authority");
 if (!string.IsNullOrEmpty(keycloakAuthority))
 {
@@ -56,21 +69,71 @@ if (!string.IsNullOrEmpty(keycloakAuthority))
             options.Audience = builder.Configuration.GetValue<string>("Keycloak:Audience") ?? "account";
             options.RequireHttpsMetadata = builder.Configuration.GetValue("Keycloak:RequireHttpsMetadata", false);
             options.TokenValidationParameters.ValidIssuer = keycloakAuthority;
-        });
+
+            // Support SSE token via query param (EventSource can't send headers)
+            options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
+            {
+                OnMessageReceived = context =>
+                {
+                    var token = context.Request.Query["token"];
+                    if (!string.IsNullOrEmpty(token))
+                        context.Token = token;
+                    return Task.CompletedTask;
+                }
+            };
+        })
+        .AddScheme<AuthenticationSchemeOptions, WorkerKeyAuthenticationHandler>(
+            WorkerKeyAuthenticationHandler.SchemeName, null);
+
     builder.Services.AddTransient<IClaimsTransformation, KeycloakRoleClaimsTransformation>();
-    builder.Services.AddAuthorization(options =>
-    {
-        options.AddPolicy(AuthPolicies.AdminOnly, p => p.RequireRole(MediaPlatformRoles.Admin));
-        options.AddPolicy(AuthPolicies.OperatorOrAdmin, p => p.RequireRole(MediaPlatformRoles.Admin, MediaPlatformRoles.Operator));
-        options.AddPolicy(AuthPolicies.ViewerOrAbove, p => p.RequireRole(MediaPlatformRoles.Admin, MediaPlatformRoles.Operator, MediaPlatformRoles.Viewer));
-    });
 }
 else
 {
-    // No Keycloak configured — allow anonymous (development mode)
-    builder.Services.AddAuthentication();
-    builder.Services.AddAuthorization();
+    // Development mode — auto-authenticate all requests as admin
+    builder.Services.AddAuthentication("Development")
+        .AddScheme<AuthenticationSchemeOptions, DevelopmentAuthenticationHandler>("Development", null)
+        .AddScheme<AuthenticationSchemeOptions, DevelopmentAuthenticationHandler>(
+            JwtBearerDefaults.AuthenticationScheme, null)
+        .AddScheme<AuthenticationSchemeOptions, DevelopmentAuthenticationHandler>(
+            WorkerKeyAuthenticationHandler.SchemeName, null);
 }
+
+// Authorization policies (MEDIA-713)
+// All policies include both auth schemes so authenticated users get 403 (not 401)
+builder.Services.AddAuthorization(options =>
+{
+    // Read-only: JWT users or Worker Key
+    options.AddPolicy(AuthPolicies.ReadAccess, policy =>
+        policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme, WorkerKeyAuthenticationHandler.SchemeName)
+              .RequireAuthenticatedUser());
+
+    // Queue add: JWT users or Worker Key
+    options.AddPolicy(AuthPolicies.QueueAdd, policy =>
+        policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme, WorkerKeyAuthenticationHandler.SchemeName)
+              .RequireAuthenticatedUser());
+
+    // Own items: JWT user (Worker Key users are rejected — TV cannot delete)
+    options.AddPolicy(AuthPolicies.QueueOwner, policy =>
+        policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme, WorkerKeyAuthenticationHandler.SchemeName)
+              .RequireAuthenticatedUser()
+              .RequireAssertion(ctx => !ctx.User.HasClaim("origin", "worker")));
+
+    // TV reporting: must have worker role
+    options.AddPolicy(AuthPolicies.WorkerOnly, policy =>
+        policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme, WorkerKeyAuthenticationHandler.SchemeName)
+              .RequireAuthenticatedUser()
+              .RequireRole("worker"));
+
+    // Admin actions: JWT with media-admin role
+    options.AddPolicy(AuthPolicies.AdminOnly, policy =>
+        policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme, WorkerKeyAuthenticationHandler.SchemeName)
+              .RequireAuthenticatedUser()
+              .RequireRole(MediaPlatformRoles.Admin));
+
+    // Legacy policies
+    options.AddPolicy(AuthPolicies.OperatorOrAdmin, p => p.RequireRole(MediaPlatformRoles.Admin, MediaPlatformRoles.Operator));
+    options.AddPolicy(AuthPolicies.ViewerOrAbove, p => p.RequireRole(MediaPlatformRoles.Admin, MediaPlatformRoles.Operator, MediaPlatformRoles.Viewer));
+});
 
 // Rate limiting
 builder.Services.AddRateLimiter(options =>
@@ -85,6 +148,12 @@ builder.Services.AddRateLimiter(options =>
     options.AddFixedWindowLimiter("general", limiter =>
     {
         limiter.PermitLimit = 120;
+        limiter.Window = TimeSpan.FromMinutes(1);
+        limiter.QueueLimit = 0;
+    });
+    options.AddFixedWindowLimiter("queue-add-tv", limiter =>
+    {
+        limiter.PermitLimit = 10;
         limiter.Window = TimeSpan.FromMinutes(1);
         limiter.QueueLimit = 0;
     });
@@ -138,7 +207,7 @@ builder.Services.AddScoped<SetQueueModeHandler>();
 
 var app = builder.Build();
 
-app.UseCors();
+app.UseCors("MediaPlatform");
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
@@ -147,7 +216,6 @@ app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseHttpMetrics();
 
 // Security middleware pipeline (order matters)
-app.UseMiddleware<WorkerAuthMiddleware>();
 app.UseAuthentication();
 app.UseMiddleware<KillSwitchMiddleware>();
 app.UseRateLimiter();

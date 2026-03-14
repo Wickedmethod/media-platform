@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using MediaPlatform.Api.Authorization;
 using MediaPlatform.Application.Abstractions;
 using Microsoft.Extensions.Configuration;
 
@@ -8,7 +9,7 @@ public static class AdminEndpoints
 {
     public static void MapAdminEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("/admin").WithTags("Admin");
+        var group = app.MapGroup("/admin").WithTags("Admin").RequireAuthorization(AuthPolicies.AdminOnly);
 
         // Player Liveness
         group.MapGet("/players", async (IPlayerRegistry registry, CancellationToken ct) =>

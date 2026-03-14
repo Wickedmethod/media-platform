@@ -5,7 +5,7 @@
 **Epic:** MEDIA-BE-MULTI — Multi-User Backend Support  
 **Priority:** High  
 **Effort:** 3 points  
-**Status:** ⏳ Planned  
+**Status:** ✅ Done  
 **Depends on:** MEDIA-604 (JWT auth), MEDIA-622 (Worker Key), MEDIA-711 (added-by tracking)  \n**Absorbs:** MEDIA-727 (SSE Authorization & Guest Access Policy)
 
 ---

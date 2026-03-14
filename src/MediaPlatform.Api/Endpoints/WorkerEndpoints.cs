@@ -1,3 +1,4 @@
+using MediaPlatform.Api.Authorization;
 using MediaPlatform.Application.Abstractions;
 
 namespace MediaPlatform.Api.Endpoints;
@@ -6,7 +7,7 @@ public static class WorkerEndpoints
 {
     public static void MapWorkerEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("/worker").WithTags("Worker");
+        var group = app.MapGroup("/worker").WithTags("Worker").RequireAuthorization(AuthPolicies.WorkerOnly);
 
         group.MapPost("/register", async (WorkerRegistrationRequest request, IPlayerRegistry registry, IEventBroadcaster events, CancellationToken ct) =>
         {

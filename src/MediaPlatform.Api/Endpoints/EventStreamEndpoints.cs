@@ -1,3 +1,4 @@
+using MediaPlatform.Api.Authorization;
 using MediaPlatform.Application.Abstractions;
 
 namespace MediaPlatform.Api.Endpoints;
@@ -25,7 +26,7 @@ public static class EventStreamEndpoints
                 await ctx.Response.WriteAsync($"event: {eventType}\ndata: {json}\n\n", ct);
                 await ctx.Response.Body.FlushAsync(ct);
             }
-        }).WithTags("Events").ExcludeFromDescription();
+        }).WithTags("Events").RequireAuthorization(AuthPolicies.ReadAccess).ExcludeFromDescription();
     }
 
     private static async Task SendHeartbeatsAsync(HttpContext ctx, CancellationToken ct)
