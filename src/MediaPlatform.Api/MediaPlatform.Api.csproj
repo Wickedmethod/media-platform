@@ -1,6 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
+    <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="9.*" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\MediaPlatform.Application\MediaPlatform.Application.csproj" />
     <ProjectReference Include="..\MediaPlatform.Infrastructure\MediaPlatform.Infrastructure.csproj" />
   </ItemGroup>

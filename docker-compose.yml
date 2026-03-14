@@ -17,9 +17,10 @@ services:
   redis:
     image: redis:7-alpine
     container_name: media-platform-redis
-    command: redis-server --appendonly yes
+    command: redis-server /usr/local/etc/redis/redis.conf
     volumes:
       - redis-data:/data
+      - ./docker/redis.conf:/usr/local/etc/redis/redis.conf:ro
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s

@@ -11,6 +11,7 @@ public sealed class RedisQueueRepository(IConnectionMultiplexer redis) : IQueueR
 {
     private const string QueueKey = "media:queue";
     private const string NowPlayingKey = "media:now-playing";
+    private const string QueueModeKey = "media:queue-mode";
 
     private IDatabase Db => redis.GetDatabase();
 
@@ -27,6 +28,12 @@ public sealed class RedisQueueRepository(IConnectionMultiplexer redis) : IQueueR
     {
         var json = Serialize(item);
         await Db.ListRightPushAsync(QueueKey, json);
+    }
+
+    public async Task AddNextAsync(QueueItem item, CancellationToken ct = default)
+    {
+        var json = Serialize(item);
+        await Db.ListLeftPushAsync(QueueKey, json);
     }
 
     public async Task RemoveAsync(string itemId, CancellationToken ct = default)
@@ -49,6 +56,19 @@ public sealed class RedisQueueRepository(IConnectionMultiplexer redis) : IQueueR
         return value.IsNullOrEmpty ? null : Deserialize(value!);
     }
 
+    public async Task<QueueItem?> DequeueShuffledAsync(CancellationToken ct = default)
+    {
+        var length = await Db.ListLengthAsync(QueueKey);
+        if (length == 0) return null;
+
+        var index = Random.Shared.Next((int)length);
+        var value = await Db.ListGetByIndexAsync(QueueKey, index);
+        if (value.IsNullOrEmpty) return await DequeueNextAsync(ct);
+
+        await Db.ListRemoveAsync(QueueKey, value, 1);
+        return Deserialize(value!);
+    }
+
     public async Task<PlaybackState> GetPlaybackStateAsync(CancellationToken ct = default)
     {
         var hash = await Db.HashGetAllAsync(NowPlayingKey);
@@ -68,7 +88,19 @@ public sealed class RedisQueueRepository(IConnectionMultiplexer redis) : IQueueR
                 ? parsed
                 : null;
 
-        return new PlaybackState(playerState, currentItem, startedAt);
+        var positionSeconds = dict.TryGetValue("positionSeconds", out var posStr)
+            && double.TryParse(posStr, System.Globalization.CultureInfo.InvariantCulture, out var pos)
+                ? pos
+                : 0;
+
+        var retryCount = dict.TryGetValue("retryCount", out var retryStr)
+            && int.TryParse(retryStr, out var retry)
+                ? retry
+                : 0;
+
+        dict.TryGetValue("lastError", out var lastError);
+
+        return new PlaybackState(playerState, currentItem, startedAt, positionSeconds, retryCount, lastError);
     }
 
     public async Task SavePlaybackStateAsync(PlaybackState state, CancellationToken ct = default)
@@ -77,16 +109,32 @@ public sealed class RedisQueueRepository(IConnectionMultiplexer redis) : IQueueR
         {
             new("state", state.State.ToString()),
             new("itemJson", state.CurrentItem is not null ? Serialize(state.CurrentItem) : ""),
-            new("startedAt", state.StartedAt?.ToString("O") ?? "")
+            new("startedAt", state.StartedAt?.ToString("O") ?? ""),
+            new("positionSeconds", state.PositionSeconds.ToString(System.Globalization.CultureInfo.InvariantCulture)),
+            new("retryCount", state.RetryCount.ToString()),
+            new("lastError", state.LastError ?? "")
         };
 
         await Db.HashSetAsync(NowPlayingKey, entries);
     }
 
+    public async Task<QueueMode> GetQueueModeAsync(CancellationToken ct = default)
+    {
+        var value = await Db.StringGetAsync(QueueModeKey);
+        return value.IsNullOrEmpty
+            ? QueueMode.Normal
+            : Enum.TryParse<QueueMode>(value!, out var mode) ? mode : QueueMode.Normal;
+    }
+
+    public async Task SetQueueModeAsync(QueueMode mode, CancellationToken ct = default)
+    {
+        await Db.StringSetAsync(QueueModeKey, mode.ToString());
+    }
+
     private static string Serialize(QueueItem item)
     {
         return JsonSerializer.Serialize(new QueueItemDto(
-            item.Id, item.Url.Value, item.Title, item.Status.ToString(), item.AddedAt));
+            item.Id, item.Url.Value, item.Title, item.Status.ToString(), item.AddedAt, item.StartAtSeconds));
     }
 
     private static QueueItem? Deserialize(string json)
@@ -96,9 +144,9 @@ public sealed class RedisQueueRepository(IConnectionMultiplexer redis) : IQueueR
 
         var url = VideoUrl.Create(dto.Url);
         var status = Enum.Parse<QueueItemStatus>(dto.Status);
-        return new QueueItem(dto.Id, url, dto.Title, status, dto.AddedAt);
+        return new QueueItem(dto.Id, url, dto.Title, status, dto.AddedAt, dto.StartAtSeconds);
     }
 
     private sealed record QueueItemDto(
-        string Id, string Url, string Title, string Status, DateTimeOffset AddedAt);
+        string Id, string Url, string Title, string Status, DateTimeOffset AddedAt, double StartAtSeconds = 0);
 }

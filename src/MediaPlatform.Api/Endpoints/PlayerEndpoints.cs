@@ -32,6 +32,18 @@ public static class PlayerEndpoints
             return await ExecuteCommand(handler, CommandType.Stop, ct);
         });
 
+        group.MapPost("/position", async (ReportPositionRequest request, ReportPositionHandler handler, CancellationToken ct) =>
+        {
+            var state = await handler.HandleAsync(new ReportPositionCommand(request.PositionSeconds), ct);
+            return Results.Ok(MapState(state));
+        });
+
+        group.MapPost("/error", async (ReportErrorRequest request, ReportErrorHandler handler, CancellationToken ct) =>
+        {
+            var state = await handler.HandleAsync(new ReportErrorCommand(request.Reason), ct);
+            return Results.Ok(MapState(state));
+        });
+
         app.MapGet("/now-playing", async (GetPlaybackStateHandler handler, CancellationToken ct) =>
         {
             var state = await handler.HandleAsync(ct);
@@ -49,7 +61,7 @@ public static class PlayerEndpoints
         }
         catch (InvalidStateTransitionException ex)
         {
-            return Results.Conflict(new { error = ex.Message });
+            return Results.Conflict(new ApiError(ex.Message));
         }
     }
 
@@ -62,7 +74,11 @@ public static class PlayerEndpoints
                     state.CurrentItem.Url.Value,
                     state.CurrentItem.Title,
                     state.CurrentItem.Status.ToString(),
-                    state.CurrentItem.AddedAt)
+                    state.CurrentItem.AddedAt,
+                    state.CurrentItem.StartAtSeconds)
                 : null,
-            state.StartedAt);
+            state.StartedAt,
+            state.PositionSeconds,
+            state.RetryCount,
+            state.LastError);
 }

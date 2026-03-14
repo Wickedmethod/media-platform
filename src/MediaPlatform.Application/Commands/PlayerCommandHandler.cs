@@ -26,9 +26,27 @@ public sealed class PlayerCommandHandler(IQueueRepository repository)
 
         if (command.Command is CommandType.Play && state.State is PlayerState.Idle or PlayerState.Stopped)
         {
-            nextItem = await repository.DequeueNextAsync(ct);
+            nextItem = await DequeueByModeAsync(ct);
             if (nextItem is null)
                 return state; // Nothing to play
+        }
+
+        // On skip, auto-advance to the next item
+        if (command.Command is CommandType.Skip &&
+            state.State is PlayerState.Playing or PlayerState.Paused or PlayerState.Buffering)
+        {
+            PlaybackStateMachine.Apply(state, playerEvent, nextItem);
+
+            // Try to auto-play next
+            var next = await DequeueByModeAsync(ct);
+            if (next is not null)
+            {
+                PlaybackStateMachine.Apply(state, PlayerEvent.PlayRequested, next);
+                PlaybackStateMachine.Apply(state, PlayerEvent.PlaybackStarted);
+            }
+
+            await repository.SavePlaybackStateAsync(state, ct);
+            return state;
         }
 
         PlaybackStateMachine.Apply(state, playerEvent, nextItem);
@@ -40,5 +58,15 @@ public sealed class PlayerCommandHandler(IQueueRepository repository)
         await repository.SavePlaybackStateAsync(state, ct);
 
         return state;
+    }
+
+    private async Task<QueueItem?> DequeueByModeAsync(CancellationToken ct)
+    {
+        var mode = await repository.GetQueueModeAsync(ct);
+        return mode switch
+        {
+            QueueMode.Shuffle => await repository.DequeueShuffledAsync(ct),
+            _ => await repository.DequeueNextAsync(ct)
+        };
     }
 }

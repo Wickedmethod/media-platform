@@ -10,7 +10,7 @@ namespace MediaPlatform.Domain;
 /// </summary>
 public static class PlaybackStateMachine
 {
-    public static void Apply(PlaybackState state, PlayerEvent playerEvent, QueueItem? item = null)
+    public static void Apply(PlaybackState state, PlayerEvent playerEvent, QueueItem? item = null, string? errorReason = null)
     {
         var current = state.State;
 
@@ -69,7 +69,7 @@ public static class PlaybackStateMachine
                 break;
 
             case PlayerEvent.ErrorOccurred when current is not PlayerState.Stopped:
-                state.SetError();
+                state.SetError(errorReason);
                 break;
 
             default:

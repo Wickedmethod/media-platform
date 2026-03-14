@@ -1,8 +1,8 @@
+using MediaPlatform.Application.Abstractions;
 using MediaPlatform.Application.Commands;
 using MediaPlatform.Application.Queries;
 using MediaPlatform.Domain.Entities;
 using MediaPlatform.Domain.Enums;
-using MediaPlatform.Domain.Errors;
 
 namespace MediaPlatform.Api.Endpoints;
 
@@ -22,13 +22,13 @@ public static class QueueEndpoints
         {
             try
             {
-                var command = new AddToQueueCommand(request.Url, request.Title);
+                var command = new AddToQueueCommand(request.Url, request.Title, request.StartAtSeconds);
                 var item = await handler.HandleAsync(command, ct);
                 return Results.Created($"/queue/{item.Id}", MapItem(item));
             }
             catch (ArgumentException ex)
             {
-                return Results.BadRequest(new { error = ex.Message });
+                return Results.BadRequest(new ApiError(ex.Message));
             }
         });
 
@@ -38,8 +38,23 @@ public static class QueueEndpoints
             await handler.HandleAsync(command, ct);
             return Results.NoContent();
         });
+
+        group.MapGet("/mode", async (SetQueueModeHandler handler, IQueueRepository repo, CancellationToken ct) =>
+        {
+            var mode = await repo.GetQueueModeAsync(ct);
+            return Results.Ok(new QueueModeResponse(mode.ToString()));
+        });
+
+        group.MapPost("/mode", async (SetQueueModeRequest request, SetQueueModeHandler handler, CancellationToken ct) =>
+        {
+            if (!Enum.TryParse<QueueMode>(request.Mode, true, out var mode))
+                return Results.BadRequest(new ApiError($"Invalid queue mode: {request.Mode}. Valid modes: Normal, Shuffle, PlayNext"));
+
+            await handler.HandleAsync(new SetQueueModeCommand(mode), ct);
+            return Results.Ok(new QueueModeResponse(mode.ToString()));
+        });
     }
 
     private static QueueItemResponse MapItem(QueueItem item) =>
-        new(item.Id, item.Url.Value, item.Title, item.Status.ToString(), item.AddedAt);
+        new(item.Id, item.Url.Value, item.Title, item.Status.ToString(), item.AddedAt, item.StartAtSeconds);
 }
