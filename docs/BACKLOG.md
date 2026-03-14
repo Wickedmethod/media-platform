@@ -1,6 +1,6 @@
 # Media Platform — Backlog
 
-> Last updated: 2026-03-15
+> Last updated: 2026-03-16
 
 ## Legend
 
@@ -15,7 +15,7 @@
 - **23 stories done** (all tested, committed)
 - **123 tests** (93 unit + 30 integration), 0 failures
 - **22 stories blocked** by external dependencies
-- **0 stories remaining** that can be implemented without infrastructure
+- **12 new frontend stories** planned across 4 epics
 
 ---
 
@@ -151,9 +151,85 @@
 
 ## Next Steps to Unblock
 
-To unlock the remaining 28 stories, set up in this order:
+To unlock the remaining 22 blocked stories, set up in this order:
 
 1. **Keycloak** — Enables auth stories (610, 626, 630, 632)
 2. **Vault + VaultFacade** — Enables secret stories (605, 629)
 3. **Google OAuth** — Enables YouTube stories (401–404, 625, 627)
 4. **Raspberry Pi** — Enables player node stories (201–205, 501–503, 612, 615–616)
+
+---
+
+## Epic: MEDIA-FE-ADMIN — Admin & User Frontend (Vue 3 SPA)
+
+> Mobile-first PWA for queue management, search, and admin controls.  
+> Tech stack: Vue 3 + Vite + TailwindCSS v4 + shadcn-vue + Pinia + TanStack Query + Orval + keycloak-js
+
+| Story | Title | Effort | Status | Depends on |
+|-------|-------|--------|--------|------------|
+| MEDIA-700 | Admin Frontend Project Setup | 3 pts | ⏳ Planned | — |
+| MEDIA-701 | Keycloak Auth Flow | 3 pts | ⏳ Planned | MEDIA-700 |
+| MEDIA-702 | Queue Management View | 3 pts | ⏳ Planned | MEDIA-700, MEDIA-701, MEDIA-704 |
+| MEDIA-703 | Admin Dashboard View | 3 pts | ⏳ Planned | MEDIA-700, MEDIA-701 |
+| MEDIA-704 | SSE Real-Time Composable & Player Store | 3 pts | ⏳ Planned | MEDIA-700 |
+| MEDIA-705 | PWA Configuration | 2 pts | ⏳ Planned | MEDIA-700 |
+| MEDIA-706 | Frontend Docker & Deployment | 2 pts | ⏳ Planned | MEDIA-700 |
+| MEDIA-707 | Mobile Navigation & App Layout | 2 pts | ⏳ Planned | MEDIA-700, MEDIA-701 |
+| MEDIA-710 | YouTube Search Integration (Invidious) | 3 pts | ⏳ Planned | MEDIA-700, MEDIA-701 |
+
+## Epic: MEDIA-FE-TV — TV Frontend (Pi Kiosk)
+
+> Lightweight HTML/JS application for Raspberry Pi Chromium kiosk mode.  
+> Fullscreen YouTube player with CEC remote control and on-screen search.
+
+| Story | Title | Effort | Status | Depends on |
+|-------|-------|--------|--------|------------|
+| MEDIA-720 | TV Frontend — Pi Kiosk Application | 5 pts | ⏳ Planned | MEDIA-704 (pattern) |
+| MEDIA-721 | CEC Remote Control Integration | 3 pts | ⏳ Planned | MEDIA-720 |
+| MEDIA-722 | TV On-Screen Keyboard & Search | 3 pts | ⏳ Planned | MEDIA-720, MEDIA-721, MEDIA-710 |
+
+## Epic: MEDIA-BE-MULTI — Multi-User Backend Support
+
+> API extensions for user tracking and OpenAPI spec generation.
+
+| Story | Title | Effort | Status | Depends on |
+|-------|-------|--------|--------|------------|
+| MEDIA-711 | Track "Added By" User on Queue Items | 2 pts | ⏳ Planned | MEDIA-604 (JWT) |
+| MEDIA-712 | OpenAPI Spec Generation | 1 pt | ⏳ Planned | — |
+
+## Epic: MEDIA-MULTI — Multi-Device Audio (v2)
+
+> Personal playback sessions — users listen to different songs on their devices.
+
+| Story | Title | Effort | Status | Depends on |
+|-------|-------|--------|--------|------------|
+| MEDIA-730 | Multi-Device Audio — Separate Playback Sessions | 8 pts | ⏳ Planned | MEDIA-711, MEDIA-701 |
+
+---
+
+## Recommended Build Order
+
+### Phase 1: Foundation
+1. **MEDIA-712** — OpenAPI spec (enables Orval client gen)
+2. **MEDIA-700** — Project setup (scaffold + tooling)
+3. **MEDIA-711** — Track added-by user (backend)
+
+### Phase 2: Core SPA
+4. **MEDIA-701** — Keycloak auth flow
+5. **MEDIA-704** — SSE composable + player store
+6. **MEDIA-707** — Nav + layout shell
+7. **MEDIA-702** — Queue management view
+
+### Phase 3: Features
+8. **MEDIA-710** — YouTube search (Invidious)
+9. **MEDIA-703** — Admin dashboard
+10. **MEDIA-705** — PWA config
+11. **MEDIA-706** — Docker deployment
+
+### Phase 4: TV Experience
+12. **MEDIA-720** — TV kiosk app
+13. **MEDIA-721** — CEC remote
+14. **MEDIA-722** — TV on-screen keyboard
+
+### Phase 5: Multi-Device (v2)
+15. **MEDIA-730** — Personal playback sessions
