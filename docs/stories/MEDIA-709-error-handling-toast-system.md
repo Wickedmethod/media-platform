@@ -6,7 +6,8 @@
 **Priority:** High  
 **Effort:** 2 points  
 **Status:** ⏳ Planned  
-**Depends on:** MEDIA-700 (project setup)
+**Depends on:** MEDIA-700 (project setup)  
+**Absorbs:** MEDIA-761 (Global Error Boundary & Fallback UI)
 
 ---
 
@@ -280,6 +281,61 @@ export const queryClient = new QueryClient({
 
 ---
 
+## Global Error Boundary & Fallback UI (absorbed from MEDIA-761)
+
+Vue's `onErrorCaptured` lifecycle hook enables component-level error boundaries. Wrap route views in an `ErrorBoundary` component that catches render errors and displays a recovery UI instead of a blank screen.
+
+```vue
+<!-- src/shared/components/ErrorBoundary.vue -->
+<script setup lang="ts">
+import { ref, onErrorCaptured } from 'vue'
+import FallbackError from './FallbackError.vue'
+
+const error = ref<Error | null>(null)
+
+onErrorCaptured((err: Error) => {
+  error.value = err
+  return false // prevent propagation
+})
+
+function retry() {
+  error.value = null
+}
+</script>
+
+<template>
+  <FallbackError v-if="error" :error="error" @retry="retry" />
+  <slot v-else />
+</template>
+```
+
+```vue
+<!-- src/shared/components/FallbackError.vue -->
+<script setup lang="ts">
+defineProps<{ error: Error }>()
+defineEmits<{ retry: [] }>()
+</script>
+
+<template>
+  <div class="flex flex-col items-center justify-center min-h-[200px] gap-4 p-8 text-center">
+    <AlertCircle class="h-12 w-12 text-destructive" />
+    <h2 class="text-lg font-semibold">Something went wrong</h2>
+    <p class="text-sm text-muted-foreground max-w-md">{{ error.message }}</p>
+    <Button variant="outline" @click="$emit('retry')">Try Again</Button>
+  </div>
+</template>
+```
+
+Usage in `App.vue`:
+
+```vue
+<ErrorBoundary>
+  <RouterView />
+</ErrorBoundary>
+```
+
+---
+
 ## Tasks
 
 - [ ] Create `ApiError` class in `src/lib/api-error.ts`
@@ -289,7 +345,10 @@ export const queryClient = new QueryClient({
 - [ ] Configure TanStack Query default error handling
 - [ ] Handle 401 → redirect to Keycloak login
 - [ ] Handle 429 → show retry countdown
-- [ ] Add error boundary for component-level errors
+- [ ] Add error boundary for component-level errors (`onErrorCaptured`)
+- [ ] Create `ErrorBoundary.vue` wrapper component with fallback UI
+- [ ] Create `FallbackError.vue` with "Something went wrong" + retry button
+- [ ] Wire `app.config.errorHandler` to log + toast unhandled Vue errors
 - [ ] Write unit tests for error classification
 - [ ] Write unit tests for toast composable
 
@@ -307,3 +366,7 @@ export const queryClient = new QueryClient({
 - [ ] Toasts can be manually dismissed
 - [ ] Toasts stack vertically, max 3 visible at once
 - [ ] Unhandled promise rejections caught and displayed
+- [ ] `ErrorBoundary.vue` catches component render errors and shows fallback UI
+- [ ] Fallback UI shows error message + "Try Again" button that re-renders the slot
+- [ ] Route-level `ErrorBoundary` wraps `<RouterView>` in App.vue
+- [ ] `app.config.errorHandler` logs errors and shows toast for unhandled Vue errors

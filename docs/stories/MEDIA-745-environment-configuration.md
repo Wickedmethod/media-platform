@@ -6,7 +6,8 @@
 **Priority:** Medium  
 **Effort:** 2 points  
 **Status:** ⏳ Planned  
-**Depends on:** MEDIA-744 (Docker Compose Stack)
+**Depends on:** MEDIA-744 (Docker Compose Stack)  
+**Absorbs:** MEDIA-764 (Secrets Management for Docker Compose)
 
 ---
 
@@ -91,6 +92,30 @@ Alerting__Discord__WebhookUrl=vault:secret/data/media-platform/discord-webhook#u
 
 ---
 
+## Docker Compose Secrets Integration (absorbed from MEDIA-764)
+
+All sensitive values are managed through VaultFacade + Arcane Vault Bridge. Never hardcode secrets in compose files or `.env`.
+
+### Secret Creation Workflow
+
+1. Generate secrets via `mcp_vaultfacade_generate_batch`:
+   - `secret/data/media-platform/worker-key` — Worker auth key (type: `ApiKey`)
+   - `secret/data/media-platform/discord-webhook` — Discord webhook URL (type: `Generic`)
+   - `secret/data/media-platform/redis-password` — Redis password if auth enabled (type: `Password`)
+
+2. Map secrets in `.vault-env` (see above)
+
+3. Arcane Vault Bridge resolves `.vault-env` → `.env` automatically on deploy
+
+### Security Rules
+
+- `.env` is in `.gitignore` — never committed
+- `.vault-env` is safe to commit (contains only Vault paths, not values)
+- Rotate secrets via `mcp_vaultfacade_rotate_secret` — bridge picks up new values on next deploy
+- Validate in CI that no secret values appear in compose files or tracked env files
+
+---
+
 ## C# Configuration Classes
 
 ```csharp
@@ -125,6 +150,9 @@ builder.Services.Configure<WorkerAuthOptions>(builder.Configuration.GetSection("
 - [ ] Create `.env.example` in project root with all variables
 - [ ] Create `frontend/.env.example` with VITE_ variables
 - [ ] Create `.vault-env` for secret mapping
+- [ ] Generate initial secrets in VaultFacade (`worker-key`, `discord-webhook`)
+- [ ] Ensure `.env` is in `.gitignore` (never committed)
+- [ ] Document secret rotation procedure in `docs/CONFIG.md`
 - [ ] Create C# options classes (`RedisOptions`, `KeycloakOptions`, `WorkerAuthOptions`)
 - [ ] Register options classes in `Program.cs`
 - [ ] Replace hardcoded config values with injected options
@@ -139,4 +167,7 @@ builder.Services.Configure<WorkerAuthOptions>(builder.Configuration.GetSection("
 - [ ] Strongly-typed C# options classes for all config sections
 - [ ] Missing required config fails at startup with clear error
 - [ ] `.vault-env` ready for Arcane Vault Bridge secret injection
+- [ ] All secrets created in VaultFacade with proper paths and types
+- [ ] No secret values in compose files, `.env.example`, or version control
+- [ ] Secret rotation documented and works via `mcp_vaultfacade_rotate_secret`
 - [ ] `docs/CONFIG.md` explains every variable

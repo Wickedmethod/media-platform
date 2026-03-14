@@ -1,6 +1,6 @@
 # Media Platform — Backlog
 
-> Last updated: 2026-06-15
+> Last updated: 2025-06-15
 
 ## Legend
 
@@ -15,7 +15,7 @@
 - **23 stories done** (all tested, committed)
 - **123 tests** (93 unit + 30 integration), 0 failures
 - **22 stories blocked** by external dependencies
-- **48 new frontend/integration/infra stories** planned across 9 epics
+- **53 new frontend/integration/infra stories** planned across 9 epics
 
 ### Merge Log
 
@@ -32,6 +32,8 @@ The following proposed stories were merged into existing stories to avoid duplic
 | MEDIA-753 (TV Idle Mode & Screensaver) | MEDIA-720 | TvIdle.vue already defined in TV kiosk story |
 | MEDIA-754 (TV Player Overlay UI) | MEDIA-720 | TvOverlay.vue already defined in TV kiosk story |
 | MEDIA-757 (Structured JSON Logging) | MEDIA-741 | Structured JSON logging fully covered in correlation IDs story |
+| MEDIA-761 (Global Error Boundary & Fallback UI) | MEDIA-709 | Error boundary already scoped in task #8; expanded with ErrorBoundary.vue + FallbackError.vue |
+| MEDIA-764 (Secrets Management for Docker Compose) | MEDIA-745 | .vault-env secret injection already scoped in environment configuration story |
 
 ---
 
@@ -213,6 +215,7 @@ To unlock the remaining 22 blocked stories, set up in this order:
 | MEDIA-748 | Player Command Rate Limiting & Debounce | 2 pts | ⏳ Planned | MEDIA-704, MEDIA-702 |
 | MEDIA-751 | Global Connection Status Indicator | 2 pts | ⏳ Planned | MEDIA-704, MEDIA-707 |
 | MEDIA-752 | Reconnect & Offline Banner for SPA | 2 pts | ⏳ Planned | MEDIA-704, MEDIA-751 |
+| MEDIA-762 | Feature Flag System for Frontend | 2 pts | ⏳ Planned | MEDIA-700 |
 
 ## Epic: MEDIA-FE-TV — TV Frontend (Pi Kiosk)
 
@@ -239,6 +242,7 @@ To unlock the remaining 22 blocked stories, set up in this order:
 | MEDIA-713 | Guest Access Model & SSE Authorization | 3 pts | ⏳ Planned | MEDIA-604, MEDIA-622, MEDIA-711 |
 | MEDIA-747 | Queue Item Metadata Enrichment (YouTube Fetch) | 3 pts | ⏳ Planned | MEDIA-710 |
 | MEDIA-749 | Queue Item Validation & Sanitization | 2 pts | ⏳ Planned | — |
+| MEDIA-759 | API Versioning Strategy | 3 pts | ⏳ Planned | MEDIA-712 |
 
 ## Epic: MEDIA-BE-RESILIENCE — Backend Resilience & Consistency
 
@@ -262,6 +266,8 @@ To unlock the remaining 22 blocked stories, set up in this order:
 | MEDIA-733 | Player Version & Update Check | 2 pts | ⏳ Planned | MEDIA-729 |
 | MEDIA-755 | Player Playback Timeout Detection | 2 pts | ⏳ Planned | MEDIA-720, MEDIA-724 |
 | MEDIA-756 | Player Disk Usage & Cache Cleanup | 2 pts | ⏳ Planned | MEDIA-612, MEDIA-729 |
+| MEDIA-760 | Graceful Player Shutdown Handling | 2 pts | ⏳ Planned | MEDIA-724, MEDIA-729 |
+| MEDIA-763 | Player Network Connectivity Monitoring | 3 pts | ⏳ Planned | MEDIA-729, MEDIA-732 |
 
 ## Epic: MEDIA-OBS — Infrastructure & Observability
 
@@ -283,6 +289,7 @@ To unlock the remaining 22 blocked stories, set up in this order:
 | MEDIA-744 | Docker Compose Stack for Full Platform | 3 pts | ⏳ Planned | MEDIA-706 |
 | MEDIA-745 | Environment Configuration Management | 2 pts | ⏳ Planned | MEDIA-744 |
 | MEDIA-746 | Production Reverse Proxy Configuration | 2 pts | ⏳ Planned | MEDIA-744, MEDIA-706 |
+| MEDIA-765 | Platform Upgrade & Migration Strategy | 3 pts | ⏳ Planned | MEDIA-744, MEDIA-606 |
 
 ## Epic: MEDIA-MULTI — Multi-Device Audio (v2)
 
@@ -346,20 +353,25 @@ To unlock the remaining 22 blocked stories, set up in this order:
 37. **MEDIA-733** — Player version & update check
 38. **MEDIA-755** — Player playback timeout detection
 39. **MEDIA-756** — Player disk usage & cache cleanup
+40. **MEDIA-760** — Graceful player shutdown handling
+41. **MEDIA-763** — Player network connectivity monitoring
 
 ### Phase 7: Observability & Infra
-40. **MEDIA-741** — Centralized logging & correlation IDs (incl. JSON format)
-41. **MEDIA-742** — Metrics export (Prometheus)
-42. **MEDIA-743** — Alerting integration for anomalies
-43. **MEDIA-758** — Backup & restore strategy for Redis
+42. **MEDIA-741** — Centralized logging & correlation IDs (incl. JSON format)
+43. **MEDIA-742** — Metrics export (Prometheus)
+44. **MEDIA-743** — Alerting integration for anomalies
+45. **MEDIA-758** — Backup & restore strategy for Redis
 
 ### Phase 8: Deployment
-44. **MEDIA-744** — Docker Compose stack for full platform
-45. **MEDIA-745** — Environment configuration management
-46. **MEDIA-746** — Production reverse proxy
+46. **MEDIA-744** — Docker Compose stack for full platform
+47. **MEDIA-745** — Environment configuration management (incl. secrets)
+48. **MEDIA-746** — Production reverse proxy
+49. **MEDIA-765** — Platform upgrade & migration strategy
 
-### Phase 9: Quality & Testing
-47. **MEDIA-715** — E2E testing with Playwright
+### Phase 9: API Maturity & Quality
+50. **MEDIA-759** — API versioning strategy
+51. **MEDIA-762** — Feature flag system for frontend
+52. **MEDIA-715** — E2E testing with Playwright
 
 ### Phase 10: Multi-Device (v2)
-48. **MEDIA-730** — Personal playback sessions
+53. **MEDIA-730** — Personal playback sessions
