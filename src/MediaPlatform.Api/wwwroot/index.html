@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Media Platform — Control Deck</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface-2: #1a1a26;
+    --border: #2a2a3a;
+    --text: #e8e8f0;
+    --text-dim: #7a7a8e;
+    --accent: #ff3366;
+    --accent-glow: rgba(255, 51, 102, 0.25);
+    --green: #00e676;
+    --amber: #ffc107;
+    --blue: #448aff;
+    --radius: 12px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(ellipse at 30% 20%, rgba(255,51,102,0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 80%, rgba(68,138,255,0.04) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .shell {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 24px;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+
+  header .logo {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), #cc2952);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 0 24px var(--accent-glow);
+    flex-shrink: 0;
+  }
+
+  header h1 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  header h1 span { color: var(--accent); }
+
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--text-dim);
+    margin-left: auto;
+    transition: background 0.3s;
+  }
+  .status-dot.connected { background: var(--green); box-shadow: 0 0 8px rgba(0,230,118,0.5); }
+  .status-dot.error { background: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
+
+  /* Now Playing Card */
+  .now-playing {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .now-playing::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--blue), var(--accent));
+    background-size: 200% 100%;
+    animation: shimmer 3s linear infinite;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .now-playing.active::before { opacity: 1; }
+
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  .np-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+  }
+
+  .np-state {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .np-state .badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .badge.idle { background: var(--surface-2); color: var(--text-dim); }
+  .badge.buffering { background: rgba(255,193,7,0.15); color: var(--amber); }
+  .badge.playing { background: rgba(0,230,118,0.15); color: var(--green); }
+  .badge.paused { background: rgba(68,138,255,0.15); color: var(--blue); }
+  .badge.stopped { background: rgba(255,51,102,0.1); color: var(--accent); }
+  .badge.error { background: rgba(255,51,102,0.2); color: var(--accent); }
+
+  .np-title {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .np-title.empty {
+    color: var(--text-dim);
+    font-weight: 300;
+    font-size: 18px;
+  }
+
+  /* Player Controls */
+  .controls {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 40px;
+  }
+
+  .ctrl-btn {
+    flex: 1;
+    padding: 14px 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ctrl-btn:hover {
+    border-color: var(--accent);
+    background: var(--surface-2);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  }
+
+  .ctrl-btn:active { transform: translateY(0); }
+
+  .ctrl-btn.play:hover { border-color: var(--green); box-shadow: 0 4px 16px rgba(0,230,118,0.15); }
+  .ctrl-btn.pause:hover { border-color: var(--blue); box-shadow: 0 4px 16px rgba(68,138,255,0.15); }
+  .ctrl-btn.stop:hover { border-color: var(--accent); box-shadow: 0 4px 16px var(--accent-glow); }
+
+  .ctrl-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Add to Queue */
+  .add-form {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .add-form input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .add-form input:focus { border-color: var(--accent); }
+  .add-form input::placeholder { color: var(--text-dim); }
+
+  .add-form button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: var(--radius);
+    background: var(--accent);
+    color: #fff;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .add-form button:hover {
+    background: #e62e5c;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px var(--accent-glow);
+  }
+
+  /* Queue List */
+  .queue-section h2 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+  }
+
+  .queue-list { list-style: none; }
+
+  .queue-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 8px;
+    transition: all 0.2s;
+    animation: slideIn 0.25s ease-out;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .queue-item:hover { border-color: var(--accent); }
+
+  .queue-item .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+    width: 24px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .queue-item .info { flex: 1; min-width: 0; }
+  .queue-item .title {
+    font-weight: 500;
+    font-size: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .queue-item .url {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .queue-item .remove-btn {
+    width: 32px; height: 32px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: none;
+    color: var(--text-dim);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+
+  .queue-item .remove-btn:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: rgba(255,51,102,0.08);
+  }
+
+  .empty-queue {
+    text-align: center;
+    padding: 48px 0;
+    color: var(--text-dim);
+    font-size: 14px;
+  }
+
+  .empty-queue .icon { font-size: 32px; margin-bottom: 8px; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    padding: 12px 20px;
+    border-radius: var(--radius);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    z-index: 100;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s ease;
+  }
+
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.error { background: rgba(255,51,102,0.15); border: 1px solid var(--accent); color: var(--accent); }
+  .toast.success { background: rgba(0,230,118,0.1); border: 1px solid var(--green); color: var(--green); }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <header>
+    <div class="logo">▶</div>
+    <h1><span>media</span>::platform</h1>
+    <div class="status-dot" id="statusDot" title="API status"></div>
+  </header>
+
+  <!-- Now Playing -->
+  <div class="now-playing" id="nowPlaying">
+    <div class="np-label">Now Playing</div>
+    <div class="np-state">
+      <span class="badge idle" id="stateBadge">Idle</span>
+    </div>
+    <div class="np-title empty" id="npTitle">Nothing queued</div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <button class="ctrl-btn play" onclick="cmd('play')">▶ Play</button>
+    <button class="ctrl-btn pause" onclick="cmd('pause')">⏸ Pause</button>
+    <button class="ctrl-btn" onclick="cmd('skip')">⏭ Skip</button>
+    <button class="ctrl-btn stop" onclick="cmd('stop')">⏹ Stop</button>
+  </div>
+
+  <!-- Add to Queue -->
+  <div class="queue-section">
+    <h2>Queue</h2>
+    <form class="add-form" onsubmit="addToQueue(event)">
+      <input type="url" id="urlInput" placeholder="https://youtube.com/watch?v=..." required>
+      <input type="text" id="titleInput" placeholder="Title" required>
+      <button type="submit">+ Add</button>
+    </form>
+
+    <ul class="queue-list" id="queueList"></ul>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = location.origin;
+let polling = null;
+
+async function api(path, opts = {}) {
+  const res = await fetch(`${API}${path}`, {
+    headers: { 'Content-Type': 'application/json' },
+    ...opts
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || `HTTP ${res.status}`);
+  }
+  if (res.status === 204) return null;
+  return res.json();
+}
+
+function toast(msg, type = 'error') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `toast ${type} show`;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+async function refreshState() {
+  try {
+    const state = await api('/now-playing');
+    const badge = document.getElementById('stateBadge');
+    const title = document.getElementById('npTitle');
+    const card = document.getElementById('nowPlaying');
+
+    const s = state.state.toLowerCase();
+    badge.textContent = state.state;
+    badge.className = `badge ${s}`;
+
+    if (state.currentItem) {
+      title.textContent = state.currentItem.title;
+      title.className = 'np-title';
+      card.classList.add('active');
+    } else {
+      title.textContent = 'Nothing queued';
+      title.className = 'np-title empty';
+      card.classList.remove('active');
+    }
+
+    document.getElementById('statusDot').className = 'status-dot connected';
+  } catch {
+    document.getElementById('statusDot').className = 'status-dot error';
+  }
+}
+
+async function refreshQueue() {
+  try {
+    const items = await api('/queue');
+    const list = document.getElementById('queueList');
+
+    if (!items.length) {
+      list.innerHTML = '<li class="empty-queue"><div class="icon">🎵</div>Queue is empty — add a YouTube URL above</li>';
+      return;
+    }
+
+    list.innerHTML = items.map((item, i) => `
+      <li class="queue-item">
+        <span class="num">${i + 1}</span>
+        <div class="info">
+          <div class="title">${esc(item.title)}</div>
+          <div class="url">${esc(item.url)}</div>
+        </div>
+        <button class="remove-btn" onclick="removeItem('${esc(item.id)}')" title="Remove">×</button>
+      </li>`).join('');
+  } catch { /* handled by status dot */ }
+}
+
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+async function addToQueue(e) {
+  e.preventDefault();
+  const url = document.getElementById('urlInput').value.trim();
+  const title = document.getElementById('titleInput').value.trim();
+  try {
+    await api('/queue/add', {
+      method: 'POST',
+      body: JSON.stringify({ url, title })
+    });
+    document.getElementById('urlInput').value = '';
+    document.getElementById('titleInput').value = '';
+    toast('Added to queue', 'success');
+    refreshQueue();
+  } catch (err) {
+    toast(err.message);
+  }
+}
+
+async function removeItem(id) {
+  try {
+    await api(`/queue/${encodeURIComponent(id)}`, { method: 'DELETE' });
+    refreshQueue();
+  } catch (err) {
+    toast(err.message);
+  }
+}
+
+async function cmd(action) {
+  try {
+    await api(`/player/${action}`, { method: 'POST' });
+    refreshState();
+    refreshQueue();
+  } catch (err) {
+    toast(err.message);
+  }
+}
+
+// Poll every 2s
+function startPolling() {
+  refreshState();
+  refreshQueue();
+  polling = setInterval(() => { refreshState(); refreshQueue(); }, 2000);
+}
+
+startPolling();
+</script>
+</body>
+</html>
