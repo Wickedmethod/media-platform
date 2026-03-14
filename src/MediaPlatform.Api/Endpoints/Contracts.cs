@@ -118,3 +118,36 @@ public sealed record NotifyUpdateRequest(string Message);
 // ── MEDIA-760: Graceful Disconnect ─────────────────────────
 
 public sealed record DisconnectRequest(string Reason, string? Signal = null);
+
+// ── MEDIA-763: Network Connectivity Monitoring ─────────────
+
+public sealed record SubmitNetworkMetricsRequest(
+    string PlayerId,
+    string Timestamp,
+    LatencyMetricsDto Latency,
+    DnsMetricsDto Dns,
+    BandwidthMetricsDto Bandwidth);
+
+public sealed record LatencyMetricsDto(
+    int AvgMs, int MinMs, int MaxMs, int P95Ms, int Samples, int Failures);
+
+public sealed record DnsMetricsDto(int AvgResolveMs, int Failures);
+
+public sealed record BandwidthMetricsDto(double LastMbps, string MeasuredAt);
+
+public sealed record NetworkMetricsResponse(
+    NetworkMetricsCurrentDto? Current,
+    NetworkTrendDto Trend);
+
+public sealed record NetworkMetricsCurrentDto(
+    string PlayerId, string Timestamp,
+    LatencyMetricsDto Latency, DnsMetricsDto Dns, BandwidthMetricsDto Bandwidth);
+
+public sealed record NetworkTrendDto(
+    string LatencyTrend, int AvgLatency1h,
+    string BandwidthTrend, double AvgBandwidth1h);
+
+// ── MEDIA-743: Alerting ────────────────────────────────────
+
+public sealed record AlertConfigResponse(
+    bool Enabled, int CooldownMinutes, int ChannelCount);

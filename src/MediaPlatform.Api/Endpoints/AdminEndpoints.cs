@@ -115,6 +115,36 @@ public static class AdminEndpoints
         })
         .WithName("GetAnomalies")
         .WithDescription("Evaluate current anomaly detection status");
+
+        // MEDIA-763: Player Network Metrics
+        group.MapGet("/players/{id}/network", async (string id, INetworkMetricsStore networkStore, CancellationToken ct) =>
+        {
+            var current = await networkStore.GetCurrentAsync(id, ct);
+            var trend = await networkStore.GetTrendAsync(id, ct);
+
+            NetworkMetricsCurrentDto? currentDto = current is null ? null : new(
+                current.PlayerId, current.Timestamp,
+                new LatencyMetricsDto(current.Latency.AvgMs, current.Latency.MinMs, current.Latency.MaxMs,
+                    current.Latency.P95Ms, current.Latency.Samples, current.Latency.Failures),
+                new DnsMetricsDto(current.Dns.AvgResolveMs, current.Dns.Failures),
+                new BandwidthMetricsDto(current.Bandwidth.LastMbps, current.Bandwidth.MeasuredAt));
+
+            var trendDto = new NetworkTrendDto(trend.LatencyTrend, trend.AvgLatency1h, trend.BandwidthTrend, trend.AvgBandwidth1h);
+            return Results.Ok(new NetworkMetricsResponse(currentDto, trendDto));
+        })
+        .WithName("GetPlayerNetworkMetrics")
+        .Produces<NetworkMetricsResponse>()
+        .WithDescription("Get network connectivity metrics and trend for a specific player");
+
+        // MEDIA-743: Alert configuration status
+        group.MapGet("/alerts/config", (Microsoft.Extensions.Options.IOptions<AlertingOptions> options) =>
+        {
+            var cfg = options.Value;
+            return Results.Ok(new AlertConfigResponse(cfg.Enabled, cfg.CooldownMinutes, cfg.Channels.Count));
+        })
+        .WithName("GetAlertConfig")
+        .Produces<AlertConfigResponse>()
+        .WithDescription("Get current alerting configuration status");
     }
 }
 

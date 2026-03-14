@@ -6,6 +6,7 @@ using MediaPlatform.Api.Middleware;
 using MediaPlatform.Application.Abstractions;
 using MediaPlatform.Application.Commands;
 using MediaPlatform.Application.Queries;
+using MediaPlatform.Infrastructure.Alerting;
 using MediaPlatform.Infrastructure.Analytics;
 using MediaPlatform.Infrastructure.Events;
 using MediaPlatform.Infrastructure.Metrics;
@@ -93,6 +94,7 @@ builder.Services.AddRateLimiter(options =>
 builder.Services.AddScoped<IQueueRepository, RedisQueueRepository>();
 builder.Services.AddScoped<IPlayerRegistry, RedisPlayerRegistry>();
 builder.Services.AddScoped<IPlayerLogStore, RedisPlayerLogStore>();
+builder.Services.AddScoped<INetworkMetricsStore, RedisNetworkMetricsStore>();
 builder.Services.AddSingleton<IEventBroadcaster, InMemoryEventBroadcaster>();
 builder.Services.AddSingleton<INotificationService, WebhookNotificationService>();
 builder.Services.AddSingleton<IAnalyticsTracker, InMemoryAnalyticsTracker>();
@@ -102,6 +104,12 @@ builder.Services.AddSingleton<IAnomalyDetector, SlidingWindowAnomalyDetector>();
 builder.Services.AddSingleton<IPolicyEngine, InMemoryPolicyEngine>();
 builder.Services.AddSingleton<MediaPlatformMetrics>();
 builder.Services.AddHttpClient("webhooks");
+builder.Services.AddHttpClient("alerts");
+
+// Alerting (MEDIA-743)
+builder.Services.Configure<AlertingOptions>(builder.Configuration.GetSection("Alerting"));
+builder.Services.AddSingleton<IAlertDispatcher, AlertDispatcher>();
+builder.Services.AddHostedService<AnomalyAlertService>();
 
 // OpenAPI spec generation
 builder.Services.AddOpenApi(options =>

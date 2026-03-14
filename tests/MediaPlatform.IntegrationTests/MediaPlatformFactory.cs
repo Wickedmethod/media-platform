@@ -19,6 +19,7 @@ public class MediaPlatformFactory : WebApplicationFactory<Program>
     public IQueueRepository QueueRepository { get; } = CreateDefaultQueueRepo();
     public IPlayerRegistry PlayerRegistry { get; } = CreateDefaultPlayerRegistry();
     public IPlayerLogStore PlayerLogStore { get; } = CreateDefaultLogStore();
+    public INetworkMetricsStore NetworkMetricsStore { get; } = CreateDefaultNetworkMetricsStore();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -29,6 +30,7 @@ public class MediaPlatformFactory : WebApplicationFactory<Program>
             RemoveService<IQueueRepository>(services);
             RemoveService<IPlayerRegistry>(services);
             RemoveService<IPlayerLogStore>(services);
+            RemoveService<INetworkMetricsStore>(services);
 
             // Remove Redis health check
             var healthDescriptor = services.FirstOrDefault(d =>
@@ -38,6 +40,7 @@ public class MediaPlatformFactory : WebApplicationFactory<Program>
             services.AddScoped(_ => QueueRepository);
             services.AddScoped(_ => PlayerRegistry);
             services.AddScoped(_ => PlayerLogStore);
+            services.AddScoped(_ => NetworkMetricsStore);
             services.AddSingleton(Substitute.For<IConnectionMultiplexer>());
 
             // Override health checks to avoid Redis probe
@@ -92,6 +95,18 @@ public class MediaPlatformFactory : WebApplicationFactory<Program>
                 var playerId = callInfo.ArgAt<string>(0);
                 return new PlayerLogPage(playerId, Array.Empty<PlayerLogEntry>(), 0);
             });
+        return store;
+    }
+
+    private static INetworkMetricsStore CreateDefaultNetworkMetricsStore()
+    {
+        var store = Substitute.For<INetworkMetricsStore>();
+        store.SaveMetricsAsync(Arg.Any<string>(), Arg.Any<NetworkMetrics>(), Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
+        store.GetCurrentAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns((NetworkMetrics?)null);
+        store.GetTrendAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new NetworkTrend("stable", 0, "stable", 0));
         return store;
     }
 }

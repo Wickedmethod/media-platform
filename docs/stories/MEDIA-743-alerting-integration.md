@@ -5,7 +5,7 @@
 **Epic:** Infrastructure & Security  
 **Priority:** Low  
 **Effort:** 2 points  
-**Status:** ⏳ Planned  
+**Status:** ✅ Done  
 **Depends on:** MEDIA-631 (Anomaly Detection), MEDIA-613 (Webhooks)
 
 ---

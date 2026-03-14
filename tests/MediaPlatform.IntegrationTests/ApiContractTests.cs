@@ -680,4 +680,70 @@ public class ApiContractTests : IClassFixture<MediaPlatformFactory>
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
+
+    // ── MEDIA-763: Network Connectivity Monitoring ──────────────
+
+    [Fact]
+    public async Task Diagnostics_SubmitNetwork_Returns204()
+    {
+        var response = await _client.PostAsJsonAsync("/diagnostics/network", new
+        {
+            playerId = "pi-test",
+            timestamp = "2026-03-14T10:00:00Z",
+            latency = new { avgMs = 12, minMs = 8, maxMs = 45, p95Ms = 28, samples = 4, failures = 0 },
+            dns = new { avgResolveMs = 3, failures = 0 },
+            bandwidth = new { lastMbps = 85.2, measuredAt = "2026-03-14T09:55:00Z" }
+        });
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Diagnostics_SubmitNetwork_MissingPlayerId_Returns400()
+    {
+        var response = await _client.PostAsJsonAsync("/diagnostics/network", new
+        {
+            playerId = "",
+            timestamp = "2026-03-14T10:00:00Z",
+            latency = new { avgMs = 0, minMs = 0, maxMs = 0, p95Ms = 0, samples = 0, failures = 0 },
+            dns = new { avgResolveMs = 0, failures = 0 },
+            bandwidth = new { lastMbps = 0.0, measuredAt = "2026-03-14T10:00:00Z" }
+        });
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Diagnostics_BandwidthTest_Returns100KBPayload()
+    {
+        var response = await _client.GetAsync("/diagnostics/bandwidth-test");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var content = await response.Content.ReadAsByteArrayAsync();
+        Assert.Equal(102400, content.Length);
+    }
+
+    [Fact]
+    public async Task Admin_PlayerNetwork_ReturnsShape()
+    {
+        var response = await _client.GetAsync("/admin/players/pi-test/network");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>(JsonOpts);
+        Assert.True(body.TryGetProperty("trend", out var trend));
+        Assert.True(trend.TryGetProperty("latencyTrend", out _));
+        Assert.True(trend.TryGetProperty("bandwidthTrend", out _));
+    }
+
+    // ── MEDIA-743: Alerting Integration ─────────────────────────
+
+    [Fact]
+    public async Task Admin_AlertConfig_ReturnsShape()
+    {
+        var response = await _client.GetAsync("/admin/alerts/config");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>(JsonOpts);
+        Assert.True(body.TryGetProperty("enabled", out _));
+        Assert.True(body.TryGetProperty("cooldownMinutes", out _));
+        Assert.True(body.TryGetProperty("channelCount", out _));
+    }
 }

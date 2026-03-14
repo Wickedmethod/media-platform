@@ -12,8 +12,8 @@
 
 ## Summary
 
-- **35 stories done** (all tested, committed)
-- **235 tests** (183 unit + 52 integration), 0 failures
+- **38 stories done** (all tested, committed)
+- **251 tests** (194 unit + 57 integration), 0 failures
 - **22 stories blocked** by external dependencies
 - **50 new frontend/integration/infra stories** planned across 9 epics
 
@@ -174,9 +174,13 @@ The following proposed stories were merged into existing stories to avoid duplic
 | POST | `/admin/players/expected-version` | Set expected player version |
 | POST | `/admin/players/notify-update` | Notify players of update |
 | POST | `/worker/disconnect` | Graceful player disconnect |
+| GET | `/admin/players/{id}/network` | Get player network metrics + trend |
+| GET | `/admin/alerts/config` | Get alerting configuration status |
 | GET | `/sync` | Queue snapshot (atomic state) |
 | POST | `/queue/reorder` | Reorder queue items (admin) |
 | POST | `/diagnostics/logs` | Submit player log batch |
+| POST | `/diagnostics/network` | Submit network connectivity metrics |
+| GET | `/diagnostics/bandwidth-test` | Bandwidth test payload (100 KB) |
 | GET | `/metrics` | Prometheus metrics |
 | POST | `/queue/validate` | Validate queue item (dry-run) |
 
@@ -270,7 +274,7 @@ To unlock the remaining 22 blocked stories, set up in this order:
 | MEDIA-755 | Player Playback Timeout Detection | 2 pts | ⏳ Planned | MEDIA-720, MEDIA-724 |
 | MEDIA-756 | Player Disk Usage & Cache Cleanup | 2 pts | ⏳ Planned | MEDIA-612, MEDIA-729 |
 | MEDIA-760 | Graceful Player Shutdown Handling | 2 pts | ✅ Done | MEDIA-724, MEDIA-729 |
-| MEDIA-763 | Player Network Connectivity Monitoring | 3 pts | ⏳ Planned | MEDIA-729, MEDIA-732 |
+| MEDIA-763 | Player Network Connectivity Monitoring | 3 pts | ✅ Done | MEDIA-729, MEDIA-732 |
 
 ## Epic: MEDIA-OBS — Infrastructure & Observability
 
@@ -280,8 +284,8 @@ To unlock the remaining 22 blocked stories, set up in this order:
 |-------|-------|--------|--------|------------|
 | MEDIA-741 | Centralized Logging & Correlation IDs | 3 pts | ✅ Done | — |
 | MEDIA-742 | Metrics Export — Prometheus Format | 2 pts | ✅ Done | — |
-| MEDIA-743 | Alerting Integration for Anomalies | 2 pts | ⏳ Planned | MEDIA-631, MEDIA-613 |
-| MEDIA-758 | Backup & Restore Strategy for Redis | 2 pts | ⏳ Planned | MEDIA-606 |
+| MEDIA-743 | Alerting Integration for Anomalies | 2 pts | ✅ Done | MEDIA-631, MEDIA-613 |
+| MEDIA-758 | Backup & Restore Strategy for Redis | 2 pts | ✅ Done | MEDIA-606 |
 
 ## Epic: MEDIA-DEPLOY — Deployment & Configuration
 

@@ -5,7 +5,7 @@
 **Epic:** Infrastructure & Security  
 **Priority:** Medium  
 **Effort:** 2 points  
-**Status:** ⏳ Planned  
+**Status:** ✅ Done  
 **Depends on:** MEDIA-606 (Redis Persistence — already done)
 
 ---

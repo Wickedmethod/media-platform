@@ -5,7 +5,7 @@
 **Epic:** MEDIA-PI-OPS — Player Operations & Diagnostics  
 **Priority:** Medium  
 **Effort:** 3 points  
-**Status:** ⏳ Planned  
+**Status:** ✅ Done  
 **Depends on:** MEDIA-729 (Player Registration), MEDIA-732 (Player Log Streaming)
 
 ---
