@@ -22,9 +22,10 @@ public static class NotificationEndpoints
                 return Results.BadRequest(new ApiError("Invalid webhook URL. Must be an absolute HTTP(S) URL."));
             }
 
+            var id = request.Id ?? Guid.NewGuid().ToString("N")[..8];
             var events = new HashSet<string>(request.EventTypes ?? []);
-            svc.RegisterWebhook(request.Id, uri, events);
-            return Results.Created($"/webhooks/{request.Id}", new WebhookResponse(request.Id, uri.ToString(), events.ToList(), DateTimeOffset.UtcNow));
+            svc.RegisterWebhook(id, uri, events);
+            return Results.Created($"/webhooks/{id}", new WebhookResponse(id, uri.ToString(), events.ToList(), DateTimeOffset.UtcNow));
         });
 
         group.MapDelete("/{id}", (string id, INotificationService svc) =>
@@ -35,5 +36,5 @@ public static class NotificationEndpoints
     }
 }
 
-public record RegisterWebhookRequest(string Id, string Url, List<string>? EventTypes);
+public record RegisterWebhookRequest(string? Id, string Url, List<string>? EventTypes);
 public record WebhookResponse(string Id, string Url, List<string> EventTypes, DateTimeOffset RegisteredAt);
