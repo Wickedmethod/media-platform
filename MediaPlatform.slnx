@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MediaPlatform.Domain/MediaPlatform.Domain.csproj" />
+    <Project Path="src/MediaPlatform.Application/MediaPlatform.Application.csproj" />
+    <Project Path="src/MediaPlatform.Infrastructure/MediaPlatform.Infrastructure.csproj" />
+    <Project Path="src/MediaPlatform.Api/MediaPlatform.Api.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/MediaPlatform.UnitTests/MediaPlatform.UnitTests.csproj" />
+    <Project Path="tests/MediaPlatform.IntegrationTests/MediaPlatform.IntegrationTests.csproj" />
+  </Folder>
+</Solution>

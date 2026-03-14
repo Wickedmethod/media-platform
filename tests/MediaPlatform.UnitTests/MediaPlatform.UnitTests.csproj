@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" Version="*" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="*" />
+    <PackageReference Include="NSubstitute" Version="*" />
+    <PackageReference Include="FluentAssertions" Version="*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\MediaPlatform.Domain\MediaPlatform.Domain.csproj" />
+    <ProjectReference Include="..\..\src\MediaPlatform.Application\MediaPlatform.Application.csproj" />
+  </ItemGroup>
+
+</Project>

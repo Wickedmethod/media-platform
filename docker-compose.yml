@@ -1,0 +1,39 @@
+services:
+  media-platform-api:
+    build: .
+    container_name: media-platform-api
+    ports:
+      - "5300:8080"
+    environment:
+      - Redis__ConnectionString=redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - media-platform
+      - keycloak-public
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: media-platform-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    networks:
+      - media-platform
+    restart: unless-stopped
+
+volumes:
+  redis-data:
+
+networks:
+  media-platform:
+    driver: bridge
+  keycloak-public:
+    external: true

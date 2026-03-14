@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="StackExchange.Redis" Version="2.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MediaPlatform.Domain\MediaPlatform.Domain.csproj" />
+    <ProjectReference Include="..\MediaPlatform.Application\MediaPlatform.Application.csproj" />
+  </ItemGroup>
+
+</Project>
