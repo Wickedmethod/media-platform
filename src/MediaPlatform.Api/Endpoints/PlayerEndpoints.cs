@@ -17,28 +17,47 @@ public static class PlayerEndpoints
         group.MapPost("/play", async (PlayerCommandHandler handler, IEventBroadcaster events, IAnalyticsTracker analytics, INotificationService notifications, CancellationToken ct) =>
         {
             return await ExecuteCommand(handler, events, analytics, notifications, CommandType.Play, ct);
-        });
+        })
+        .WithName("Play")
+        .Produces<PlaybackStateResponse>()
+        .Produces<ApiError>(StatusCodes.Status409Conflict)
+        .WithDescription("Start or resume playback");
 
         group.MapPost("/pause", async (PlayerCommandHandler handler, IEventBroadcaster events, IAnalyticsTracker analytics, INotificationService notifications, CancellationToken ct) =>
         {
             return await ExecuteCommand(handler, events, analytics, notifications, CommandType.Pause, ct);
-        });
+        })
+        .WithName("Pause")
+        .Produces<PlaybackStateResponse>()
+        .Produces<ApiError>(StatusCodes.Status409Conflict)
+        .WithDescription("Pause playback");
 
         group.MapPost("/skip", async (PlayerCommandHandler handler, IEventBroadcaster events, IAnalyticsTracker analytics, INotificationService notifications, CancellationToken ct) =>
         {
             return await ExecuteCommand(handler, events, analytics, notifications, CommandType.Skip, ct);
-        });
+        })
+        .WithName("Skip")
+        .Produces<PlaybackStateResponse>()
+        .Produces<ApiError>(StatusCodes.Status409Conflict)
+        .WithDescription("Skip to the next track");
 
         group.MapPost("/stop", async (PlayerCommandHandler handler, IEventBroadcaster events, IAnalyticsTracker analytics, INotificationService notifications, CancellationToken ct) =>
         {
             return await ExecuteCommand(handler, events, analytics, notifications, CommandType.Stop, ct);
-        });
+        })
+        .WithName("Stop")
+        .Produces<PlaybackStateResponse>()
+        .Produces<ApiError>(StatusCodes.Status409Conflict)
+        .WithDescription("Stop playback");
 
         group.MapPost("/position", async (ReportPositionRequest request, ReportPositionHandler handler, CancellationToken ct) =>
         {
             var state = await handler.HandleAsync(new ReportPositionCommand(request.PositionSeconds), ct);
             return Results.Ok(MapState(state));
-        });
+        })
+        .WithName("ReportPosition")
+        .Produces<PlaybackStateResponse>()
+        .WithDescription("Report current playback position");
 
         group.MapPost("/error", async (ReportErrorRequest request, ReportErrorHandler handler, IEventBroadcaster events, IAnalyticsTracker analytics, INotificationService notifications, CancellationToken ct) =>
         {
@@ -47,13 +66,20 @@ public static class PlayerEndpoints
             events.Broadcast("playback-error", MapState(state));
             _ = notifications.NotifyAsync("playback-error", new { reason = request.Reason, state = state.State.ToString() }, ct);
             return Results.Ok(MapState(state));
-        });
+        })
+        .WithName("ReportError")
+        .Produces<PlaybackStateResponse>()
+        .WithDescription("Report a playback error");
 
         app.MapGet("/now-playing", async (GetPlaybackStateHandler handler, CancellationToken ct) =>
         {
             var state = await handler.HandleAsync(ct);
             return Results.Ok(MapState(state));
-        }).WithTags("Player");
+        })
+        .WithTags("Player")
+        .WithName("GetNowPlaying")
+        .Produces<PlaybackStateResponse>()
+        .WithDescription("Get current playback state");
     }
 
     private static async Task<IResult> ExecuteCommand(
@@ -87,7 +113,9 @@ public static class PlayerEndpoints
                     state.CurrentItem.Title,
                     state.CurrentItem.Status.ToString(),
                     state.CurrentItem.AddedAt,
-                    state.CurrentItem.StartAtSeconds)
+                    state.CurrentItem.StartAtSeconds,
+                    state.CurrentItem.AddedByUserId,
+                    state.CurrentItem.AddedByName)
                 : null,
             state.StartedAt,
             state.PositionSeconds,

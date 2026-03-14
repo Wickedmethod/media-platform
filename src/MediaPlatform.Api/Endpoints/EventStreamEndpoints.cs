@@ -4,6 +4,8 @@ namespace MediaPlatform.Api.Endpoints;
 
 public static class EventStreamEndpoints
 {
+    private static readonly TimeSpan HeartbeatInterval = TimeSpan.FromSeconds(30);
+
     public static void MapEventStreamEndpoints(this WebApplication app)
     {
         app.MapGet("/events", async (IEventBroadcaster broadcaster, HttpContext ctx, CancellationToken ct) =>
@@ -12,7 +14,11 @@ public static class EventStreamEndpoints
             ctx.Response.Headers.CacheControl = "no-cache";
             ctx.Response.Headers.Connection = "keep-alive";
 
+            await ctx.Response.WriteAsync("retry: 3000\n\n", ct);
             await ctx.Response.Body.FlushAsync(ct);
+
+            using var heartbeatCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+            _ = SendHeartbeatsAsync(ctx, heartbeatCts.Token);
 
             await foreach (var (eventType, json) in broadcaster.SubscribeAsync(ct))
             {
@@ -20,5 +26,15 @@ public static class EventStreamEndpoints
                 await ctx.Response.Body.FlushAsync(ct);
             }
         }).WithTags("Events").ExcludeFromDescription();
+    }
+
+    private static async Task SendHeartbeatsAsync(HttpContext ctx, CancellationToken ct)
+    {
+        using var timer = new PeriodicTimer(HeartbeatInterval);
+        while (await timer.WaitForNextTickAsync(ct))
+        {
+            await ctx.Response.WriteAsync("event: heartbeat\ndata: {}\n\n", ct);
+            await ctx.Response.Body.FlushAsync(ct);
+        }
     }
 }

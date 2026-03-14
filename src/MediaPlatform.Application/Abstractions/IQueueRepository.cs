@@ -6,6 +6,7 @@ namespace MediaPlatform.Application.Abstractions;
 public interface IQueueRepository
 {
     Task<List<QueueItem>> GetQueueAsync(CancellationToken ct = default);
+    Task<QueueItem?> GetByIdAsync(string itemId, CancellationToken ct = default);
     Task AddAsync(QueueItem item, CancellationToken ct = default);
     Task AddNextAsync(QueueItem item, CancellationToken ct = default);
     Task RemoveAsync(string itemId, CancellationToken ct = default);

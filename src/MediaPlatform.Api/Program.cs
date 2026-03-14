@@ -13,6 +13,7 @@ using MediaPlatform.Infrastructure.Redis;
 using MediaPlatform.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Scalar.AspNetCore;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -88,6 +89,21 @@ builder.Services.AddSingleton<IAnomalyDetector, SlidingWindowAnomalyDetector>();
 builder.Services.AddSingleton<IPolicyEngine, InMemoryPolicyEngine>();
 builder.Services.AddHttpClient("webhooks");
 
+// OpenAPI spec generation
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer((doc, ctx, ct) =>
+    {
+        doc.Info = new()
+        {
+            Title = "Media Platform API",
+            Version = "v1",
+            Description = "Queue-based media playback controller for homelab"
+        };
+        return Task.CompletedTask;
+    });
+});
+
 // Application handlers
 builder.Services.AddScoped<AddToQueueHandler>();
 builder.Services.AddScoped<RemoveFromQueueHandler>();
@@ -122,6 +138,13 @@ app.MapHealthChecks("/health/ready", new Microsoft.AspNetCore.Diagnostics.Health
     Predicate = check => check.Tags.Contains("ready")
 });
 app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));
+
+// OpenAPI + Scalar (dev mode)
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+    app.MapScalarApiReference();
+}
 
 app.MapQueueEndpoints();
 app.MapPlayerEndpoints();

@@ -24,6 +24,18 @@ public sealed class RedisQueueRepository(IConnectionMultiplexer redis) : IQueueR
             .ToList()!;
     }
 
+    public async Task<QueueItem?> GetByIdAsync(string itemId, CancellationToken ct = default)
+    {
+        var values = await Db.ListRangeAsync(QueueKey);
+        foreach (var value in values)
+        {
+            var item = Deserialize(value!);
+            if (item?.Id == itemId)
+                return item;
+        }
+        return null;
+    }
+
     public async Task AddAsync(QueueItem item, CancellationToken ct = default)
     {
         var json = Serialize(item);
@@ -134,7 +146,8 @@ public sealed class RedisQueueRepository(IConnectionMultiplexer redis) : IQueueR
     private static string Serialize(QueueItem item)
     {
         return JsonSerializer.Serialize(new QueueItemDto(
-            item.Id, item.Url.Value, item.Title, item.Status.ToString(), item.AddedAt, item.StartAtSeconds));
+            item.Id, item.Url.Value, item.Title, item.Status.ToString(), item.AddedAt, item.StartAtSeconds,
+            item.AddedByUserId, item.AddedByName));
     }
 
     private static QueueItem? Deserialize(string json)
@@ -144,9 +157,11 @@ public sealed class RedisQueueRepository(IConnectionMultiplexer redis) : IQueueR
 
         var url = VideoUrl.Create(dto.Url);
         var status = Enum.Parse<QueueItemStatus>(dto.Status);
-        return new QueueItem(dto.Id, url, dto.Title, status, dto.AddedAt, dto.StartAtSeconds);
+        return new QueueItem(dto.Id, url, dto.Title, status, dto.AddedAt, dto.StartAtSeconds,
+            dto.AddedByUserId, dto.AddedByName);
     }
 
     private sealed record QueueItemDto(
-        string Id, string Url, string Title, string Status, DateTimeOffset AddedAt, double StartAtSeconds = 0);
+        string Id, string Url, string Title, string Status, DateTimeOffset AddedAt, double StartAtSeconds = 0,
+        string? AddedByUserId = null, string? AddedByName = null);
 }

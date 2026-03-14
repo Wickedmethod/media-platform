@@ -5,7 +5,7 @@
 **Epic:** MEDIA-BE-MULTI — Multi-User Backend Support  
 **Priority:** High  
 **Effort:** 2 points  
-**Status:** ⏳ Planned  
+**Status:** ✅ Done  
 **Depends on:** None (existing API)  
 **Absorbs:** MEDIA-717 (SSE Event Contract Specification)
 

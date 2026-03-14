@@ -1,6 +1,6 @@
 # Media Platform — Backlog
 
-> Last updated: 2025-06-15
+> Last updated: 2026-03-14
 
 ## Legend
 
@@ -12,10 +12,10 @@
 
 ## Summary
 
-- **23 stories done** (all tested, committed)
-- **123 tests** (93 unit + 30 integration), 0 failures
+- **26 stories done** (all tested, committed)
+- **165 tests** (135 unit + 30 integration), 0 failures
 - **22 stories blocked** by external dependencies
-- **53 new frontend/integration/infra stories** planned across 9 epics
+- **50 new frontend/integration/infra stories** planned across 9 epics
 
 ### Merge Log
 
@@ -237,11 +237,11 @@ To unlock the remaining 22 blocked stories, set up in this order:
 
 | Story | Title | Effort | Status | Depends on |
 |-------|-------|--------|--------|------------|
-| MEDIA-711 | Track "Added By" User on Queue Items | 2 pts | ⏳ Planned | MEDIA-604 (JWT) |
-| MEDIA-712 | OpenAPI Spec Generation & SSE Event Contract | 2 pts | ⏳ Planned | — |
+| MEDIA-711 | Track "Added By" User on Queue Items | 2 pts | ✅ Done | MEDIA-604 (JWT) |
+| MEDIA-712 | OpenAPI Spec Generation & SSE Event Contract | 2 pts | ✅ Done | — |
 | MEDIA-713 | Guest Access Model & SSE Authorization | 3 pts | ⏳ Planned | MEDIA-604, MEDIA-622, MEDIA-711 |
 | MEDIA-747 | Queue Item Metadata Enrichment (YouTube Fetch) | 3 pts | ⏳ Planned | MEDIA-710 |
-| MEDIA-749 | Queue Item Validation & Sanitization | 2 pts | ⏳ Planned | — |
+| MEDIA-749 | Queue Item Validation & Sanitization | 2 pts | ✅ Done | — |
 | MEDIA-759 | API Versioning Strategy | 3 pts | ⏳ Planned | MEDIA-712 |
 
 ## Epic: MEDIA-BE-RESILIENCE — Backend Resilience & Consistency

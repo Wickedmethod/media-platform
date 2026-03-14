@@ -3,7 +3,8 @@ namespace MediaPlatform.Api.Endpoints;
 public sealed record AddToQueueRequest(string Url, string Title, double StartAtSeconds = 0);
 
 public sealed record QueueItemResponse(
-    string Id, string Url, string Title, string Status, DateTimeOffset AddedAt, double StartAtSeconds);
+    string Id, string Url, string Title, string Status, DateTimeOffset AddedAt, double StartAtSeconds,
+    string? AddedByUserId = null, string? AddedByName = null);
 
 public sealed record PlaybackStateResponse(
     string State, QueueItemResponse? CurrentItem, DateTimeOffset? StartedAt,

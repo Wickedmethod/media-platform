@@ -11,7 +11,9 @@ public static class PolicyEndpoints
         group.MapGet("/", (IPolicyEngine engine) =>
         {
             return Results.Ok(engine.GetPolicies());
-        });
+        })
+        .WithName("GetPolicies")
+        .WithDescription("List all playback policies");
 
         group.MapPost("/", (AddPolicyRequest request, IPolicyEngine engine, IAuditLog auditLog, HttpContext http) =>
         {
@@ -38,7 +40,10 @@ public static class PolicyEndpoints
                 DateTimeOffset.UtcNow));
 
             return Results.Created($"/policies/{policy.Id}", policy);
-        });
+        })
+        .WithName("AddPolicy")
+        .Produces<ApiError>(StatusCodes.Status400BadRequest)
+        .WithDescription("Add a new playback policy");
 
         group.MapDelete("/{id}", (string id, IPolicyEngine engine, IAuditLog auditLog, HttpContext http) =>
         {
@@ -50,13 +55,18 @@ public static class PolicyEndpoints
                 $"Policy {id}",
                 DateTimeOffset.UtcNow));
             return Results.NoContent();
-        });
+        })
+        .WithName("RemovePolicy")
+        .Produces(StatusCodes.Status204NoContent)
+        .WithDescription("Remove a policy by ID");
 
         group.MapPost("/{id}/toggle", (string id, TogglePolicyRequest request, IPolicyEngine engine) =>
         {
             engine.SetEnabled(id, request.Enabled);
             return Results.Ok(new { id, enabled = request.Enabled });
-        });
+        })
+        .WithName("TogglePolicy")
+        .WithDescription("Enable or disable a policy");
 
         // Evaluate a policy check without executing
         group.MapPost("/evaluate", (EvaluatePolicyRequest request, IPolicyEngine engine) =>
@@ -69,7 +79,9 @@ public static class PolicyEndpoints
 
             var result = engine.Evaluate(context);
             return Results.Ok(result);
-        });
+        })
+        .WithName("EvaluatePolicy")
+        .WithDescription("Dry-run policy evaluation against a URL");
     }
 }
 
