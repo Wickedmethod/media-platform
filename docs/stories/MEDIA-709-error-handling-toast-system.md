@@ -5,7 +5,7 @@
 **Epic:** MEDIA-FE-ADMIN — Admin Frontend  
 **Priority:** High  
 **Effort:** 2 points  
-**Status:** ⏳ Planned  
+**Status:** ✅ Done  
 **Depends on:** MEDIA-700 (project setup)  
 **Absorbs:** MEDIA-761 (Global Error Boundary & Fallback UI)
 

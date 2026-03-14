@@ -1,6 +1,6 @@
 # Media Platform — Backlog
 
-> Last updated: 2026-03-16
+> Last updated: 2026-03-17
 
 ## Legend
 
@@ -12,10 +12,10 @@
 
 ## Summary
 
-- **42 stories done** (all tested, committed)
+- **45 stories done** (all tested, committed)
 - **273 tests** (194 unit + 79 integration), 0 failures
 - **22 stories blocked** by external dependencies
-- **50 new frontend/integration/infra stories** planned across 9 epics
+- **47 new frontend/integration/infra stories** planned across 9 epics
 
 ### Merge Log
 
@@ -206,12 +206,12 @@ To unlock the remaining 22 blocked stories, set up in this order:
 | MEDIA-701 | Keycloak Auth Flow | 3 pts | ⏳ Planned | MEDIA-700 |
 | MEDIA-702 | Queue Management View & Now Playing Panel | 3 pts | ⏳ Planned | MEDIA-700, MEDIA-701, MEDIA-704 |
 | MEDIA-703 | Admin Dashboard View | 3 pts | ⏳ Planned | MEDIA-700, MEDIA-701 |
-| MEDIA-704 | SSE Real-Time Composable & Player Store | 3 pts | ⏳ Planned | MEDIA-700 |
+| MEDIA-704 | SSE Real-Time Composable & Player Store | 3 pts | ✅ Done | MEDIA-700 |
 | MEDIA-705 | PWA Configuration | 2 pts | ⏳ Planned | MEDIA-700 |
 | MEDIA-706 | Frontend Docker & Deployment | 2 pts | ⏳ Planned | MEDIA-700 |
 | MEDIA-707 | Mobile Navigation & App Layout | 2 pts | ⏳ Planned | MEDIA-700, MEDIA-701 |
-| MEDIA-708 | Orval Client Generation Pipeline | 2 pts | ⏳ Planned | MEDIA-700, MEDIA-712 |
-| MEDIA-709 | Error Handling & Toast Notification System | 2 pts | ⏳ Planned | MEDIA-700 |
+| MEDIA-708 | Orval Client Generation Pipeline | 2 pts | ✅ Done | MEDIA-700, MEDIA-712 |
+| MEDIA-709 | Error Handling & Toast Notification System | 2 pts | ✅ Done | MEDIA-700 |
 | MEDIA-710 | YouTube Search Integration (Invidious) | 3 pts | ⏳ Planned | MEDIA-700, MEDIA-701 |
 | MEDIA-714 | Loading States & Skeleton Screens | 2 pts | ⏳ Planned | MEDIA-700 |
 | MEDIA-715 | E2E Testing with Playwright | 3 pts | ⏳ Planned | MEDIA-700, MEDIA-701, MEDIA-702 |

@@ -5,7 +5,7 @@
 **Epic:** MEDIA-FE-ADMIN — Admin Frontend  
 **Priority:** High (blocks all API calls from frontend)  
 **Effort:** 2 points  
-**Status:** ⏳ Planned  
+**Status:** ✅ Done  
 **Depends on:** MEDIA-700 (project setup), MEDIA-712 (OpenAPI spec)
 
 ---

@@ -1,4 +1,5 @@
 import { useAuthStore } from '@/stores/auth'
+import { ApiError } from '@/lib/api-error'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '/api'
 
@@ -28,7 +29,13 @@ export async function apiFetch<T>(path: string, options: ApiOptions = {}): Promi
   })
 
   if (!response.ok) {
-    throw new ApiError(response.status, response.statusText, await response.text())
+    let body: ApiError['body'] = {}
+    try {
+      body = await response.json()
+    } catch {
+      body = { error: response.statusText }
+    }
+    throw new ApiError(response.status, body)
   }
 
   if (response.status === 204) {
@@ -36,15 +43,4 @@ export async function apiFetch<T>(path: string, options: ApiOptions = {}): Promi
   }
 
   return response.json() as Promise<T>
-}
-
-export class ApiError extends Error {
-  constructor(
-    public readonly status: number,
-    public readonly statusText: string,
-    public readonly body: string,
-  ) {
-    super(`API Error ${status}: ${statusText}`)
-    this.name = 'ApiError'
-  }
 }

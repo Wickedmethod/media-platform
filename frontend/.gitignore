@@ -2,3 +2,7 @@ node_modules/
 dist/
 *.local
 .env
+*.tsbuildinfo
+
+# Generated API client (orval)
+src/generated/

@@ -13,8 +13,8 @@ export default defineConfig({
       prettier: true,
       override: {
         mutator: {
-          path: 'src/composables/useApi.ts',
-          name: 'apiFetch',
+          path: 'src/lib/api-client.ts',
+          name: 'apiClient',
         },
         query: {
           useQuery: true,
