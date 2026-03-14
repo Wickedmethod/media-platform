@@ -22,6 +22,28 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  media-platform-web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_KEYCLOAK_URL: http://keycloak:8080
+        VITE_KEYCLOAK_REALM: media-platform
+        VITE_KEYCLOAK_CLIENT_ID: media-platform-web
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+          cpus: "0.25"
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+    labels:
+      - "arcane.managed=true"
+      - "arcane.stack=media-platform"
+
   redis:
     deploy:
       resources:

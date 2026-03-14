@@ -7,7 +7,7 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '/api'
 export const apiClient = async <T>(config: {
   url: string
   method: string
-  params?: Record<string, string>
+  params?: Record<string, unknown>
   data?: unknown
   headers?: HeadersInit
   signal?: AbortSignal

@@ -14,6 +14,19 @@ services:
       - keycloak-public
     restart: unless-stopped
 
+  media-platform-web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: media-platform-web
+    ports:
+      - "3000:80"
+    depends_on:
+      - media-platform-api
+    networks:
+      - media-platform
+    restart: unless-stopped
+
   redis:
     image: redis:7-alpine
     container_name: media-platform-redis

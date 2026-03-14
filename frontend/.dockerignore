@@ -1,0 +1,9 @@
+node_modules
+dist
+*.local
+.env
+.git
+.gitignore
+*.md
+src/generated
+tsconfig.*.tsbuildinfo
