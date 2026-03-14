@@ -14,7 +14,7 @@
 
 Build a dedicated TV frontend optimized for Raspberry Pi 4/5 running in Chromium kiosk mode. The TV is the **second entry point** in the shared Vue project (`tv.html` → `src/tv.ts` → `TvApp.vue`). It reuses shared composables (`useSSE`, Orval API client, `usePlayerStore`) but has its own lightweight component tree — no router, no Keycloak, no admin features.
 
-**Absorbs:** MEDIA-735 (TV Idle Screen & Queue Preview)
+**Absorbs:** MEDIA-735 (TV Idle Screen & Queue Preview), MEDIA-753 (TV Idle Mode & Screensaver Timer), MEDIA-754 (TV Player Overlay UI)
 
 ---
 

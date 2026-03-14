@@ -14,6 +14,8 @@
 
 Create reusable loading state components — skeleton screens, spinners, and empty states — used across all views. Data-fetching components never show blank screens; they always show either content, a skeleton, or an empty state.
 
+**Absorbs:** MEDIA-750 (Queue Empty State UI) — empty states for queue and other views are fully covered here.
+
 ---
 
 ## Component Library

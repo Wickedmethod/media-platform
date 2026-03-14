@@ -14,6 +14,8 @@
 
 Add correlation IDs to every request flowing through the API so that a single user action can be traced across all log entries. Implement structured JSON logging and prepare for centralized log aggregation (Grafana Loki, Seq, or similar).
 
+**Absorbs:** MEDIA-757 (Structured JSON Logging Format) — structured JSON output is fully covered in this story's logging setup.
+
 ---
 
 ## Architecture
