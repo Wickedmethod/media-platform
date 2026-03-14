@@ -1,29 +1,8 @@
 import { ref, watch, readonly } from "vue";
-import { useQuery } from "@tanstack/vue-query";
+import { useQuery, useQueryClient } from "@tanstack/vue-query";
+import { invidiousClient } from "@/lib/invidious";
 
-export interface InvidiousVideo {
-  videoId: string;
-  title: string;
-  author: string;
-  authorId: string;
-  lengthSeconds: number;
-  videoThumbnails: { quality: string; url: string; width: number; height: number }[];
-}
-
-export interface SearchResult {
-  videoId: string;
-  title: string;
-  channel: string;
-  duration: number;
-  thumbnailUrl: string;
-  youtubeUrl: string;
-}
-
-const INVIDIOUS_INSTANCES = [
-  "https://vid.puffyan.us",
-  "https://inv.tux.pizza",
-  "https://invidious.nerdvpn.de",
-];
+export type { SearchResult } from "@/lib/invidious";
 
 const RECENT_SEARCHES_KEY = "media-platform:recent-searches";
 const MAX_RECENT_SEARCHES = 10;
@@ -47,54 +26,8 @@ function formatDuration(seconds: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-function getBestThumbnail(
-  thumbnails: InvidiousVideo["videoThumbnails"],
-): string {
-  const preferred = thumbnails.find(
-    (t) => t.quality === "medium" || t.quality === "default",
-  );
-  return preferred?.url ?? thumbnails[0]?.url ?? "";
-}
-
-async function searchInvidious(
-  query: string,
-  signal?: AbortSignal,
-): Promise<SearchResult[]> {
-  let lastError: Error | null = null;
-
-  for (const instance of INVIDIOUS_INSTANCES) {
-    try {
-      const url = new URL("/api/v1/search", instance);
-      url.searchParams.set("q", query);
-      url.searchParams.set("type", "video");
-      url.searchParams.set("sort_by", "relevance");
-
-      const response = await fetch(url.toString(), { signal });
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      const data = (await response.json()) as InvidiousVideo[];
-      return data
-        .filter((item) => item.videoId && item.title)
-        .map((item) => ({
-          videoId: item.videoId,
-          title: item.title,
-          channel: item.author,
-          duration: item.lengthSeconds,
-          thumbnailUrl: getBestThumbnail(item.videoThumbnails),
-          youtubeUrl: `https://www.youtube.com/watch?v=${item.videoId}`,
-        }));
-    } catch (err) {
-      if (signal?.aborted) throw err;
-      lastError = err instanceof Error ? err : new Error(String(err));
-    }
-  }
-
-  throw lastError ?? new Error("All Invidious instances unreachable");
-}
-
 export function useYouTubeSearch() {
+  const queryClient = useQueryClient();
   const query = ref("");
   const debouncedQuery = ref("");
   const recentSearches = ref<string[]>(loadRecentSearches());
@@ -120,7 +53,7 @@ export function useYouTubeSearch() {
     error,
   } = useQuery({
     queryKey: ["youtube-search", debouncedQuery],
-    queryFn: ({ signal }) => searchInvidious(debouncedQuery.value, signal),
+    queryFn: ({ signal }) => invidiousClient.search(debouncedQuery.value, signal),
     enabled: () => debouncedQuery.value.length > 0,
     staleTime: 5 * 60 * 1000,
     retry: 1,
@@ -148,6 +81,10 @@ export function useYouTubeSearch() {
     query.value = term;
   }
 
+  function retrySearch() {
+    queryClient.invalidateQueries({ queryKey: ["youtube-search"] });
+  }
+
   return {
     query,
     results,
@@ -159,6 +96,7 @@ export function useYouTubeSearch() {
     removeRecent,
     clearRecent,
     selectRecent,
+    retrySearch,
     formatDuration,
   };
 }

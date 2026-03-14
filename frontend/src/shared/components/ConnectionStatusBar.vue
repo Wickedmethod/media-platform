@@ -1,7 +1,31 @@
 <script setup lang="ts">
+import { computed, inject } from "vue";
+import { RefreshCw } from "lucide-vue-next";
 import { useSSEStatus } from "@/composables/useSSEStatus";
+import { useNetworkStatus } from "@/composables/useNetworkStatus";
+import { Button } from "@/shared/components/ui/button";
 
-const { state, message } = useSSEStatus();
+const { state: sseState, message: sseMessage } = useSSEStatus();
+const { isOnline } = useNetworkStatus();
+const reconnect = inject<() => void>("sseReconnect");
+
+const state = computed(() => {
+  if (!isOnline.value) return "offline" as const;
+  return sseState.value;
+});
+
+const message = computed(() => {
+  if (!isOnline.value) return "No internet connection";
+  return sseMessage.value;
+});
+
+const showRetry = computed(
+  () => state.value === "disconnected" || state.value === "offline",
+);
+
+function handleRetry() {
+  reconnect?.();
+}
 </script>
 
 <template>
@@ -12,7 +36,7 @@ const { state, message } = useSSEStatus();
       :class="{
         'bg-yellow-500/90 text-yellow-950': state === 'connecting',
         'bg-destructive/90 text-destructive-foreground':
-          state === 'disconnected',
+          state === 'disconnected' || state === 'offline',
         'bg-green-500/90 text-green-950': state === 'reconnected',
       }"
     >
@@ -20,11 +44,22 @@ const { state, message } = useSSEStatus();
         class="h-2 w-2 rounded-full"
         :class="{
           'bg-yellow-950 animate-pulse': state === 'connecting',
-          'bg-destructive-foreground': state === 'disconnected',
+          'bg-destructive-foreground':
+            state === 'disconnected' || state === 'offline',
           'bg-green-950': state === 'reconnected',
         }"
       />
       {{ message }}
+      <Button
+        v-if="showRetry"
+        variant="ghost"
+        size="sm"
+        class="ml-1 h-6 px-2 text-xs"
+        @click="handleRetry"
+      >
+        <RefreshCw class="mr-1 h-3 w-3" />
+        Retry
+      </Button>
     </div>
   </Transition>
 </template>

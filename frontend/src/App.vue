@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { watch } from "vue";
+import { watch, provide } from "vue";
 import { RouterView } from "vue-router";
 import ErrorBoundary from "@/shared/components/ErrorBoundary.vue";
 import ToastContainer from "@/shared/components/ToastContainer.vue";
@@ -9,6 +9,7 @@ import NowPlayingBar from "@/shared/components/NowPlayingBar.vue";
 import ConnectionStatusBar from "@/shared/components/ConnectionStatusBar.vue";
 import { usePlayerStore } from "@/stores/player";
 import { useSSE } from "@/composables/useSSE";
+import { useOfflineRecovery } from "@/composables/useOfflineRecovery";
 import { config } from "@/config";
 
 const player = usePlayerStore();
@@ -31,6 +32,15 @@ watch(
 );
 
 sse.connect();
+
+// Invalidate queries on SSE reconnect
+const { manualRetry } = useOfflineRecovery();
+
+// Provide reconnect action for ConnectionStatusBar
+provide("sseReconnect", () => {
+  sse.connect();
+  manualRetry();
+});
 </script>
 
 <template>

@@ -215,13 +215,13 @@ To unlock the remaining 22 blocked stories, set up in this order:
 | MEDIA-710 | YouTube Search Integration (Invidious) | 3 pts | ✅ Done | MEDIA-700, MEDIA-701 |
 | MEDIA-714 | Loading States & Skeleton Screens | 2 pts | ✅ Done | MEDIA-700 |
 | MEDIA-715 | E2E Testing with Playwright | 3 pts | ⏳ Planned | MEDIA-700, MEDIA-701, MEDIA-702 |
-| MEDIA-716 | Invidious Search Resilience & Failover | 2 pts | ⏳ Planned | MEDIA-710 |
+| MEDIA-716 | Invidious Search Resilience & Failover | 2 pts | ✅ Done | MEDIA-710 |
 | MEDIA-737 | Queue Reordering — Drag & Drop | 3 pts | ⏳ Planned | MEDIA-702 |
 | MEDIA-739 | Queue Item Details Modal | 2 pts | ⏳ Planned | MEDIA-702 |
 | MEDIA-740 | User Activity Indicators ("Added By") | 2 pts | ⏳ Planned | MEDIA-711 |
 | MEDIA-748 | Player Command Rate Limiting & Debounce | 2 pts | ✅ Done | MEDIA-704, MEDIA-702 |
 | MEDIA-751 | Global Connection Status Indicator | 2 pts | ✅ Done | MEDIA-704, MEDIA-707 |
-| MEDIA-752 | Reconnect & Offline Banner for SPA | 2 pts | ⏳ Planned | MEDIA-704, MEDIA-751 |
+| MEDIA-752 | Reconnect & Offline Banner for SPA | 2 pts | ✅ Done | MEDIA-704, MEDIA-751 |
 | MEDIA-762 | Feature Flag System for Frontend | 2 pts | ✅ Done | MEDIA-700 |
 
 ## Epic: MEDIA-FE-TV — TV Frontend (Pi Kiosk)

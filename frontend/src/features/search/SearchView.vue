@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { Search, AlertCircle, Loader2 } from "lucide-vue-next";
+import { Search, Loader2, ServerCrash, RefreshCw } from "lucide-vue-next";
 import { useQueryClient } from "@tanstack/vue-query";
 import {
   useYouTubeSearch,
@@ -8,6 +8,7 @@ import {
 } from "@/composables/useYouTubeSearch";
 import { useAddToQueue, getGetQueueQueryKey } from "@/generated/queue/queue";
 import { useToast } from "@/composables/useToast";
+import { Button } from "@/shared/components/ui/button";
 import SearchResultCard from "./SearchResult.vue";
 import RecentSearches from "./RecentSearches.vue";
 
@@ -23,6 +24,7 @@ const {
   removeRecent,
   clearRecent,
   selectRecent,
+  retrySearch,
 } = useYouTubeSearch();
 
 const addingId = ref<string | null>(null);
@@ -86,12 +88,22 @@ function handleSelectRecent(term: string) {
     <!-- Error -->
     <div
       v-else-if="isError"
-      class="flex flex-col items-center gap-2 py-12 text-center"
+      class="flex flex-col items-center gap-3 py-12 text-center"
     >
-      <AlertCircle class="h-8 w-8 text-destructive" />
-      <p class="text-sm text-muted-foreground">
-        Search unavailable — Invidious instances may be down
-      </p>
+      <ServerCrash class="h-10 w-10 text-muted-foreground" />
+      <div>
+        <h3 class="font-medium">Search unavailable</h3>
+        <p class="mt-1 text-sm text-muted-foreground">
+          YouTube search is temporarily unavailable. You can still add songs by
+          URL.
+        </p>
+      </div>
+      <div class="mt-2 flex gap-2">
+        <Button variant="outline" size="sm" @click="retrySearch">
+          <RefreshCw class="mr-1 h-3.5 w-3.5" />
+          Try Again
+        </Button>
+      </div>
     </div>
 
     <!-- Results -->
