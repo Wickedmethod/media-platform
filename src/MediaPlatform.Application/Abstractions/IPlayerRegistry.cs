@@ -8,7 +8,28 @@ public interface IPlayerRegistry
     Task RecordHeartbeatAsync(PlayerHeartbeat heartbeat, CancellationToken ct = default);
     Task<IReadOnlyList<PlayerStatus>> GetAllPlayersAsync(CancellationToken ct = default);
     Task<WorkerRegistrationResult> RegisterAsync(WorkerRegistration registration, CancellationToken ct = default);
+    Task DisconnectAsync(string playerId, string reason, CancellationToken ct = default);
 }
+
+/// <summary>
+/// Stores and retrieves player diagnostic logs (ring buffer per player).
+/// </summary>
+public interface IPlayerLogStore
+{
+    Task AppendLogsAsync(string playerId, IReadOnlyList<PlayerLogEntry> entries, CancellationToken ct = default);
+    Task<PlayerLogPage> GetLogsAsync(string playerId, string? level = null, int limit = 100, CancellationToken ct = default);
+}
+
+public record PlayerLogEntry(
+    string Timestamp,
+    string Level,
+    string Message,
+    string? Source = null);
+
+public record PlayerLogPage(
+    string PlayerId,
+    IReadOnlyList<PlayerLogEntry> Entries,
+    int TotalCount);
 
 public record PlayerHeartbeat(
     string PlayerId,

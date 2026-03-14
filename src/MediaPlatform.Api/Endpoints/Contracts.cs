@@ -76,3 +76,45 @@ public sealed record WorkerConfigResponse(
     int HeartbeatInterval,
     int PositionReportInterval,
     string SseUrl);
+
+// ── MEDIA-732: Player Log Streaming ────────────────────────
+
+public sealed record SubmitLogsRequest(
+    string PlayerId,
+    IReadOnlyList<LogEntryRequest> Entries);
+
+public sealed record LogEntryRequest(
+    string Timestamp,
+    string Level,
+    string Message,
+    string? Source = null);
+
+public sealed record PlayerLogResponse(
+    string PlayerId,
+    IReadOnlyList<LogEntryResponse> Entries,
+    int TotalCount);
+
+public sealed record LogEntryResponse(
+    string Timestamp,
+    string Level,
+    string Message,
+    string? Source);
+
+// ── MEDIA-733: Player Version & Update Check ───────────────
+
+public sealed record VersionMatrixResponse(
+    string? ExpectedVersion,
+    IReadOnlyList<PlayerVersionInfo> Players);
+
+public sealed record PlayerVersionInfo(
+    string Id,
+    string? Version,
+    bool UpToDate);
+
+public sealed record SetExpectedVersionRequest(string Version);
+
+public sealed record NotifyUpdateRequest(string Message);
+
+// ── MEDIA-760: Graceful Disconnect ─────────────────────────
+
+public sealed record DisconnectRequest(string Reason, string? Signal = null);

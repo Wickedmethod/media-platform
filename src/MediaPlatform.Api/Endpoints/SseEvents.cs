@@ -14,4 +14,6 @@ public static class SseEvents
     public sealed record Heartbeat;
     public sealed record PlayerOffline(string PlayerId);
     public sealed record PlayerOnline(string PlayerId, string Name);
+    public sealed record PlayerDisconnected(string PlayerId, string Reason);
+    public sealed record UpdateAvailable(string Version, string Message);
 }

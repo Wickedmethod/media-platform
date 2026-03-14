@@ -566,4 +566,118 @@ public class ApiContractTests : IClassFixture<MediaPlatformFactory>
         var body = await response.Content.ReadFromJsonAsync<JsonElement>(JsonOpts);
         Assert.True(body.TryGetProperty("playerId", out _));
     }
+
+    // ── Player Log Streaming (MEDIA-732) ──────────────────────
+
+    [Fact]
+    public async Task Diagnostics_SubmitLogs_Returns204()
+    {
+        var response = await _client.PostAsJsonAsync("/diagnostics/logs",
+            new
+            {
+                playerId = "living-room-tv",
+                entries = new[]
+                {
+                    new { timestamp = "2026-03-14T10:00:00Z", level = "error", message = "Player error 150", source = "player" },
+                    new { timestamp = "2026-03-14T10:00:01Z", level = "info", message = "Reporting error", source = "tv" }
+                }
+            });
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Diagnostics_SubmitLogs_EmptyEntries_Returns204()
+    {
+        var response = await _client.PostAsJsonAsync("/diagnostics/logs",
+            new { playerId = "test", entries = Array.Empty<object>() });
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Diagnostics_SubmitLogs_MissingPlayerId_Returns400()
+    {
+        var response = await _client.PostAsJsonAsync("/diagnostics/logs",
+            new { playerId = "", entries = new[] { new { timestamp = "t", level = "info", message = "m" } } });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Admin_PlayerLogs_ReturnsLogShape()
+    {
+        var response = await _client.GetAsync("/admin/players/living-room-tv/logs");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>(JsonOpts);
+        Assert.True(body.TryGetProperty("playerId", out _));
+        Assert.True(body.TryGetProperty("entries", out var entries));
+        Assert.Equal(JsonValueKind.Array, entries.ValueKind);
+        Assert.True(body.TryGetProperty("totalCount", out _));
+    }
+
+    // ── Version Check & Update Notify (MEDIA-733) ─────────────
+
+    [Fact]
+    public async Task Admin_VersionMatrix_ReturnsShape()
+    {
+        var response = await _client.GetAsync("/admin/players/versions");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>(JsonOpts);
+        Assert.True(body.TryGetProperty("players", out var players));
+        Assert.Equal(JsonValueKind.Array, players.ValueKind);
+    }
+
+    [Fact]
+    public async Task Admin_SetExpectedVersion_ReturnsOk()
+    {
+        var response = await _client.PostAsJsonAsync("/admin/players/expected-version",
+            new { version = "1.3.0" });
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>(JsonOpts);
+        Assert.True(body.TryGetProperty("expectedVersion", out var v));
+        Assert.Equal("1.3.0", v.GetString());
+    }
+
+    [Fact]
+    public async Task Admin_NotifyUpdate_ReturnsOk()
+    {
+        var response = await _client.PostAsJsonAsync("/admin/players/notify-update",
+            new { message = "Update available: v1.3.0" });
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>(JsonOpts);
+        Assert.True(body.TryGetProperty("notified", out var notified));
+        Assert.True(notified.GetBoolean());
+    }
+
+    // ── Graceful Disconnect (MEDIA-760) ───────────────────────
+
+    [Fact]
+    public async Task Worker_Disconnect_ReturnsOk()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Post, "/worker/disconnect");
+        request.Headers.Add("X-Player-Id", "living-room-tv");
+        request.Content = JsonContent.Create(new { reason = "shutdown", signal = "SIGTERM" });
+
+        var response = await _client.SendAsync(request);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>(JsonOpts);
+        Assert.True(body.TryGetProperty("status", out var status));
+        Assert.Equal("offline", status.GetString());
+        Assert.True(body.TryGetProperty("playerId", out _));
+    }
+
+    [Fact]
+    public async Task Worker_Disconnect_MissingPlayerId_Returns400()
+    {
+        var response = await _client.PostAsJsonAsync("/worker/disconnect",
+            new { reason = "shutdown" });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
 }

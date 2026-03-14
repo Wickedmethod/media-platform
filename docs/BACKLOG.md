@@ -12,8 +12,8 @@
 
 ## Summary
 
-- **32 stories done** (all tested, committed)
-- **216 tests** (173 unit + 43 integration), 0 failures
+- **35 stories done** (all tested, committed)
+- **235 tests** (183 unit + 52 integration), 0 failures
 - **22 stories blocked** by external dependencies
 - **50 new frontend/integration/infra stories** planned across 9 epics
 
@@ -170,7 +170,10 @@ The following proposed stories were merged into existing stories to avoid duplic
 | POST | `/worker/register` | Player registration handshake |
 | GET | `/admin/players` | List registered players |
 | GET | `/admin/players/{id}/logs` | Get player diagnostic logs |
+| GET | `/admin/players/versions` | Get player version matrix |
+| POST | `/admin/players/expected-version` | Set expected player version |
 | POST | `/admin/players/notify-update` | Notify players of update |
+| POST | `/worker/disconnect` | Graceful player disconnect |
 | GET | `/sync` | Queue snapshot (atomic state) |
 | POST | `/queue/reorder` | Reorder queue items (admin) |
 | POST | `/diagnostics/logs` | Submit player log batch |
@@ -262,11 +265,11 @@ To unlock the remaining 22 blocked stories, set up in this order:
 | Story | Title | Effort | Status | Depends on |
 |-------|-------|--------|--------|------------|
 | MEDIA-731 | Player Crash Recovery & Auto-Reconnect | 3 pts | ⏳ Planned | MEDIA-725, MEDIA-734 |
-| MEDIA-732 | Player Log Streaming & Remote Diagnostics | 2 pts | ⏳ Planned | MEDIA-729 |
-| MEDIA-733 | Player Version & Update Check | 2 pts | ⏳ Planned | MEDIA-729 |
+| MEDIA-732 | Player Log Streaming & Remote Diagnostics | 2 pts | ✅ Done | MEDIA-729 |
+| MEDIA-733 | Player Version & Update Check | 2 pts | ✅ Done | MEDIA-729 |
 | MEDIA-755 | Player Playback Timeout Detection | 2 pts | ⏳ Planned | MEDIA-720, MEDIA-724 |
 | MEDIA-756 | Player Disk Usage & Cache Cleanup | 2 pts | ⏳ Planned | MEDIA-612, MEDIA-729 |
-| MEDIA-760 | Graceful Player Shutdown Handling | 2 pts | ⏳ Planned | MEDIA-724, MEDIA-729 |
+| MEDIA-760 | Graceful Player Shutdown Handling | 2 pts | ✅ Done | MEDIA-724, MEDIA-729 |
 | MEDIA-763 | Player Network Connectivity Monitoring | 3 pts | ⏳ Planned | MEDIA-729, MEDIA-732 |
 
 ## Epic: MEDIA-OBS — Infrastructure & Observability

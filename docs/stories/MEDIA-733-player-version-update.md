@@ -5,7 +5,7 @@
 **Epic:** MEDIA-002 — Raspberry Pi Player Node  
 **Priority:** Low  
 **Effort:** 2 points  
-**Status:** ⏳ Planned  
+**Status:** ✅ Done  
 **Depends on:** MEDIA-729 (registration), MEDIA-724 (heartbeat)
 
 ---

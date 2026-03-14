@@ -5,7 +5,7 @@
 **Epic:** MEDIA-PI-OPS — Player Operations & Diagnostics  
 **Priority:** Medium  
 **Effort:** 2 points  
-**Status:** ⏳ Planned  
+**Status:** ✅ Done  
 **Depends on:** MEDIA-724 (Player Heartbeat), MEDIA-729 (Player Registration)
 
 ---

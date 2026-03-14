@@ -92,6 +92,7 @@ builder.Services.AddRateLimiter(options =>
 // Infrastructure
 builder.Services.AddScoped<IQueueRepository, RedisQueueRepository>();
 builder.Services.AddScoped<IPlayerRegistry, RedisPlayerRegistry>();
+builder.Services.AddScoped<IPlayerLogStore, RedisPlayerLogStore>();
 builder.Services.AddSingleton<IEventBroadcaster, InMemoryEventBroadcaster>();
 builder.Services.AddSingleton<INotificationService, WebhookNotificationService>();
 builder.Services.AddSingleton<IAnalyticsTracker, InMemoryAnalyticsTracker>();
@@ -172,6 +173,7 @@ app.MapAnalyticsEndpoints();
 app.MapAdminEndpoints();
 app.MapPolicyEndpoints();
 app.MapWorkerEndpoints();
+app.MapDiagnosticsEndpoints();
 app.MapMetrics();
 
 app.Run();

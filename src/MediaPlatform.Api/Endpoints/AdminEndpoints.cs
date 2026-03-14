@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using MediaPlatform.Application.Abstractions;
+using Microsoft.Extensions.Configuration;
 
 namespace MediaPlatform.Api.Endpoints;
 
@@ -20,6 +21,54 @@ public static class AdminEndpoints
         .WithName("GetPlayers")
         .Produces<IEnumerable<PlayerStatusResponse>>()
         .WithDescription("List all registered players with liveness status");
+
+        // Player Logs (MEDIA-732)
+        group.MapGet("/players/{id}/logs", async (string id, IPlayerLogStore logStore, string? level, int? limit, CancellationToken ct) =>
+        {
+            var page = await logStore.GetLogsAsync(id, level, limit ?? 100, ct);
+            return Results.Ok(new PlayerLogResponse(
+                page.PlayerId,
+                page.Entries.Select(e => new LogEntryResponse(e.Timestamp, e.Level, e.Message, e.Source)).ToList(),
+                page.TotalCount));
+        })
+        .WithName("GetPlayerLogs")
+        .Produces<PlayerLogResponse>()
+        .WithDescription("Get diagnostic logs for a specific player");
+
+        // Version Matrix (MEDIA-733)
+        group.MapGet("/players/versions", async (IPlayerRegistry registry, IConfiguration config, CancellationToken ct) =>
+        {
+            var expectedVersion = config.GetValue<string>("Player:ExpectedVersion");
+            var players = await registry.GetAllPlayersAsync(ct);
+            var versions = players.Select(p => new PlayerVersionInfo(
+                p.Id,
+                p.Version,
+                expectedVersion is null || p.Version == expectedVersion)).ToList();
+            return Results.Ok(new VersionMatrixResponse(expectedVersion, versions));
+        })
+        .WithName("GetVersionMatrix")
+        .Produces<VersionMatrixResponse>()
+        .WithDescription("List all players with version comparison against expected version");
+
+        // Set Expected Version (MEDIA-733)
+        group.MapPost("/players/expected-version", (SetExpectedVersionRequest request, IConfiguration config) =>
+        {
+            // Store in-memory via config override (for runtime use)
+            config["Player:ExpectedVersion"] = request.Version;
+            return Results.Ok(new { expectedVersion = request.Version });
+        })
+        .WithName("SetExpectedVersion")
+        .WithDescription("Set the expected player software version");
+
+        // Broadcast Update Notice (MEDIA-733)
+        group.MapPost("/players/notify-update", (NotifyUpdateRequest request, IEventBroadcaster events, IConfiguration config) =>
+        {
+            var version = config.GetValue<string>("Player:ExpectedVersion") ?? "unknown";
+            events.Broadcast("update-available", new SseEvents.UpdateAvailable(version, request.Message));
+            return Results.Ok(new { notified = true, version, message = request.Message });
+        })
+        .WithName("NotifyPlayerUpdate")
+        .WithDescription("Broadcast an update-available SSE event to all connected players");
 
         // Kill Switch
         group.MapPost("/kill-switch", (KillSwitchRequest request, IKillSwitch killSwitch, IAuditLog auditLog, HttpContext http) =>

@@ -38,5 +38,21 @@ public static class WorkerEndpoints
         .WithName("RegisterWorker")
         .Produces<WorkerRegistrationResponse>()
         .WithDescription("Register a player node with the API");
+
+        group.MapPost("/disconnect", async (DisconnectRequest request, IPlayerRegistry registry, IEventBroadcaster events, HttpContext http, CancellationToken ct) =>
+        {
+            // Resolve playerId from worker key header or require it in request
+            // For now, use a header-based approach: X-Player-Id
+            var playerId = http.Request.Headers["X-Player-Id"].FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(playerId))
+                return Results.BadRequest(new ApiError("X-Player-Id header is required"));
+
+            await registry.DisconnectAsync(playerId, request.Reason, ct);
+            events.Broadcast("player-disconnected", new SseEvents.PlayerDisconnected(playerId, request.Reason));
+
+            return Results.Ok(new { status = "offline", playerId, reason = request.Reason });
+        })
+        .WithName("DisconnectWorker")
+        .WithDescription("Notify API of a planned player disconnect (graceful shutdown)");
     }
 }

@@ -18,6 +18,7 @@ public class MediaPlatformFactory : WebApplicationFactory<Program>
 {
     public IQueueRepository QueueRepository { get; } = CreateDefaultQueueRepo();
     public IPlayerRegistry PlayerRegistry { get; } = CreateDefaultPlayerRegistry();
+    public IPlayerLogStore PlayerLogStore { get; } = CreateDefaultLogStore();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -27,6 +28,7 @@ public class MediaPlatformFactory : WebApplicationFactory<Program>
             RemoveService<IConnectionMultiplexer>(services);
             RemoveService<IQueueRepository>(services);
             RemoveService<IPlayerRegistry>(services);
+            RemoveService<IPlayerLogStore>(services);
 
             // Remove Redis health check
             var healthDescriptor = services.FirstOrDefault(d =>
@@ -35,6 +37,7 @@ public class MediaPlatformFactory : WebApplicationFactory<Program>
             // Register stubs
             services.AddScoped(_ => QueueRepository);
             services.AddScoped(_ => PlayerRegistry);
+            services.AddScoped(_ => PlayerLogStore);
             services.AddSingleton(Substitute.For<IConnectionMultiplexer>());
 
             // Override health checks to avoid Redis probe
@@ -73,6 +76,22 @@ public class MediaPlatformFactory : WebApplicationFactory<Program>
                 var playerId = reg.Name.ToLowerInvariant().Replace(' ', '-');
                 return new WorkerRegistrationResult(playerId, DateTimeOffset.UtcNow, new WorkerConfig());
             });
+        registry.DisconnectAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
         return registry;
+    }
+
+    private static IPlayerLogStore CreateDefaultLogStore()
+    {
+        var store = Substitute.For<IPlayerLogStore>();
+        store.AppendLogsAsync(Arg.Any<string>(), Arg.Any<IReadOnlyList<PlayerLogEntry>>(), Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
+        store.GetLogsAsync(Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<int>(), Arg.Any<CancellationToken>())
+            .Returns(callInfo =>
+            {
+                var playerId = callInfo.ArgAt<string>(0);
+                return new PlayerLogPage(playerId, Array.Empty<PlayerLogEntry>(), 0);
+            });
+        return store;
     }
 }

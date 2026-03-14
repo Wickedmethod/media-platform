@@ -147,4 +147,19 @@ public sealed class RedisPlayerRegistry(IConnectionMultiplexer redis) : IPlayerR
             .Replace("'", "", StringComparison.Ordinal)
             .Replace("\"", "", StringComparison.Ordinal);
     }
+
+    public async Task DisconnectAsync(string playerId, string reason, CancellationToken ct = default)
+    {
+        var key = $"{RegistrationPrefix}{playerId}";
+        await Db.HashSetAsync(key,
+        [
+            new HashEntry("status", "offline"),
+            new HashEntry("disconnectedAt", DateTimeOffset.UtcNow.ToString("O")),
+            new HashEntry("disconnectReason", reason)
+        ]);
+
+        // Remove the heartbeat key so the player shows as not alive
+        var heartbeatKey = $"{HeartbeatPrefix}{playerId}{HeartbeatSuffix}";
+        await Db.KeyDeleteAsync(heartbeatKey);
+    }
 }
