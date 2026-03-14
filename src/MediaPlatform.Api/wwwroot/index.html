@@ -428,6 +428,7 @@
   <header>
     <div class="logo">▶</div>
     <h1><span>media</span>::platform</h1>
+    <a href="/tv.html" target="_blank" title="Open TV Overlay" style="color:var(--text-dim);text-decoration:none;font-size:13px;font-family:'JetBrains Mono',monospace;padding:4px 10px;border:1px solid var(--border);border-radius:6px;transition:all 0.2s;">📺 TV</a>
     <div class="status-dot" id="statusDot" title="API status"></div>
   </header>
 
@@ -474,6 +475,14 @@
     </form>
 
     <ul class="queue-list" id="queueList"></ul>
+  </div>
+
+  <!-- Analytics Summary -->
+  <div style="margin-top:20px;padding:16px 20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-dim);display:flex;gap:24px;flex-wrap:wrap;">
+    <span>📊 Commands: <span id="statCommands" style="color:var(--text)">0</span></span>
+    <span>⏱ Playback: <span id="statPlayback" style="color:var(--text)">0:00</span></span>
+    <span>⚡ Avg Latency: <span id="statLatency" style="color:var(--text)">0ms</span></span>
+    <span>❌ Errors: <span id="statErrors" style="color:var(--text)">0</span></span>
   </div>
 </div>
 
@@ -768,8 +777,22 @@ function startPolling() {
   refreshState();
   refreshQueue();
   loadMode();
+  refreshAnalytics();
   polling = setInterval(() => { refreshState(); refreshQueue(); }, 10000);
   setInterval(reportPosition, 5000);
+  setInterval(refreshAnalytics, 15000);
+}
+
+async function refreshAnalytics() {
+  try {
+    const data = await api('/analytics');
+    document.getElementById('statCommands').textContent = data.totalCommands;
+    document.getElementById('statErrors').textContent = data.totalErrors;
+    document.getElementById('statLatency').textContent = Math.round(data.averageCommandLatencyMs) + 'ms';
+    const min = Math.floor(data.totalPlaybackSeconds / 60);
+    const sec = Math.floor(data.totalPlaybackSeconds % 60);
+    document.getElementById('statPlayback').textContent = `${min}:${sec.toString().padStart(2,'0')}`;
+  } catch {}
 }
 
 connectSSE();

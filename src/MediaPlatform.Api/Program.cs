@@ -66,3 +66,6 @@ app.MapNotificationEndpoints();
 app.MapAnalyticsEndpoints();
 
 app.Run();
+
+// Marker class for WebApplicationFactory<Program>
+public partial class Program;
