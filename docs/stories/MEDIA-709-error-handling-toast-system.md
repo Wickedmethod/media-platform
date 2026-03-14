@@ -36,6 +36,25 @@ ToastContainer (renders toasts)
 
 ---
 
+## Toast Types
+
+Toasts are triggered from two sources:
+
+### 1. API Error Toasts (automatic)
+All API errors surface as toasts via the global error handler (see below).
+
+### 2. SSE Event Toasts (real-time)
+When another user adds a song, all connected clients see a toast:
+```
+┌──────────────────────────────┐
+│ 🎵 @jonas added a song       │
+│ Bohemian Rhapsody — Queen    │
+└──────────────────────────────┘
+```
+This is triggered by the `item-added` SSE event in `usePlayerStore` (see MEDIA-704).
+
+---
+
 ## Toast Composable
 
 ```typescript

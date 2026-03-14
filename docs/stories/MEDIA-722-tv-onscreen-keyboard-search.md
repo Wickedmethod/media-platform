@@ -12,7 +12,7 @@
 
 ## Summary
 
-Build a CEC-navigable on-screen keyboard on the TV that lets users search YouTube directly from the TV remote. Uses the same Invidious API as the mobile search (MEDIA-710) but with a TV-optimized grid layout navigable by arrow keys and OK button.
+Build a CEC-navigable on-screen keyboard on the TV that lets users search YouTube directly from the TV remote. Uses the same Invidious API as the mobile search (MEDIA-710) but with a TV-optimized Vue component navigable by arrow keys and OK button. Part of the shared Vue project's TV entry point (`src/features/tv/TvSearch.vue`).
 
 ---
 

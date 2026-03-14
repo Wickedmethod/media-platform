@@ -148,6 +148,7 @@ chromium-browser \\
   --enable-zero-copy \\
   --disk-cache-size=50000000 \\
   --autoplay-policy=no-user-gesture-required \\
+  \"\${API_URL}/tv.html\"
   "${API_URL}/tv.html"
 EOF
 chmod +x /home/kiosk/.xinitrc

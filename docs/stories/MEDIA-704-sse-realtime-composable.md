@@ -133,6 +133,18 @@ export const usePlayerStore = defineStore('player', () => {
         // Invalidate TanStack Query cache for queue
         queryClient.invalidateQueries({ queryKey: ['queue'] })
         break
+      case 'item-added':
+        // Show toast: "@jonas added Bohemian Rhapsody"
+        if (event.data.addedByName && event.data.title) {
+          useToast().show({
+            type: 'info',
+            title: `${event.data.addedByName} added a song`,
+            message: event.data.title,
+            duration: 4000,
+          })
+        }
+        queryClient.invalidateQueries({ queryKey: ['queue'] })
+        break
       case 'kill-switch':
         isKillSwitchActive.value = event.data.active
         break
@@ -159,6 +171,7 @@ The SSE composable does **not** replace TanStack Query. Instead:
 |------|--------|--------|
 | Player state | SSE → Pinia store | Real-time, push |
 | Queue list | TanStack Query | Paginated, cached |
+| Item-added events | SSE → Toast + Query invalidation | Real-time "@user added Song" toast |
 | Analytics | TanStack Query | Polled, admin-only |
 | Policies | TanStack Query | Rarely changes |
 | Audit log | TanStack Query | On-demand fetch |

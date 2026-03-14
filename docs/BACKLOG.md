@@ -1,6 +1,6 @@
 # Media Platform — Backlog
 
-> Last updated: 2026-03-16
+> Last updated: 2026-06-15
 
 ## Legend
 
@@ -15,7 +15,19 @@
 - **23 stories done** (all tested, committed)
 - **123 tests** (93 unit + 30 integration), 0 failures
 - **22 stories blocked** by external dependencies
-- **21 new frontend/integration stories** planned across 4 epics
+- **40 new frontend/integration/infra stories** planned across 9 epics
+
+### Merge Log
+
+The following proposed stories were merged into existing stories to avoid duplication:
+
+| Merged | Into | Reason |
+|--------|------|--------|
+| MEDIA-717 (SSE Event Contract) | MEDIA-712 | SSE event types belong with OpenAPI spec |
+| MEDIA-726 (Player Capabilities) | MEDIA-729 | Capabilities are part of registration handshake |
+| MEDIA-727 (SSE Auth & Guest Policy) | MEDIA-713 | SSE auth is part of guest access model |
+| MEDIA-735 (TV Idle Screen) | MEDIA-720 | Idle screen is a feature of the TV kiosk app |
+| MEDIA-738 (Now Playing Panel) | MEDIA-702 | Player controls already in queue view |
 
 ---
 
@@ -148,6 +160,15 @@
 | GET | `/admin/kill-switch` | Get kill switch status |
 | GET | `/admin/audit` | Get audit log entries |
 | GET | `/admin/anomalies` | Check for anomalies |
+| POST | `/player/heartbeat` | Player heartbeat (liveness) |
+| POST | `/worker/register` | Player registration handshake |
+| GET | `/admin/players` | List registered players |
+| GET | `/admin/players/{id}/logs` | Get player diagnostic logs |
+| POST | `/admin/players/notify-update` | Notify players of update |
+| GET | `/sync` | Queue snapshot (atomic state) |
+| POST | `/queue/reorder` | Reorder queue items (admin) |
+| POST | `/diagnostics/logs` | Submit player log batch |
+| GET | `/metrics` | Prometheus metrics |
 
 ## Next Steps to Unblock
 
@@ -169,7 +190,7 @@ To unlock the remaining 22 blocked stories, set up in this order:
 |-------|-------|--------|--------|------------|
 | MEDIA-700 | Admin Frontend Project Setup | 3 pts | ⏳ Planned | — |
 | MEDIA-701 | Keycloak Auth Flow | 3 pts | ⏳ Planned | MEDIA-700 |
-| MEDIA-702 | Queue Management View | 3 pts | ⏳ Planned | MEDIA-700, MEDIA-701, MEDIA-704 |
+| MEDIA-702 | Queue Management View & Now Playing Panel | 3 pts | ⏳ Planned | MEDIA-700, MEDIA-701, MEDIA-704 |
 | MEDIA-703 | Admin Dashboard View | 3 pts | ⏳ Planned | MEDIA-700, MEDIA-701 |
 | MEDIA-704 | SSE Real-Time Composable & Player Store | 3 pts | ⏳ Planned | MEDIA-700 |
 | MEDIA-705 | PWA Configuration | 2 pts | ⏳ Planned | MEDIA-700 |
@@ -181,18 +202,23 @@ To unlock the remaining 22 blocked stories, set up in this order:
 | MEDIA-714 | Loading States & Skeleton Screens | 2 pts | ⏳ Planned | MEDIA-700 |
 | MEDIA-715 | E2E Testing with Playwright | 3 pts | ⏳ Planned | MEDIA-700, MEDIA-701, MEDIA-702 |
 | MEDIA-716 | Invidious Search Resilience & Failover | 2 pts | ⏳ Planned | MEDIA-710 |
+| MEDIA-737 | Queue Reordering — Drag & Drop | 3 pts | ⏳ Planned | MEDIA-702 |
+| MEDIA-739 | Queue Item Details Modal | 2 pts | ⏳ Planned | MEDIA-702 |
+| MEDIA-740 | User Activity Indicators ("Added By") | 2 pts | ⏳ Planned | MEDIA-711 |
 
 ## Epic: MEDIA-FE-TV — TV Frontend (Pi Kiosk)
 
-> Lightweight HTML/JS application for Raspberry Pi Chromium kiosk mode.  
-> Fullscreen YouTube player with CEC remote control and on-screen search.
+> Vue 3 second entry point sharing composables with the SPA.  
+> Fullscreen YouTube player on Raspberry Pi Chromium kiosk with CEC remote and on-screen search.
 
 | Story | Title | Effort | Status | Depends on |
 |-------|-------|--------|--------|------------|
-| MEDIA-720 | TV Frontend — Pi Kiosk Application | 5 pts | ⏳ Planned | MEDIA-704 (pattern) |
+| MEDIA-720 | TV Frontend — Pi Kiosk Application (Vue) | 5 pts | ⏳ Planned | MEDIA-700, MEDIA-704 |
 | MEDIA-721 | CEC Remote Control Integration | 3 pts | ⏳ Planned | MEDIA-720 |
-| MEDIA-722 | TV On-Screen Keyboard & Search | 3 pts | ⏳ Planned | MEDIA-720, MEDIA-721, MEDIA-710 |
+| MEDIA-722 | TV On-Screen Keyboard & Search (Vue) | 3 pts | ⏳ Planned | MEDIA-720, MEDIA-721, MEDIA-710 |
 | MEDIA-723 | Pi Provisioning & Setup Automation | 3 pts | ⏳ Planned | MEDIA-720, MEDIA-721 |
+| MEDIA-734 | TV SSE Reconnect & State Recovery | 2 pts | ⏳ Planned | MEDIA-720, MEDIA-704 |
+| MEDIA-736 | TV Playback Error Screen | 2 pts | ⏳ Planned | MEDIA-720 |
 
 ## Epic: MEDIA-BE-MULTI — Multi-User Backend Support
 
@@ -201,8 +227,49 @@ To unlock the remaining 22 blocked stories, set up in this order:
 | Story | Title | Effort | Status | Depends on |
 |-------|-------|--------|--------|------------|
 | MEDIA-711 | Track "Added By" User on Queue Items | 2 pts | ⏳ Planned | MEDIA-604 (JWT) |
-| MEDIA-712 | OpenAPI Spec Generation | 1 pt | ⏳ Planned | — |
-| MEDIA-713 | Guest Access Model (TV Anonymous + SPA Auth) | 3 pts | ⏳ Planned | MEDIA-604, MEDIA-622, MEDIA-711 |
+| MEDIA-712 | OpenAPI Spec Generation & SSE Event Contract | 2 pts | ⏳ Planned | — |
+| MEDIA-713 | Guest Access Model & SSE Authorization | 3 pts | ⏳ Planned | MEDIA-604, MEDIA-622, MEDIA-711 |
+
+## Epic: MEDIA-BE-RESILIENCE — Backend Resilience & Consistency
+
+> Race condition protection, client-server sync, and queue consistency guarantees.
+
+| Story | Title | Effort | Status | Depends on |
+|-------|-------|--------|--------|------------|
+| MEDIA-724 | Player Heartbeat & Liveness Reporting | 3 pts | ⏳ Planned | MEDIA-622 |
+| MEDIA-725 | Queue Snapshot Endpoint for Fast Client Sync | 2 pts | ⏳ Planned | — |
+| MEDIA-728 | Queue Consistency Guard (Race Condition Protection) | 3 pts | ⏳ Planned | — |
+| MEDIA-729 | Player Registration & Capability Handshake | 3 pts | ⏳ Planned | MEDIA-622, MEDIA-724 |
+
+## Epic: MEDIA-PI-OPS — Player Operations & Diagnostics
+
+> Remote monitoring, diagnostics, and lifecycle management for Raspberry Pi player nodes.
+
+| Story | Title | Effort | Status | Depends on |
+|-------|-------|--------|--------|------------|
+| MEDIA-731 | Player Crash Recovery & Auto-Reconnect | 3 pts | ⏳ Planned | MEDIA-725, MEDIA-734 |
+| MEDIA-732 | Player Log Streaming & Remote Diagnostics | 2 pts | ⏳ Planned | MEDIA-729 |
+| MEDIA-733 | Player Version & Update Check | 2 pts | ⏳ Planned | MEDIA-729 |
+
+## Epic: MEDIA-OBS — Infrastructure & Observability
+
+> Logging, metrics, and alerting for production monitoring.
+
+| Story | Title | Effort | Status | Depends on |
+|-------|-------|--------|--------|------------|
+| MEDIA-741 | Centralized Logging & Correlation IDs | 3 pts | ⏳ Planned | — |
+| MEDIA-742 | Metrics Export — Prometheus Format | 2 pts | ⏳ Planned | — |
+| MEDIA-743 | Alerting Integration for Anomalies | 2 pts | ⏳ Planned | MEDIA-631, MEDIA-613 |
+
+## Epic: MEDIA-DEPLOY — Deployment & Configuration
+
+> Docker Compose stack, environment config, and production reverse proxy.
+
+| Story | Title | Effort | Status | Depends on |
+|-------|-------|--------|--------|------------|
+| MEDIA-744 | Docker Compose Stack for Full Platform | 3 pts | ⏳ Planned | MEDIA-706 |
+| MEDIA-745 | Environment Configuration Management | 2 pts | ⏳ Planned | MEDIA-744 |
+| MEDIA-746 | Production Reverse Proxy Configuration | 2 pts | ⏳ Planned | MEDIA-744, MEDIA-706 |
 
 ## Epic: MEDIA-MULTI — Multi-Device Audio (v2)
 
@@ -217,35 +284,61 @@ To unlock the remaining 22 blocked stories, set up in this order:
 ## Recommended Build Order
 
 ### Phase 1: Foundation (Backend + Scaffold)
-1. **MEDIA-712** — OpenAPI spec generation
+1. **MEDIA-712** — OpenAPI spec generation & SSE event contract
 2. **MEDIA-711** — Track added-by user (backend)
-3. **MEDIA-713** — Guest access model + CORS (backend)
-4. **MEDIA-700** — Frontend project setup (scaffold + tooling)
+3. **MEDIA-713** — Guest access model & SSE authorization
+4. **MEDIA-700** — Frontend project setup (scaffold + tooling + TV entry point)
 5. **MEDIA-708** — Orval client generation pipeline
 
-### Phase 2: Core SPA
-6. **MEDIA-709** — Error handling & toast system
-7. **MEDIA-714** — Loading states & skeleton screens
-8. **MEDIA-701** — Keycloak auth flow
-9. **MEDIA-704** — SSE composable + player store
-10. **MEDIA-707** — Nav + layout shell
-11. **MEDIA-702** — Queue management view
+### Phase 2: Backend Resilience
+6. **MEDIA-725** — Queue snapshot endpoint
+7. **MEDIA-728** — Queue consistency guard
+8. **MEDIA-724** — Player heartbeat & liveness
+9. **MEDIA-729** — Player registration & capability handshake
 
-### Phase 3: Features
-12. **MEDIA-710** — YouTube search (Invidious)
-13. **MEDIA-716** — Invidious search resilience & failover
-14. **MEDIA-703** — Admin dashboard
-15. **MEDIA-705** — PWA config
-16. **MEDIA-706** — Docker deployment
+### Phase 3: Core SPA
+10. **MEDIA-709** — Error handling & toast system
+11. **MEDIA-714** — Loading states & skeleton screens
+12. **MEDIA-701** — Keycloak auth flow
+13. **MEDIA-704** — SSE composable + player store
+14. **MEDIA-707** — Nav + layout shell
+15. **MEDIA-702** — Queue management view & now playing panel
 
-### Phase 4: TV Experience
-17. **MEDIA-720** — TV kiosk app
-18. **MEDIA-721** — CEC remote
-19. **MEDIA-722** — TV on-screen keyboard
-20. **MEDIA-723** — Pi provisioning script
+### Phase 4: SPA Features
+16. **MEDIA-710** — YouTube search (Invidious)
+17. **MEDIA-716** — Invidious search resilience & failover
+18. **MEDIA-703** — Admin dashboard
+19. **MEDIA-737** — Queue reordering (drag & drop)
+20. **MEDIA-739** — Queue item details modal
+21. **MEDIA-740** — User activity indicators
+22. **MEDIA-705** — PWA config
+23. **MEDIA-706** — Docker deployment
 
-### Phase 5: Quality & Testing
-21. **MEDIA-715** — E2E testing with Playwright
+### Phase 5: TV Experience
+24. **MEDIA-720** — TV kiosk app (Vue)
+25. **MEDIA-721** — CEC remote
+26. **MEDIA-722** — TV on-screen keyboard (Vue)
+27. **MEDIA-734** — TV SSE reconnect & state recovery
+28. **MEDIA-736** — TV playback error screen
+29. **MEDIA-723** — Pi provisioning script
 
-### Phase 6: Multi-Device (v2)
-22. **MEDIA-730** — Personal playback sessions
+### Phase 6: Player Operations
+30. **MEDIA-731** — Player crash recovery
+31. **MEDIA-732** — Player log streaming
+32. **MEDIA-733** — Player version & update check
+
+### Phase 7: Observability & Infra
+33. **MEDIA-741** — Centralized logging & correlation IDs
+34. **MEDIA-742** — Metrics export (Prometheus)
+35. **MEDIA-743** — Alerting integration for anomalies
+
+### Phase 8: Deployment
+36. **MEDIA-744** — Docker Compose stack for full platform
+37. **MEDIA-745** — Environment configuration management
+38. **MEDIA-746** — Production reverse proxy
+
+### Phase 9: Quality & Testing
+39. **MEDIA-715** — E2E testing with Playwright
+
+### Phase 10: Multi-Device (v2)
+40. **MEDIA-730** — Personal playback sessions

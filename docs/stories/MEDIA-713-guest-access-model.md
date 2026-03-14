@@ -6,7 +6,7 @@
 **Priority:** High  
 **Effort:** 3 points  
 **Status:** ⏳ Planned  
-**Depends on:** MEDIA-604 (JWT auth), MEDIA-622 (Worker Key), MEDIA-711 (added-by tracking)
+**Depends on:** MEDIA-604 (JWT auth), MEDIA-622 (Worker Key), MEDIA-711 (added-by tracking)  \n**Absorbs:** MEDIA-727 (SSE Authorization & Guest Access Policy)
 
 ---
 
@@ -197,6 +197,53 @@ const eventSource = new EventSource('/api/events', { withCredentials: true })
 ```
 
 For the TV frontend (Worker Key), SSE doesn't need auth — it's read-only state.
+
+---
+
+## SSE Authorization Policy (absorbed from MEDIA-727)
+
+The SSE endpoint (`GET /events`) requires access control:
+
+| Client | Auth Method | Event Access |
+|--------|------------|--------------|
+| TV (Worker Key) | `X-Worker-Key` query param | All shared events (state, track, queue, error) |
+| SPA User (JWT) | Cookie or `?token=` param | All shared events |
+| SPA Admin (JWT) | Cookie or `?token=` param | All events + policy-changed, anomaly alerts |
+| Unauthenticated | None | ❌ Rejected (401) |
+
+### SSE Auth Implementation
+
+Since `EventSource` doesn't support custom headers, use query-param or cookie-based auth:
+
+```csharp
+// SSE endpoint with dual auth support
+app.MapGet("/events", async (HttpContext ctx, ISseService sse) =>
+{
+    // Try cookie auth first, then query-param token, then worker key
+    var (isAuthenticated, identity) = await ResolveSSEIdentity(ctx);
+    if (!isAuthenticated) {
+        ctx.Response.StatusCode = 401;
+        return;
+    }
+
+    ctx.Response.ContentType = "text/event-stream";
+    ctx.Response.Headers.CacheControl = "no-cache";
+
+    // Filter events based on identity role
+    var filter = identity.IsAdmin
+        ? EventFilter.All
+        : EventFilter.SharedOnly; // Excludes admin-only events
+
+    await sse.StreamEventsAsync(ctx, filter, ctx.RequestAborted);
+});
+```
+
+### Tasks (SSE Auth)
+
+- [ ] Add `?token=` query param auth support for SSE
+- [ ] Add `?worker-key=` query param auth support for SSE (TV)
+- [ ] Implement event filtering (admin vs user vs TV)
+- [ ] Reject unauthenticated SSE connections
 
 ---
 

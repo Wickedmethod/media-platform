@@ -12,7 +12,9 @@
 
 ## Summary
 
-Build a dedicated TV frontend optimized for Raspberry Pi 4/5 running in Chromium kiosk mode. This is **not** the Vue SPA — it's a lightweight, self-contained HTML/CSS/JS application designed for fullscreen 1080p display connected to a TV via HDMI. The TV is the primary playback device where YouTube videos are actually rendered.
+Build a dedicated TV frontend optimized for Raspberry Pi 4/5 running in Chromium kiosk mode. The TV is the **second entry point** in the shared Vue project (`tv.html` → `src/tv.ts` → `TvApp.vue`). It reuses shared composables (`useSSE`, Orval API client, `usePlayerStore`) but has its own lightweight component tree — no router, no Keycloak, no admin features.
+
+**Absorbs:** MEDIA-735 (TV Idle Screen & Queue Preview)
 
 ---
 
@@ -21,50 +23,60 @@ Build a dedicated TV frontend optimized for Raspberry Pi 4/5 running in Chromium
 ```
 Pi 4/5 (Chromium kiosk)
     │
-    ├── TV Frontend (this story)
-    │   ├── YouTube IFrame Player
-    │   ├── SSE connection to API
-    │   ├── Overlay bar (now-playing)
-    │   ├── Search UI (CEC navigable)
-    │   └── Idle/screensaver state
+    ├── TV Frontend (this story) — Vue 3 (shared project, separate entry)
+    │   ├── TvApp.vue (root)
+    │   │   ├── TvPlayer.vue (YouTube IFrame)
+    │   │   ├── TvOverlay.vue (now-playing bar)
+    │   │   ├── TvIdle.vue (idle screen + queue preview)
+    │   │   ├── TvSearch.vue (on-screen keyboard, MEDIA-722)
+    │   │   └── TvError.vue (error screen, MEDIA-736)
+    │   ├── useSSE composable (shared from SPA)
+    │   ├── usePlayerStore (shared from SPA)
+    │   └── Orval API client (shared from SPA)
     │
     └── CEC listener (MEDIA-721)
-        └── Sends commands to API
+        └── WebSocket → useCEC composable → local navigation
 ```
 
-### Why Not Vue SPA?
+### Why Vue (not vanilla HTML/JS)?
 
-- **Minimal JS footprint** — Pi has limited resources
-- **Fast boot** — single HTML file loads in < 2s
-- **No build step needed** — served directly from API wwwroot or nginx
-- **YouTube IFrame API** — needs direct DOM access, no framework overhead
-- **Kiosk stability** — fewer dependencies = fewer crashes
+- **Shared composables** — `useSSE`, `usePlayerStore`, API client reused without duplication
+- **Reactive state** — player state, overlay visibility, search results all reactive
+- **Component-based** — TvPlayer, TvOverlay, TvIdle, TvSearch, TvError are clean components
+- **Tree-shaking** — TV entry imports only what it needs; no Keycloak, no Router, no admin code
+- **Type safety** — shared TypeScript types for SSE events, API responses
+- **Still lightweight** — no router, no state management lib beyond reactive refs, fast boot
 
 ---
 
 ## Screen States
 
-### 1. Idle State (nothing playing)
+### 1. Idle State (nothing playing) — absorbed from MEDIA-735
 
 ```
 ┌──────────────────────────────────────────┐
-│                                          │
 │                                          │
 │           🎵 Media Platform              │
 │                                          │
 │         Waiting for music...             │
 │                                          │
-│     Queue is empty. Add songs from       │
-│     your phone or press OK to search.    │
+│     Next up:                             │
+│     1. Bohemian Rhapsody — Queen         │
+│     2. Gangnam Style — PSY              │
+│     3. Despacito — Luis Fonsi           │
 │                                          │
+│     Add songs from your phone            │
+│     or press OK to search.              │
 │                                          │
 │                          14:32  Wi-Fi ●  │
 └──────────────────────────────────────────┘
 ```
 
-- Subtle animated gradient background (CSS only, no JS animation)
+- Subtle animated gradient background (CSS only)
+- **Queue preview** — shows next 3 items if queue is not empty
 - Clock in corner
 - Hint text about adding songs or pressing OK to search
+- Transitions to playing state when SSE `track-changed` event arrives
 
 ### 2. Playing State
 
@@ -113,41 +125,63 @@ Pi 4/5 (Chromium kiosk)
 
 ---
 
-## YouTube IFrame Player Integration
+## YouTube IFrame Player — Vue Component
 
-```javascript
-// TV player controller
-class TVPlayer {
-  constructor(containerId) {
-    this.player = null
-    this.overlay = document.getElementById('overlay')
-    this.overlayTimeout = null
+```vue
+<!-- src/features/tv/TvPlayer.vue -->
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { usePlayerStore } from '@/stores/player'
+
+const playerStore = usePlayerStore()
+const playerRef = ref<HTMLDivElement>()
+let ytPlayer: YT.Player | null = null
+
+function initPlayer() {
+  ytPlayer = new YT.Player(playerRef.value!, {
+    height: '100%',
+    width: '100%',
+    playerVars: {
+      autoplay: 1,
+      controls: 0,
+      modestbranding: 1,
+      rel: 0,
+      showinfo: 0,
+      iv_load_policy: 3,
+      fs: 0,
+    },
+    events: {
+      onStateChange: onPlayerStateChange,
+      onError: onPlayerError,
+    },
+  })
+}
+
+function onPlayerStateChange(e: YT.OnStateChangeEvent) {
+  if (e.data === YT.PlayerState.ENDED) {
+    reportTrackEnd()
   }
+}
 
-  init() {
-    this.player = new YT.Player('player', {
-      height: '100%',
-      width: '100%',
-      playerVars: {
-        autoplay: 1,
-        controls: 0,      // Hide YouTube controls
-        modestbranding: 1,
-        rel: 0,
-        showinfo: 0,
-        iv_load_policy: 3, // No annotations
-        fs: 0,             // No fullscreen button (already fullscreen)
-      },
-      events: {
-        onStateChange: (e) => this.onPlayerStateChange(e),
-        onError: (e) => this.onPlayerError(e),
-      },
+function onPlayerError(e: YT.OnErrorEvent) {
+  reportPlaybackError(e.data)
+}
+
+// Watch for track changes from SSE
+watch(() => playerStore.currentItem, (item) => {
+  if (item && ytPlayer) {
+    ytPlayer.loadVideoById({
+      videoId: extractVideoId(item.url),
+      startSeconds: playerStore.position,
     })
   }
+})
+</script>
 
-  play(videoId, startAt = 0) {
-    this.player.loadVideoById({ videoId, startSeconds: startAt })
-    this.showOverlay()
-  }
+<template>
+  <div ref="playerRef" class="absolute inset-0 bg-black" />
+</template>
+```
 
   onPlayerStateChange(event) {
     if (event.data === YT.PlayerState.ENDED) {

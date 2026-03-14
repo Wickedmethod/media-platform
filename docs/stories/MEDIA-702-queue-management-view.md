@@ -6,7 +6,8 @@
 **Priority:** High  
 **Effort:** 5 points  
 **Status:** ⏳ Planned  
-**Depends on:** MEDIA-700, MEDIA-701
+**Depends on:** MEDIA-700, MEDIA-701  
+**Absorbs:** MEDIA-738 (Now Playing Control Panel)
 
 ---
 

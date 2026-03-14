@@ -40,10 +40,11 @@ The project lives at `projects/media-platform/frontend/` and follows the same te
 
 ```
 projects/media-platform/frontend/
-├── index.html
+├── index.html                   # SPA entry point
+├── tv.html                      # TV kiosk entry point
 ├── package.json
 ├── pnpm-lock.yaml
-├── vite.config.ts
+├── vite.config.ts               # Multi-page build (index + tv)
 ├── tsconfig.json
 ├── tsconfig.node.json
 ├── tailwind.config.ts
@@ -56,22 +57,31 @@ projects/media-platform/frontend/
 ├── public/
 │   └── icons/                   # PWA icons
 └── src/
-    ├── main.ts
-    ├── App.vue
+    ├── main.ts                  # SPA bootstrap (Keycloak, Router, Pinia)
+    ├── tv.ts                    # TV bootstrap (SSE only, no auth)
+    ├── App.vue                  # SPA root component
+    ├── TvApp.vue                # TV root component (fullscreen player)
     ├── env.d.ts
     ├── router/
-    │   └── index.ts
+    │   └── index.ts             # SPA routes only (TV has no router)
     ├── stores/
-    │   ├── auth.ts              # Keycloak auth state
-    │   └── player.ts            # Real-time player state via SSE
+    │   ├── auth.ts              # Keycloak auth state (SPA only)
+    │   └── player.ts            # Real-time player state via SSE (shared)
     ├── composables/
-    │   ├── useSSE.ts            # SSE connection manager
-    │   └── useApi.ts            # Base API fetch with auth
-    ├── generated/               # Orval output
+    │   ├── useSSE.ts            # SSE connection manager (shared)
+    │   ├── useApi.ts            # Base API fetch with auth
+    │   └── useCEC.ts            # CEC WebSocket bridge (TV only)
+    ├── generated/               # Orval output (shared)
     ├── features/
-    │   ├── queue/               # Queue views + components
-    │   ├── player/              # Player controls
-    │   ├── admin/               # Admin-only views
+    │   ├── queue/               # Queue views + components (SPA)
+    │   ├── player/              # Player controls (SPA)
+    │   ├── admin/               # Admin-only views (SPA)
+    │   ├── tv/                  # TV-specific views
+    │   │   ├── TvPlayer.vue     # YouTube IFrame player
+    │   │   ├── TvOverlay.vue    # Now-playing overlay bar
+    │   │   ├── TvIdle.vue       # Idle state with queue preview
+    │   │   ├── TvSearch.vue     # On-screen keyboard + search
+    │   │   └── TvError.vue      # Playback error screen
     │   └── shared/              # Layout, nav, etc.
     └── shared/
         ├── components/
@@ -83,12 +93,38 @@ projects/media-platform/frontend/
         └── types/
 ```
 
+### Vite Multi-Page Setup
+
+Both SPA and TV are built from the same project but have separate entry points:
+
+```typescript
+// vite.config.ts
+export default defineConfig({
+  build: {
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        tv: resolve(__dirname, 'tv.html'),
+      },
+    },
+  },
+})
+```
+
+**Benefits of shared project:**
+- `useSSE` composable reused by both SPA and TV
+- Orval-generated API client shared
+- Shared TypeScript types and utilities
+- Single build, two deployment artifacts
+- TV imports only what it needs (tree-shaking removes SPA code)
+
 ---
 
 ## Tasks
 
 - [ ] `pnpm create vite frontend --template vue-ts`
 - [ ] Install dependencies (tailwind, shadcn-vue, pinia, tanstack-query, vue-router, keycloak-js, orval)
+- [ ] Configure Vite multi-page build (index.html + tv.html entry points)
 - [ ] Configure Vite with proxy to `http://localhost:5000`
 - [ ] Configure shadcn-vue (new-york style, slate base color)
 - [ ] Setup TailwindCSS with CSS variables
@@ -97,6 +133,9 @@ projects/media-platform/frontend/
 - [ ] Setup Pinia with auth + player stores
 - [ ] Configure Orval to generate from API's OpenAPI spec
 - [ ] Add PWA manifest (VitePWA plugin)
+- [ ] Create `TvApp.vue` placeholder with YouTube player container
+- [ ] Create `src/tv.ts` entry point (SSE only, no Keycloak)
+- [ ] Create `tv.html` entry page
 - [ ] Create Dockerfile (multi-stage: node build → nginx serve)
 - [ ] Create `.env.example` with `VITE_API_URL` and `VITE_KEYCLOAK_URL`
 - [ ] Create `copilot-instructions.md`
@@ -107,6 +146,7 @@ projects/media-platform/frontend/
 ## Acceptance Criteria
 
 - [ ] `pnpm dev` runs on `http://localhost:5173` and proxies API calls to `:5000`
+- [ ] TV entry available at `http://localhost:5173/tv.html`
 - [ ] TailwindCSS + shadcn-vue components render correctly
 - [ ] Vue Router navigates between placeholder routes
 - [ ] Orval generates typed API client from OpenAPI spec
@@ -121,3 +161,6 @@ projects/media-platform/frontend/
 - API needs a minimal OpenAPI spec (or we generate one from minimal API endpoints)
 - The API should serve the frontend's `dist/` from wwwroot in production, OR the frontend runs as a separate container behind Caddy
 - In dev mode, Vite proxies to API on `:5000`
+- **TV and SPA share one project** — Vite multi-page build produces two entry points
+- TV entry (`tv.html`) imports only `useSSE`, `usePlayerStore`, and TV-specific components
+- TV does NOT import Keycloak, Vue Router, or admin features (tree-shaking)
