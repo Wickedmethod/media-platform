@@ -203,7 +203,7 @@ To unlock the remaining 22 blocked stories, set up in this order:
 | Story | Title | Effort | Status | Depends on |
 |-------|-------|--------|--------|------------|
 | MEDIA-700 | Admin Frontend Project Setup | 3 pts | ✅ Done | — |
-| MEDIA-701 | Keycloak Auth Flow | 3 pts | ⏳ Planned | MEDIA-700 |
+| MEDIA-701 | Keycloak Auth Flow | 3 pts | ✅ Done | MEDIA-700 |
 | MEDIA-702 | Queue Management View & Now Playing Panel | 3 pts | ⏳ Planned | MEDIA-700, MEDIA-701, MEDIA-704 |
 | MEDIA-703 | Admin Dashboard View | 3 pts | ⏳ Planned | MEDIA-700, MEDIA-701 |
 | MEDIA-704 | SSE Real-Time Composable & Player Store | 3 pts | ✅ Done | MEDIA-700 |
@@ -222,7 +222,7 @@ To unlock the remaining 22 blocked stories, set up in this order:
 | MEDIA-748 | Player Command Rate Limiting & Debounce | 2 pts | ⏳ Planned | MEDIA-704, MEDIA-702 |
 | MEDIA-751 | Global Connection Status Indicator | 2 pts | ⏳ Planned | MEDIA-704, MEDIA-707 |
 | MEDIA-752 | Reconnect & Offline Banner for SPA | 2 pts | ⏳ Planned | MEDIA-704, MEDIA-751 |
-| MEDIA-762 | Feature Flag System for Frontend | 2 pts | ⏳ Planned | MEDIA-700 |
+| MEDIA-762 | Feature Flag System for Frontend | 2 pts | ✅ Done | MEDIA-700 |
 
 ## Epic: MEDIA-FE-TV — TV Frontend (Pi Kiosk)
 

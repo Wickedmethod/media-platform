@@ -1,16 +1,37 @@
 <script setup lang="ts">
-import { useToast, type Toast } from '@/composables/useToast'
-import { CheckCircle, AlertCircle, AlertTriangle, Info, X } from 'lucide-vue-next'
-import { type Component } from 'vue'
+import { useToast, type Toast } from "@/composables/useToast";
+import {
+  CheckCircle,
+  AlertCircle,
+  AlertTriangle,
+  Info,
+  X,
+} from "lucide-vue-next";
+import { type Component } from "vue";
 
-const { toasts, dismiss } = useToast()
+const { toasts, dismiss } = useToast();
 
-const typeConfig: Record<Toast['type'], { bg: string; border: string; icon: Component }> = {
-  success: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', icon: CheckCircle },
-  error: { bg: 'bg-red-500/10', border: 'border-red-500/20', icon: AlertCircle },
-  warning: { bg: 'bg-amber-500/10', border: 'border-amber-500/20', icon: AlertTriangle },
-  info: { bg: 'bg-blue-500/10', border: 'border-blue-500/20', icon: Info },
-}
+const typeConfig: Record<
+  Toast["type"],
+  { bg: string; border: string; icon: Component }
+> = {
+  success: {
+    bg: "bg-emerald-500/10",
+    border: "border-emerald-500/20",
+    icon: CheckCircle,
+  },
+  error: {
+    bg: "bg-red-500/10",
+    border: "border-red-500/20",
+    icon: AlertCircle,
+  },
+  warning: {
+    bg: "bg-amber-500/10",
+    border: "border-amber-500/20",
+    icon: AlertTriangle,
+  },
+  info: { bg: "bg-blue-500/10", border: "border-blue-500/20", icon: Info },
+};
 </script>
 
 <template>

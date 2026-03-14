@@ -5,7 +5,7 @@
 **Epic:** MEDIA-FE-ADMIN — Admin Frontend  
 **Priority:** Low  
 **Effort:** 2 points  
-**Status:** ⏳ Planned  
+**Status:** ✅ Done  
 **Depends on:** MEDIA-700 (Project Setup)
 
 ---

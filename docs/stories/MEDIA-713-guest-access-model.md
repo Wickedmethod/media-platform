@@ -6,7 +6,7 @@
 **Priority:** High  
 **Effort:** 3 points  
 **Status:** ✅ Done  
-**Depends on:** MEDIA-604 (JWT auth), MEDIA-622 (Worker Key), MEDIA-711 (added-by tracking)  \n**Absorbs:** MEDIA-727 (SSE Authorization & Guest Access Policy)
+**Depends on:** MEDIA-604 (JWT auth), MEDIA-622 (Worker Key), MEDIA-711 (added-by tracking) \n**Absorbs:** MEDIA-727 (SSE Authorization & Guest Access Policy)
 
 ---
 
@@ -46,23 +46,23 @@ Define and implement the dual access model: **TV is guest-friendly** (no login),
 
 ## Endpoint Access Matrix
 
-| Endpoint | TV (Worker Key) | User (JWT) | Admin (JWT) |
-|----------|:-:|:-:|:-:|
-| `GET /queue` | ✅ | ✅ | ✅ |
-| `POST /queue/add` | ✅ (as "Guest") | ✅ (with user) | ✅ |
-| `DELETE /queue/{id}` | ❌ | ✅ (own only) | ✅ (any) |
-| `GET /now-playing` | ✅ | ✅ | ✅ |
-| `GET /events` (SSE) | ✅ | ✅ | ✅ |
-| `POST /player/play` | ❌ | ❌ | ✅ |
-| `POST /player/pause` | ❌ | ❌ | ✅ |
-| `POST /player/skip` | ❌ | ❌ | ✅ |
-| `POST /player/stop` | ❌ | ❌ | ✅ |
-| `POST /player/position` | ✅ (TV reports) | ❌ | ✅ |
-| `POST /player/report-end` | ✅ (TV reports) | ❌ | ✅ |
-| `GET /policies` | ❌ | ❌ | ✅ |
-| `POST /policies` | ❌ | ❌ | ✅ |
-| `GET /admin/*` | ❌ | ❌ | ✅ |
-| `GET /analytics` | ❌ | ❌ | ✅ |
+| Endpoint                  | TV (Worker Key) |   User (JWT)   | Admin (JWT) |
+| ------------------------- | :-------------: | :------------: | :---------: |
+| `GET /queue`              |       ✅        |       ✅       |     ✅      |
+| `POST /queue/add`         | ✅ (as "Guest") | ✅ (with user) |     ✅      |
+| `DELETE /queue/{id}`      |       ❌        | ✅ (own only)  |  ✅ (any)   |
+| `GET /now-playing`        |       ✅        |       ✅       |     ✅      |
+| `GET /events` (SSE)       |       ✅        |       ✅       |     ✅      |
+| `POST /player/play`       |       ❌        |       ❌       |     ✅      |
+| `POST /player/pause`      |       ❌        |       ❌       |     ✅      |
+| `POST /player/skip`       |       ❌        |       ❌       |     ✅      |
+| `POST /player/stop`       |       ❌        |       ❌       |     ✅      |
+| `POST /player/position`   | ✅ (TV reports) |       ❌       |     ✅      |
+| `POST /player/report-end` | ✅ (TV reports) |       ❌       |     ✅      |
+| `GET /policies`           |       ❌        |       ❌       |     ✅      |
+| `POST /policies`          |       ❌        |       ❌       |     ✅      |
+| `GET /admin/*`            |       ❌        |       ❌       |     ✅      |
+| `GET /analytics`          |       ❌        |       ❌       |     ✅      |
 
 ---
 
@@ -86,7 +86,7 @@ The API resolves identity:
 // If JWT present → extract user from claims
 // Else if X-Worker-Key present → identity = "TV Guest"
 var (userId, userName) = context.User.Identity?.IsAuthenticated == true
-    ? (context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value, 
+    ? (context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value,
        context.User.FindFirst("preferred_username")?.Value)
     : IsWorkerKeyValid(context)
         ? ("tv-guest", "TV")
@@ -94,6 +94,7 @@ var (userId, userName) = context.User.Identity?.IsAuthenticated == true
 ```
 
 Queue items from TV show as:
+
 ```json
 {
   "addedByUserId": "tv-guest",
@@ -174,12 +175,12 @@ app.UseCors("MediaPlatform");
 
 ### When CORS is NOT Needed
 
-| Scenario | CORS Required? |
-|----------|:-:|
-| TV served from API wwwroot (`/tv.html`) | ❌ Same origin |
+| Scenario                                         |      CORS Required?      |
+| ------------------------------------------------ | :----------------------: |
+| TV served from API wwwroot (`/tv.html`)          |      ❌ Same origin      |
 | SPA served from nginx on same domain (via proxy) | ❌ Same origin (proxied) |
-| SPA on `localhost:5173` during dev | ✅ Different port |
-| SPA on separate container/domain | ✅ Different origin |
+| SPA on `localhost:5173` during dev               |    ✅ Different port     |
+| SPA on separate container/domain                 |   ✅ Different origin    |
 
 ---
 
@@ -189,11 +190,11 @@ Server-Sent Events (`EventSource`) don't support custom headers. For authenticat
 
 ```typescript
 // Option A: Token as query param (less secure, but standard for SSE)
-const eventSource = new EventSource(`/api/events?token=${authStore.token}`)
+const eventSource = new EventSource(`/api/events?token=${authStore.token}`);
 
 // Option B: Cookie-based auth (preferred)
 // Keycloak sets httpOnly cookie, SSE sends it automatically with credentials
-const eventSource = new EventSource('/api/events', { withCredentials: true })
+const eventSource = new EventSource("/api/events", { withCredentials: true });
 ```
 
 For the TV frontend (Worker Key), SSE doesn't need auth — it's read-only state.
@@ -204,12 +205,12 @@ For the TV frontend (Worker Key), SSE doesn't need auth — it's read-only state
 
 The SSE endpoint (`GET /events`) requires access control:
 
-| Client | Auth Method | Event Access |
-|--------|------------|--------------|
+| Client          | Auth Method                | Event Access                                   |
+| --------------- | -------------------------- | ---------------------------------------------- |
 | TV (Worker Key) | `X-Worker-Key` query param | All shared events (state, track, queue, error) |
-| SPA User (JWT) | Cookie or `?token=` param | All shared events |
-| SPA Admin (JWT) | Cookie or `?token=` param | All events + policy-changed, anomaly alerts |
-| Unauthenticated | None | ❌ Rejected (401) |
+| SPA User (JWT)  | Cookie or `?token=` param  | All shared events                              |
+| SPA Admin (JWT) | Cookie or `?token=` param  | All events + policy-changed, anomaly alerts    |
+| Unauthenticated | None                       | ❌ Rejected (401)                              |
 
 ### SSE Auth Implementation
 
@@ -263,6 +264,7 @@ app.MapPost("/queue/add", handler)
 ## Tasks
 
 ### Backend
+
 - [ ] Add "WorkerKey" authentication scheme (extend existing MEDIA-622)
 - [ ] Define authorization policies: `ReadAccess`, `QueueAdd`, `QueueOwner`, `WorkerOnly`, `AdminOnly`
 - [ ] Apply policies to all endpoints
@@ -273,11 +275,13 @@ app.MapPost("/queue/add", handler)
 - [ ] Write integration tests for guest vs authenticated access
 
 ### Frontend (SPA)
+
 - [ ] Ensure Orval custom fetch sends Bearer token
 - [ ] Handle 401 (redirect to Keycloak login)
 - [ ] Handle 403 (show "Not authorized" toast)
 
 ### TV Frontend
+
 - [ ] Ensure all API calls include `X-Worker-Key` header
 - [ ] No Keycloak dependency in TV code
 
