@@ -12,6 +12,7 @@ public sealed class RedisQueueRepository(IConnectionMultiplexer redis) : IQueueR
     private const string QueueKey = "media:queue";
     private const string NowPlayingKey = "media:now-playing";
     private const string QueueModeKey = "media:queue-mode";
+    private const string VersionKey = "queue:version";
 
     private IDatabase Db => redis.GetDatabase();
 
@@ -141,6 +142,17 @@ public sealed class RedisQueueRepository(IConnectionMultiplexer redis) : IQueueR
     public async Task SetQueueModeAsync(QueueMode mode, CancellationToken ct = default)
     {
         await Db.StringSetAsync(QueueModeKey, mode.ToString());
+    }
+
+    public async Task<long> GetVersionAsync(CancellationToken ct = default)
+    {
+        var value = await Db.StringGetAsync(VersionKey);
+        return value.IsNullOrEmpty ? 0 : (long)value;
+    }
+
+    public async Task<long> IncrementVersionAsync(CancellationToken ct = default)
+    {
+        return await Db.StringIncrementAsync(VersionKey);
     }
 
     private static string Serialize(QueueItem item)

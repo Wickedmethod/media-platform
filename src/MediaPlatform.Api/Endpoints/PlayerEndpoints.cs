@@ -14,9 +14,39 @@ public static class PlayerEndpoints
     {
         var group = app.MapGroup("/player").WithTags("Player").RequireRateLimiting("commands");
 
-        group.MapPost("/play", async (PlayerCommandHandler handler, IEventBroadcaster events, IAnalyticsTracker analytics, INotificationService notifications, CancellationToken ct) =>
+        group.MapPost("/heartbeat", async (HeartbeatRequest request, IPlayerRegistry registry, IEventBroadcaster events, CancellationToken ct) =>
         {
-            return await ExecuteCommand(handler, events, analytics, notifications, CommandType.Play, ct);
+            // Check for zombies before recording new heartbeat
+            var playersBefore = await registry.GetAllPlayersAsync(ct);
+            var wasAlive = playersBefore.Any(p => p.Id == request.PlayerId && p.IsAlive);
+
+            await registry.RecordHeartbeatAsync(
+                new PlayerHeartbeat(request.PlayerId, request.State, request.Position,
+                    request.VideoId, request.Uptime, request.Version), ct);
+
+            // Detect any newly-offline players
+            var playersAfter = await registry.GetAllPlayersAsync(ct);
+            foreach (var player in playersAfter.Where(p => !p.IsAlive))
+            {
+                // Only emit for players that were previously alive (not for the current heartbeat sender going offline)
+                var wasPreviouslyAlive = playersBefore.Any(p => p.Id == player.Id && p.IsAlive);
+                if (wasPreviouslyAlive)
+                {
+                    events.Broadcast("player-offline", new SseEvents.PlayerOffline(player.Id));
+                }
+            }
+
+            return Results.NoContent();
+        })
+        .WithName("PlayerHeartbeat")
+        .Produces(StatusCodes.Status204NoContent)
+        .WithDescription("Report player liveness heartbeat");
+
+        group.MapPost("/play", async (PlayerCommandHandler handler, IEventBroadcaster events, IAnalyticsTracker analytics, INotificationService notifications, IQueueRepository repo, CancellationToken ct) =>
+        {
+            var result = await ExecuteCommand(handler, events, analytics, notifications, CommandType.Play, ct);
+            await repo.IncrementVersionAsync(ct);
+            return result;
         })
         .WithName("Play")
         .Produces<PlaybackStateResponse>()
@@ -32,9 +62,11 @@ public static class PlayerEndpoints
         .Produces<ApiError>(StatusCodes.Status409Conflict)
         .WithDescription("Pause playback");
 
-        group.MapPost("/skip", async (PlayerCommandHandler handler, IEventBroadcaster events, IAnalyticsTracker analytics, INotificationService notifications, CancellationToken ct) =>
+        group.MapPost("/skip", async (PlayerCommandHandler handler, IEventBroadcaster events, IAnalyticsTracker analytics, INotificationService notifications, IQueueRepository repo, CancellationToken ct) =>
         {
-            return await ExecuteCommand(handler, events, analytics, notifications, CommandType.Skip, ct);
+            var result = await ExecuteCommand(handler, events, analytics, notifications, CommandType.Skip, ct);
+            await repo.IncrementVersionAsync(ct);
+            return result;
         })
         .WithName("Skip")
         .Produces<PlaybackStateResponse>()

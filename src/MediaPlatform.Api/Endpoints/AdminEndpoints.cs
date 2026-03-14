@@ -9,6 +9,17 @@ public static class AdminEndpoints
     {
         var group = app.MapGroup("/admin").WithTags("Admin");
 
+        // Player Liveness
+        group.MapGet("/players", async (IPlayerRegistry registry, CancellationToken ct) =>
+        {
+            var players = await registry.GetAllPlayersAsync(ct);
+            return Results.Ok(players.Select(p => new PlayerStatusResponse(
+                p.Id, p.LastSeen, p.State, p.IsAlive, p.Uptime, p.Version)));
+        })
+        .WithName("GetPlayers")
+        .Produces<IEnumerable<PlayerStatusResponse>>()
+        .WithDescription("List all registered players with liveness status");
+
         // Kill Switch
         group.MapPost("/kill-switch", (KillSwitchRequest request, IKillSwitch killSwitch, IAuditLog auditLog, HttpContext http) =>
         {

@@ -12,4 +12,5 @@ public static class SseEvents
     public sealed record PlaybackError(string Error, string VideoId, int RetryCount);
     public sealed record PolicyChanged(string Action);
     public sealed record Heartbeat;
+    public sealed record PlayerOffline(string PlayerId);
 }

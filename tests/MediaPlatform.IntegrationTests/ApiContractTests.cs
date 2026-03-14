@@ -1,6 +1,8 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using MediaPlatform.Application.Abstractions;
+using NSubstitute;
 using Xunit;
 
 namespace MediaPlatform.IntegrationTests;
@@ -13,10 +15,12 @@ namespace MediaPlatform.IntegrationTests;
 public class ApiContractTests : IClassFixture<MediaPlatformFactory>
 {
     private readonly HttpClient _client;
+    private readonly MediaPlatformFactory _factory;
     private static readonly JsonSerializerOptions JsonOpts = new() { PropertyNameCaseInsensitive = true };
 
     public ApiContractTests(MediaPlatformFactory factory)
     {
+        _factory = factory;
         _client = factory.CreateClient();
     }
 
@@ -379,5 +383,109 @@ public class ApiContractTests : IClassFixture<MediaPlatformFactory>
         var response = await _client.SendAsync(request);
         // No worker key configured in test — should reject
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    // ── Sync Endpoint (MEDIA-725) ─────────────────────────────
+
+    [Fact]
+    public async Task Sync_Get_ReturnsSyncSnapshotShape()
+    {
+        var response = await _client.GetAsync("/sync");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>(JsonOpts);
+        Assert.True(body.TryGetProperty("queue", out var queue));
+        Assert.Equal(JsonValueKind.Array, queue.ValueKind);
+        Assert.True(body.TryGetProperty("nowPlaying", out _));
+        Assert.True(body.TryGetProperty("queueMode", out _));
+        Assert.True(body.TryGetProperty("policies", out _));
+        Assert.True(body.TryGetProperty("killSwitch", out _));
+        Assert.True(body.TryGetProperty("serverTime", out _));
+        Assert.True(body.TryGetProperty("version", out _));
+    }
+
+    [Fact]
+    public async Task Sync_Get_ReturnsETagHeader()
+    {
+        var response = await _client.GetAsync("/sync");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var etag = response.Headers.ETag;
+        Assert.NotNull(etag);
+    }
+
+    [Fact]
+    public async Task Sync_Get_WithMatchingETag_Returns304()
+    {
+        // Get initial snapshot to obtain version ETag
+        var first = await _client.GetAsync("/sync");
+        Assert.Equal(HttpStatusCode.OK, first.StatusCode);
+        var etag = first.Headers.ETag?.Tag;
+        Assert.NotNull(etag);
+
+        // Send request with If-None-Match
+        var request = new HttpRequestMessage(HttpMethod.Get, "/sync");
+        request.Headers.TryAddWithoutValidation("If-None-Match", etag);
+        var second = await _client.SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.NotModified, second.StatusCode);
+    }
+
+    // ── Player Heartbeat (MEDIA-724) ──────────────────────────
+
+    [Fact]
+    public async Task Player_Heartbeat_Returns204()
+    {
+        var response = await _client.PostAsJsonAsync("/player/heartbeat",
+            new { playerId = "living-room", state = "Playing", position = 42.5, videoId = "abc", uptime = 3600, version = "1.0.0" });
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Admin_Players_ReturnsArray()
+    {
+        var response = await _client.GetAsync("/admin/players");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var body = await response.Content.ReadAsStringAsync();
+        var arr = JsonSerializer.Deserialize<JsonElement>(body);
+        Assert.Equal(JsonValueKind.Array, arr.ValueKind);
+    }
+
+    // ── Queue Consistency Guard (MEDIA-728) ───────────────────
+
+    [Fact]
+    public async Task Queue_Delete_WithStaleVersion_Returns409()
+    {
+        // Set current version to 5
+        _factory.QueueRepository.GetVersionAsync(Arg.Any<CancellationToken>()).Returns(5L);
+
+        var request = new HttpRequestMessage(HttpMethod.Delete, "/queue/some-id");
+        request.Headers.Add("X-Queue-Version", "3");
+        var response = await _client.SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>(JsonOpts);
+        Assert.True(body.TryGetProperty("error", out _));
+    }
+
+    [Fact]
+    public async Task Queue_Delete_WithMatchingVersion_Succeeds()
+    {
+        _factory.QueueRepository.GetVersionAsync(Arg.Any<CancellationToken>()).Returns(5L);
+
+        var request = new HttpRequestMessage(HttpMethod.Delete, "/queue/some-id");
+        request.Headers.Add("X-Queue-Version", "5");
+        var response = await _client.SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Queue_Delete_WithoutVersionHeader_Succeeds()
+    {
+        var response = await _client.DeleteAsync("/queue/some-id");
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
     }
 }

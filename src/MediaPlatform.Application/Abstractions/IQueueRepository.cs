@@ -16,4 +16,6 @@ public interface IQueueRepository
     Task SavePlaybackStateAsync(PlaybackState state, CancellationToken ct = default);
     Task<QueueMode> GetQueueModeAsync(CancellationToken ct = default);
     Task SetQueueModeAsync(QueueMode mode, CancellationToken ct = default);
+    Task<long> GetVersionAsync(CancellationToken ct = default);
+    Task<long> IncrementVersionAsync(CancellationToken ct = default);
 }

@@ -23,10 +23,14 @@ public static class QueueEndpoints
         .Produces<IEnumerable<QueueItemResponse>>()
         .WithDescription("List all pending queue items");
 
-        group.MapPost("/add", async (AddToQueueRequest request, AddToQueueHandler handler, IEventBroadcaster events, IPolicyEngine policyEngine, IAuditLog auditLog, HttpContext http, CancellationToken ct) =>
+        group.MapPost("/add", async (AddToQueueRequest request, AddToQueueHandler handler, IEventBroadcaster events, IPolicyEngine policyEngine, IAuditLog auditLog, IQueueRepository repo, HttpContext http, CancellationToken ct) =>
         {
             try
             {
+                // Optimistic concurrency check
+                var conflict = await CheckVersionConflict(http, repo, ct);
+                if (conflict is not null) return conflict;
+
                 // Sanitize input
                 var (url, title) = QueueItemSanitizer.Sanitize(request.Url, request.Title);
 
@@ -55,6 +59,7 @@ public static class QueueEndpoints
                 var command = new AddToQueueCommand(url, title ?? string.Empty, request.StartAtSeconds,
                     AddedByUserId: userId, AddedByName: userName);
                 var item = await handler.HandleAsync(command, ct);
+                await repo.IncrementVersionAsync(ct);
                 events.Broadcast("item-added", new SseEvents.ItemAdded(item.Id, item.Title, item.Url.Value,
                     item.AddedByUserId, item.AddedByName));
                 events.Broadcast("queue-updated", new SseEvents.QueueUpdated("add"));
@@ -69,10 +74,15 @@ public static class QueueEndpoints
         .Produces<QueueItemResponse>(StatusCodes.Status201Created)
         .Produces<ApiError>(StatusCodes.Status400BadRequest)
         .Produces<ApiError>(StatusCodes.Status403Forbidden)
+        .Produces<ApiError>(StatusCodes.Status409Conflict)
         .WithDescription("Add a media item to the queue");
 
         group.MapDelete("/{id}", async (string id, RemoveFromQueueHandler handler, IQueueRepository repo, IEventBroadcaster events, HttpContext http, CancellationToken ct) =>
         {
+            // Optimistic concurrency check
+            var conflict = await CheckVersionConflict(http, repo, ct);
+            if (conflict is not null) return conflict;
+
             // Ownership check: own item OR media-admin role
             var userId = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var isAdmin = http.User.IsInRole("media-admin");
@@ -89,12 +99,14 @@ public static class QueueEndpoints
 
             var command = new RemoveFromQueueCommand(id);
             await handler.HandleAsync(command, ct);
+            await repo.IncrementVersionAsync(ct);
             events.Broadcast("queue-updated", new SseEvents.QueueUpdated("remove"));
             return Results.NoContent();
         })
         .WithName("RemoveFromQueue")
         .Produces(StatusCodes.Status204NoContent)
         .Produces<ApiError>(StatusCodes.Status403Forbidden)
+        .Produces<ApiError>(StatusCodes.Status409Conflict)
         .WithDescription("Remove an item from the queue");
 
         group.MapGet("/mode", async (IQueueRepository repo, CancellationToken ct) =>
@@ -106,19 +118,42 @@ public static class QueueEndpoints
         .Produces<QueueModeResponse>()
         .WithDescription("Get the current queue mode");
 
-        group.MapPost("/mode", async (SetQueueModeRequest request, SetQueueModeHandler handler, IEventBroadcaster events, CancellationToken ct) =>
+        group.MapPost("/mode", async (SetQueueModeRequest request, SetQueueModeHandler handler, IEventBroadcaster events, IQueueRepository repo, HttpContext http, CancellationToken ct) =>
         {
+            var conflict = await CheckVersionConflict(http, repo, ct);
+            if (conflict is not null) return conflict;
+
             if (!Enum.TryParse<QueueMode>(request.Mode, true, out var mode))
                 return Results.BadRequest(new ApiError($"Invalid queue mode: {request.Mode}. Valid modes: Normal, Shuffle, PlayNext"));
 
             await handler.HandleAsync(new SetQueueModeCommand(mode), ct);
+            await repo.IncrementVersionAsync(ct);
             events.Broadcast("queue-mode", new QueueModeResponse(mode.ToString()));
             return Results.Ok(new QueueModeResponse(mode.ToString()));
         })
         .WithName("SetQueueMode")
         .Produces<QueueModeResponse>()
         .Produces<ApiError>(StatusCodes.Status400BadRequest)
+        .Produces<ApiError>(StatusCodes.Status409Conflict)
         .WithDescription("Set queue mode (Normal, Shuffle, PlayNext)");
+    }
+
+    /// <summary>
+    /// Checks X-Queue-Version header for optimistic concurrency.
+    /// Returns a 409 Conflict result if the version is stale, or null if OK/no header.
+    /// </summary>
+    public static async Task<IResult?> CheckVersionConflict(HttpContext http, IQueueRepository repo, CancellationToken ct)
+    {
+        var clientVersionHeader = http.Request.Headers["X-Queue-Version"].FirstOrDefault();
+        if (clientVersionHeader is not null && long.TryParse(clientVersionHeader, out var clientVersion))
+        {
+            var currentVersion = await repo.GetVersionAsync(ct);
+            if (clientVersion != currentVersion)
+            {
+                return Results.Conflict(new ApiError("Queue was modified. Refresh and retry.", $"Expected version {clientVersion}, current is {currentVersion}"));
+            }
+        }
+        return null;
     }
 
     private static QueueItemResponse MapItem(QueueItem item) =>

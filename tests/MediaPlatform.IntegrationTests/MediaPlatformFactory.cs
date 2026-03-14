@@ -17,6 +17,7 @@ namespace MediaPlatform.IntegrationTests;
 public class MediaPlatformFactory : WebApplicationFactory<Program>
 {
     public IQueueRepository QueueRepository { get; } = CreateDefaultQueueRepo();
+    public IPlayerRegistry PlayerRegistry { get; } = CreateDefaultPlayerRegistry();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -25,6 +26,7 @@ public class MediaPlatformFactory : WebApplicationFactory<Program>
             // Remove real Redis registrations
             RemoveService<IConnectionMultiplexer>(services);
             RemoveService<IQueueRepository>(services);
+            RemoveService<IPlayerRegistry>(services);
 
             // Remove Redis health check
             var healthDescriptor = services.FirstOrDefault(d =>
@@ -32,6 +34,7 @@ public class MediaPlatformFactory : WebApplicationFactory<Program>
 
             // Register stubs
             services.AddScoped(_ => QueueRepository);
+            services.AddScoped(_ => PlayerRegistry);
             services.AddSingleton(Substitute.For<IConnectionMultiplexer>());
 
             // Override health checks to avoid Redis probe
@@ -53,6 +56,16 @@ public class MediaPlatformFactory : WebApplicationFactory<Program>
             .Returns(new PlaybackState());
         repo.GetQueueModeAsync(Arg.Any<CancellationToken>())
             .Returns(QueueMode.Normal);
+        repo.GetVersionAsync(Arg.Any<CancellationToken>())
+            .Returns(0L);
         return repo;
+    }
+
+    private static IPlayerRegistry CreateDefaultPlayerRegistry()
+    {
+        var registry = Substitute.For<IPlayerRegistry>();
+        registry.GetAllPlayersAsync(Arg.Any<CancellationToken>())
+            .Returns(Array.Empty<PlayerStatus>());
+        return registry;
     }
 }

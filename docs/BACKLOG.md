@@ -12,8 +12,8 @@
 
 ## Summary
 
-- **26 stories done** (all tested, committed)
-- **165 tests** (135 unit + 30 integration), 0 failures
+- **29 stories done** (all tested, committed)
+- **189 tests** (151 unit + 38 integration), 0 failures
 - **22 stories blocked** by external dependencies
 - **50 new frontend/integration/infra stories** planned across 9 epics
 
@@ -250,9 +250,9 @@ To unlock the remaining 22 blocked stories, set up in this order:
 
 | Story | Title | Effort | Status | Depends on |
 |-------|-------|--------|--------|------------|
-| MEDIA-724 | Player Heartbeat & Liveness Reporting | 3 pts | ⏳ Planned | MEDIA-622 |
-| MEDIA-725 | Queue Snapshot Endpoint for Fast Client Sync | 2 pts | ⏳ Planned | — |
-| MEDIA-728 | Queue Consistency Guard (Race Condition Protection) | 3 pts | ⏳ Planned | — |
+| MEDIA-724 | Player Heartbeat & Liveness Reporting | 3 pts | ✅ Done | MEDIA-622 |
+| MEDIA-725 | Queue Snapshot Endpoint for Fast Client Sync | 2 pts | ✅ Done | — |
+| MEDIA-728 | Queue Consistency Guard (Race Condition Protection) | 3 pts | ✅ Done | — |
 | MEDIA-729 | Player Registration & Capability Handshake | 3 pts | ⏳ Planned | MEDIA-622, MEDIA-724 |
 
 ## Epic: MEDIA-PI-OPS — Player Operations & Diagnostics

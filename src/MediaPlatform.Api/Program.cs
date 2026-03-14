@@ -80,6 +80,7 @@ builder.Services.AddRateLimiter(options =>
 
 // Infrastructure
 builder.Services.AddScoped<IQueueRepository, RedisQueueRepository>();
+builder.Services.AddScoped<IPlayerRegistry, RedisPlayerRegistry>();
 builder.Services.AddSingleton<IEventBroadcaster, InMemoryEventBroadcaster>();
 builder.Services.AddSingleton<INotificationService, WebhookNotificationService>();
 builder.Services.AddSingleton<IAnalyticsTracker, InMemoryAnalyticsTracker>();
@@ -148,6 +149,7 @@ if (app.Environment.IsDevelopment())
 
 app.MapQueueEndpoints();
 app.MapPlayerEndpoints();
+app.MapSyncEndpoints();
 app.MapEventStreamEndpoints();
 app.MapNotificationEndpoints();
 app.MapAnalyticsEndpoints();
