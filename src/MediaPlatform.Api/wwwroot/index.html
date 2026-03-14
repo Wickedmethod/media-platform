@@ -484,6 +484,21 @@
     <span>⚡ Avg Latency: <span id="statLatency" style="color:var(--text)">0ms</span></span>
     <span>❌ Errors: <span id="statErrors" style="color:var(--text)">0</span></span>
   </div>
+
+  <!-- Admin Controls -->
+  <div style="margin-top:20px;padding:16px 20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <h3 style="margin:0;font-size:14px;color:var(--text-dim);">🛡️ Security Controls</h3>
+      <span id="killSwitchBadge" style="font-size:11px;padding:2px 8px;border-radius:8px;background:#2d5a2d;color:#7dff7d;">OPERATIONAL</span>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+      <button class="btn" onclick="activateKillSwitch()" style="background:#8b2500;font-size:12px;padding:6px 12px;">🚨 Kill Switch</button>
+      <button class="btn" onclick="deactivateKillSwitch()" style="background:#2d5a2d;font-size:12px;padding:6px 12px;">✅ Resume</button>
+      <button class="btn" onclick="viewAuditLog()" style="font-size:12px;padding:6px 12px;">📋 Audit Log</button>
+      <button class="btn" onclick="checkAnomalies()" style="font-size:12px;padding:6px 12px;">🔍 Check Anomalies</button>
+    </div>
+    <div id="adminOutput" style="display:none;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px;font-family:'JetBrains Mono',monospace;font-size:11px;max-height:200px;overflow-y:auto;white-space:pre-wrap;color:var(--text-dim);"></div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -795,8 +810,60 @@ async function refreshAnalytics() {
   } catch {}
 }
 
+// ── Admin / Security Controls ──
+
+async function refreshKillSwitch() {
+  try {
+    const data = await api('/admin/kill-switch');
+    const badge = document.getElementById('killSwitchBadge');
+    if (data.active) {
+      badge.textContent = '🚨 KILL SWITCH ACTIVE';
+      badge.style.background = '#8b2500';
+      badge.style.color = '#ff7d7d';
+    } else {
+      badge.textContent = 'OPERATIONAL';
+      badge.style.background = '#2d5a2d';
+      badge.style.color = '#7dff7d';
+    }
+  } catch {}
+}
+
+async function activateKillSwitch() {
+  const reason = prompt('Kill switch reason:');
+  if (!reason) return;
+  await api('/admin/kill-switch', 'POST', { reason });
+  showToast('🚨 Kill switch activated');
+  refreshKillSwitch();
+}
+
+async function deactivateKillSwitch() {
+  await fetch(API + '/admin/kill-switch', { method: 'DELETE' });
+  showToast('✅ Kill switch deactivated');
+  refreshKillSwitch();
+}
+
+function showAdminOutput(data) {
+  const el = document.getElementById('adminOutput');
+  el.style.display = 'block';
+  el.textContent = JSON.stringify(data, null, 2);
+}
+
+async function viewAuditLog() {
+  const data = await api('/admin/audit?count=20');
+  showAdminOutput(data);
+}
+
+async function checkAnomalies() {
+  const data = await api('/admin/anomalies');
+  showAdminOutput(data);
+  if (data.hasAnomalies) showToast('⚠️ Anomalies detected!');
+  else showToast('✅ No anomalies');
+}
+
 connectSSE();
 startPolling();
+refreshKillSwitch();
+setInterval(refreshKillSwitch, 15000);
 </script>
 </body>
 </html>

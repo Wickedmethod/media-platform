@@ -257,4 +257,63 @@ public class ApiContractTests : IClassFixture<MediaPlatformFactory>
         var response = await _client.GetAsync("/tv.html");
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
+
+    // ── Admin / Security Endpoints ────────────────────────────
+
+    [Fact]
+    public async Task KillSwitch_Get_ReturnsStatus()
+    {
+        var response = await _client.GetAsync("/admin/kill-switch");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.True(body.TryGetProperty("active", out var active));
+        Assert.False(active.GetBoolean());
+    }
+
+    [Fact]
+    public async Task KillSwitch_Activate_BlocksWriteOperations()
+    {
+        // Activate kill switch
+        var activateResponse = await _client.PostAsJsonAsync("/admin/kill-switch", new { reason = "test" });
+        Assert.Equal(HttpStatusCode.OK, activateResponse.StatusCode);
+
+        // Verify write operations are blocked
+        var playResponse = await _client.PostAsync("/player/play", null);
+        Assert.Equal(HttpStatusCode.ServiceUnavailable, playResponse.StatusCode);
+
+        // Verify GET operations still work
+        var getResponse = await _client.GetAsync("/admin/kill-switch");
+        Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
+
+        // Deactivate
+        var deactivateResponse = await _client.DeleteAsync("/admin/kill-switch");
+        Assert.Equal(HttpStatusCode.OK, deactivateResponse.StatusCode);
+
+        // Verify write operations work again
+        var playAgainResponse = await _client.PostAsync("/player/play", null);
+        Assert.NotEqual(HttpStatusCode.ServiceUnavailable, playAgainResponse.StatusCode);
+    }
+
+    [Fact]
+    public async Task Audit_Get_ReturnsArray()
+    {
+        var response = await _client.GetAsync("/admin/audit");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var body = await response.Content.ReadAsStringAsync();
+        var arr = JsonSerializer.Deserialize<JsonElement>(body);
+        Assert.Equal(JsonValueKind.Array, arr.ValueKind);
+    }
+
+    [Fact]
+    public async Task Anomalies_Get_ReturnsReport()
+    {
+        var response = await _client.GetAsync("/admin/anomalies");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.True(body.TryGetProperty("hasAnomalies", out _));
+        Assert.True(body.TryGetProperty("alerts", out _));
+    }
 }

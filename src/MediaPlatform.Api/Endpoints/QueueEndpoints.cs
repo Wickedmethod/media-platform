@@ -10,7 +10,7 @@ public static class QueueEndpoints
 {
     public static void MapQueueEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("/queue").WithTags("Queue");
+        var group = app.MapGroup("/queue").WithTags("Queue").RequireRateLimiting("general");
 
         group.MapGet("/", async (GetQueueHandler handler, CancellationToken ct) =>
         {

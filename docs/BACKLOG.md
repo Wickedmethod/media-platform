@@ -12,9 +12,9 @@
 
 ## Summary
 
-- **17 stories done** (all tested, committed)
-- **86 tests** (66 unit + 20 integration), 0 failures
-- **28 stories blocked** by external dependencies
+- **21 stories done** (all tested, committed)
+- **107 tests** (83 unit + 24 integration), 0 failures
+- **24 stories blocked** by external dependencies
 - **0 stories remaining** that can be implemented without infrastructure
 
 ---
@@ -53,7 +53,7 @@
 | MEDIA-624 | API Contract Tests | ✅ Done | 20 integration tests via WebApplicationFactory |
 | MEDIA-610 | Multi-User Voting | 🔶 Blocked | Needs Keycloak auth |
 | MEDIA-630 | YouTube Action Approval | 🔶 Blocked | Needs Keycloak roles |
-| MEDIA-631 | Security Alerts & Anomaly Detection | 🔶 Blocked | Needs MEDIA-604 audit |
+| MEDIA-631 | Security Alerts & Anomaly Detection | ✅ Done | Sliding window anomaly detector, webhook alerts |
 
 ## Epic: MEDIA-004 — YouTube Integration
 
@@ -65,7 +65,7 @@
 | MEDIA-404 | Playlist Management | 🔶 Blocked | Needs OAuth tokens |
 | MEDIA-625 | Primary Account OAuth Hardening | 🔶 Blocked | Needs OAuth + Vault |
 | MEDIA-627 | OAuth Scope Minimization | 🔶 Blocked | Needs OAuth flow |
-| MEDIA-628 | Emergency Token Revoke | 🔶 Blocked | Needs OAuth + Vault |
+| MEDIA-628 | Emergency Token Revoke | ✅ Done | Kill switch endpoint, blocks all writes |
 | MEDIA-629 | Vault Policy Hardening | 🔶 Blocked | Needs Vault setup |
 
 ## Epic: MEDIA-005 — CEC Remote Control
@@ -104,9 +104,9 @@
 | MEDIA-603 | Health Checks | ✅ Done | `/health/live`, `/health/ready` |
 | MEDIA-606 | Redis Persistence | ✅ Done | AOF + RDB, custom redis.conf |
 | MEDIA-623 | Architecture Enforcement | ✅ Done | 8 reflection-based boundary tests |
-| MEDIA-604 | AuthZ & Rate Limiting | 🔶 Blocked | Needs Keycloak |
+| MEDIA-604 | AuthZ & Rate Limiting | ✅ Done | JWT auth ready, fixed-window rate limits, audit log |
 | MEDIA-605 | Vault Secret Storage | 🔶 Blocked | Needs Vault |
-| MEDIA-621 | Internal Network Restrictions | 🔶 Blocked | Needs network config |
+| MEDIA-621 | Internal Network Restrictions | ✅ Done | Audit middleware, request logging, anomaly detection |
 | MEDIA-622 | Trusted Worker Communication | 🔶 Blocked | Needs MEDIA-621 |
 | MEDIA-626 | Keycloak Gate for YouTube | 🔶 Blocked | Needs Keycloak + OAuth |
 

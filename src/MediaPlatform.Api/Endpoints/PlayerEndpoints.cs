@@ -12,7 +12,7 @@ public static class PlayerEndpoints
 {
     public static void MapPlayerEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("/player").WithTags("Player");
+        var group = app.MapGroup("/player").WithTags("Player").RequireRateLimiting("commands");
 
         group.MapPost("/play", async (PlayerCommandHandler handler, IEventBroadcaster events, IAnalyticsTracker analytics, INotificationService notifications, CancellationToken ct) =>
         {
