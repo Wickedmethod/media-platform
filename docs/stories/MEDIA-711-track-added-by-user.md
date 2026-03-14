@@ -83,12 +83,12 @@ The `AddedByUserId` and `AddedByName` fields are stored in the Redis hash alongs
 
 ## Authorization Rules
 
-| Action | Who can do it |
-|--------|--------------|
-| Add to queue | Any authenticated user |
+| Action          | Who can do it                                   |
+| --------------- | ----------------------------------------------- |
+| Add to queue    | Any authenticated user                          |
 | Remove own item | The user who added it (`addedByUserId` matches) |
-| Remove any item | `media-admin` role only |
-| Skip current | `media-admin` role only |
+| Remove any item | `media-admin` role only                         |
+| Skip current    | `media-admin` role only                         |
 
 ---
 

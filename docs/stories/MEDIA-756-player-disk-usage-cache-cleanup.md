@@ -69,13 +69,13 @@ Target: Reduce to 70% usage (10% hysteresis to avoid frequent cleanups)
 
 ### Eviction Rules
 
-| Condition | Action |
-|-----------|--------|
-| Cache > 80% quota | LRU eviction → reduce to 70% |
-| Single file > 500MB | Never cache (too large) |
-| File age > 30 days without access | Delete regardless of space |
-| Currently playing video | Never evict |
-| Videos in queue | Prefer keeping, evict last |
+| Condition                         | Action                       |
+| --------------------------------- | ---------------------------- |
+| Cache > 80% quota                 | LRU eviction → reduce to 70% |
+| Single file > 500MB               | Never cache (too large)      |
+| File age > 30 days without access | Delete regardless of space   |
+| Currently playing video           | Never evict                  |
+| Videos in queue                   | Prefer keeping, evict last   |
 
 ### Configuration
 
@@ -102,35 +102,35 @@ Target: Reduce to 70% usage (10% hysteresis to avoid frequent cleanups)
 ```typescript
 // Player-side (Node.js on Pi)
 async function cleanupCache(config: CacheConfig): Promise<CleanupResult> {
-  const cacheDir = config.directory
-  const files = await getCacheFiles(cacheDir) // { path, size, lastAccessed }
+  const cacheDir = config.directory;
+  const files = await getCacheFiles(cacheDir); // { path, size, lastAccessed }
 
-  const totalSize = files.reduce((sum, f) => sum + f.size, 0)
-  const maxSize = config.maxSizeMb * 1024 * 1024
-  const targetSize = maxSize * (config.lowWatermarkPercent / 100)
+  const totalSize = files.reduce((sum, f) => sum + f.size, 0);
+  const maxSize = config.maxSizeMb * 1024 * 1024;
+  const targetSize = maxSize * (config.lowWatermarkPercent / 100);
 
   if (totalSize <= maxSize * (config.highWatermarkPercent / 100)) {
-    return { deleted: 0, freedBytes: 0 }
+    return { deleted: 0, freedBytes: 0 };
   }
 
   // Sort by last accessed (oldest first = LRU)
-  const sorted = files.sort((a, b) => a.lastAccessed - b.lastAccessed)
+  const sorted = files.sort((a, b) => a.lastAccessed - b.lastAccessed);
 
-  let currentSize = totalSize
-  let deleted = 0
-  let freedBytes = 0
+  let currentSize = totalSize;
+  let deleted = 0;
+  let freedBytes = 0;
 
   for (const file of sorted) {
-    if (currentSize <= targetSize) break
-    if (isCurrentlyPlaying(file) || isInQueue(file)) continue
+    if (currentSize <= targetSize) break;
+    if (isCurrentlyPlaying(file) || isInQueue(file)) continue;
 
-    await fs.unlink(file.path)
-    currentSize -= file.size
-    freedBytes += file.size
-    deleted++
+    await fs.unlink(file.path);
+    currentSize -= file.size;
+    freedBytes += file.size;
+    deleted++;
   }
 
-  return { deleted, freedBytes }
+  return { deleted, freedBytes };
 }
 ```
 

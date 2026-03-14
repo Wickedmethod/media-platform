@@ -32,10 +32,10 @@ User opens app
 
 ## Roles (from Keycloak)
 
-| Role | Maps to | Capabilities |
-|------|---------|-------------|
-| `media-admin` | Admin | Full control: skip, stop, kill switch, policies, audit log |
-| `media-user` | User | Add to queue, view queue, see now-playing, vote |
+| Role          | Maps to | Capabilities                                               |
+| ------------- | ------- | ---------------------------------------------------------- |
+| `media-admin` | Admin   | Full control: skip, stop, kill switch, policies, audit log |
+| `media-user`  | User    | Add to queue, view queue, see now-playing, vote            |
 
 If no `media-admin` role → user gets User capabilities.
 
@@ -47,15 +47,15 @@ If no `media-admin` role → user gets User capabilities.
 
 ```typescript
 interface AuthState {
-  keycloak: Keycloak | null
-  authenticated: boolean
+  keycloak: Keycloak | null;
+  authenticated: boolean;
   user: {
-    id: string
-    name: string
-    email: string
-    roles: ('media-admin' | 'media-user')[]
-  } | null
-  isAdmin: boolean
+    id: string;
+    name: string;
+    email: string;
+    roles: ("media-admin" | "media-user")[];
+  } | null;
+  isAdmin: boolean;
 }
 ```
 

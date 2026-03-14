@@ -19,6 +19,7 @@ Add a single `GET /sync` endpoint that returns an atomic snapshot of all client-
 ## Problem
 
 Current startup flow (4 requests):
+
 ```
 Client boots →
   GET /queue          → 50ms
@@ -30,6 +31,7 @@ Client boots →
 ```
 
 With snapshot (1 request):
+
 ```
 Client boots →
   GET /sync           → 60ms

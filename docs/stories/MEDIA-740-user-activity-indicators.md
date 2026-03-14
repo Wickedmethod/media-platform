@@ -28,6 +28,7 @@ Each queue item shows who added it:
 ```
 
 For TV guest additions:
+
 ```
 ┌────────────────────────────────────────┐
 │  🎵 Gangnam Style — PSY               │
@@ -67,11 +68,11 @@ case 'item-added':
 
 ## User Identity Sources
 
-| Source | Display | Icon |
-|--------|---------|------|
-| Keycloak JWT (SPA user) | `preferred_username` claim | 👤 |
-| X-Worker-Key (TV guest) | "TV" | 📺 |
-| Unknown / legacy | "Unknown" | ❓ |
+| Source                  | Display                    | Icon |
+| ----------------------- | -------------------------- | ---- |
+| Keycloak JWT (SPA user) | `preferred_username` claim | 👤   |
+| X-Worker-Key (TV guest) | "TV"                       | 📺   |
+| Unknown / legacy        | "Unknown"                  | ❓   |
 
 ---
 
@@ -82,13 +83,13 @@ case 'item-added':
 ```vue
 <script setup lang="ts">
 const props = defineProps<{
-  userId: string | null
-  userName: string | null
-}>()
+  userId: string | null;
+  userName: string | null;
+}>();
 
-const isTV = computed(() => props.userId === 'tv-guest')
-const icon = computed(() => isTV.value ? '📺' : '👤')
-const displayName = computed(() => props.userName ?? 'Unknown')
+const isTV = computed(() => props.userId === "tv-guest");
+const icon = computed(() => (isTV.value ? "📺" : "👤"));
+const displayName = computed(() => props.userName ?? "Unknown");
 </script>
 
 <template>

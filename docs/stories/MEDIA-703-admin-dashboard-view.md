@@ -62,33 +62,33 @@ Admin-only dashboard accessible at `/admin`. Provides security controls, analyti
 
 ## Components
 
-| Component | Purpose |
-|-----------|---------|
-| `AdminView.vue` | Main admin layout |
-| `StatusCards.vue` | Analytics metrics as cards |
-| `KillSwitchPanel.vue` | Kill switch controls |
-| `PolicyManager.vue` | Policy CRUD |
-| `PolicyForm.vue` | Add/edit policy dialog |
-| `AuditLog.vue` | Scrollable audit entries |
-| `AnomalyPanel.vue` | Anomaly detection status |
+| Component             | Purpose                    |
+| --------------------- | -------------------------- |
+| `AdminView.vue`       | Main admin layout          |
+| `StatusCards.vue`     | Analytics metrics as cards |
+| `KillSwitchPanel.vue` | Kill switch controls       |
+| `PolicyManager.vue`   | Policy CRUD                |
+| `PolicyForm.vue`      | Add/edit policy dialog     |
+| `AuditLog.vue`        | Scrollable audit entries   |
+| `AnomalyPanel.vue`    | Anomaly detection status   |
 
 ---
 
 ## API Endpoints Used
 
-| Method | Path | Purpose |
-|--------|------|---------|
-| GET | `/analytics` | System metrics |
-| POST | `/admin/kill-switch` | Activate kill switch |
-| DELETE | `/admin/kill-switch` | Deactivate kill switch |
-| GET | `/admin/kill-switch` | Kill switch status |
-| GET | `/admin/audit` | Audit log entries |
-| GET | `/admin/anomalies` | Anomaly report |
-| GET | `/policies` | List policies |
-| POST | `/policies` | Add policy |
-| DELETE | `/policies/{id}` | Remove policy |
-| POST | `/policies/{id}/toggle` | Toggle policy |
-| POST | `/policies/evaluate` | Dry-run test |
+| Method | Path                    | Purpose                |
+| ------ | ----------------------- | ---------------------- |
+| GET    | `/analytics`            | System metrics         |
+| POST   | `/admin/kill-switch`    | Activate kill switch   |
+| DELETE | `/admin/kill-switch`    | Deactivate kill switch |
+| GET    | `/admin/kill-switch`    | Kill switch status     |
+| GET    | `/admin/audit`          | Audit log entries      |
+| GET    | `/admin/anomalies`      | Anomaly report         |
+| GET    | `/policies`             | List policies          |
+| POST   | `/policies`             | Add policy             |
+| DELETE | `/policies/{id}`        | Remove policy          |
+| POST   | `/policies/{id}/toggle` | Toggle policy          |
+| POST   | `/policies/evaluate`    | Dry-run test           |
 
 ---
 

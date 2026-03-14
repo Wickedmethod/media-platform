@@ -48,12 +48,12 @@ All API routes prefixed with version:
 
 ### Why URL Path?
 
-| Approach | Pros | Cons |
-|----------|------|------|
-| **URL path** (`/api/v1/`) | Visible, cacheable, easy to log/route | URL changes on version bump |
-| Header (`Api-Version: 1`) | URL stays clean | Hidden, hard to debug |
-| Query param (`?api-version=1`) | Simple | Breaks caching, messy URLs |
-| Content negotiation | RESTful purists like it | Complex, poor tooling support |
+| Approach                       | Pros                                  | Cons                          |
+| ------------------------------ | ------------------------------------- | ----------------------------- |
+| **URL path** (`/api/v1/`)      | Visible, cacheable, easy to log/route | URL changes on version bump   |
+| Header (`Api-Version: 1`)      | URL stays clean                       | Hidden, hard to debug         |
+| Query param (`?api-version=1`) | Simple                                | Breaks caching, messy URLs    |
+| Content negotiation            | RESTful purists like it               | Complex, poor tooling support |
 
 URL path is the right choice for a homelab platform — simple, debuggable, and works with reverse proxies.
 
@@ -133,11 +133,11 @@ Orval generates clients from the versioned spec URL: `/swagger/v1/swagger.json`.
 
 ## Deprecation Policy
 
-| Stage | Duration | Action |
-|-------|----------|--------|
-| **Active** | Current | Default version, fully supported |
-| **Deprecated** | 3 months | `Sunset` header, warning in docs, logs deprecation usage |
-| **Removed** | After sunset | Returns 410 Gone with migration link |
+| Stage          | Duration     | Action                                                   |
+| -------------- | ------------ | -------------------------------------------------------- |
+| **Active**     | Current      | Default version, fully supported                         |
+| **Deprecated** | 3 months     | `Sunset` header, warning in docs, logs deprecation usage |
+| **Removed**    | After sunset | Returns 410 Gone with migration link                     |
 
 ### Migration Guide Template
 
@@ -145,14 +145,17 @@ Orval generates clients from the versioned spec URL: `/swagger/v1/swagger.json`.
 ## Migrating from v1 to v2
 
 ### Breaking Changes
+
 - `POST /api/v1/queue/add` → `POST /api/v2/queue` (simplified path)
 - `QueueItemResponse.videoId` → `QueueItemResponse.mediaId` (renamed field)
 
 ### New Features in v2
+
 - Batch add support: `POST /api/v2/queue/batch`
 - Rich metadata in responses
 
 ### Timeline
+
 - v1 deprecated: 2027-01-01
 - v1 removed: 2027-04-01
 ```
@@ -163,11 +166,11 @@ Orval generates clients from the versioned spec URL: `/swagger/v1/swagger.json`.
 
 Some endpoints stay unversioned:
 
-| Endpoint | Reason |
-|----------|--------|
-| `/health/*` | Standard health checks, no API contract |
-| `/metrics` | Prometheus scrape target, stable format |
-| `/events` | SSE stream — version negotiated via `Accept` header or event schema |
+| Endpoint    | Reason                                                              |
+| ----------- | ------------------------------------------------------------------- |
+| `/health/*` | Standard health checks, no API contract                             |
+| `/metrics`  | Prometheus scrape target, stable format                             |
+| `/events`   | SSE stream — version negotiated via `Accept` header or event schema |
 
 SSE events include a `version` field in the payload for forward compatibility:
 

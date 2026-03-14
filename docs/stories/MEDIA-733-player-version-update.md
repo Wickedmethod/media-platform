@@ -69,6 +69,7 @@ Authorization: Bearer <admin-jwt>
 ```
 
 This sends an SSE event to all connected players:
+
 ```json
 { "type": "update-available", "data": { "version": "1.3.0", "message": "..." } }
 ```

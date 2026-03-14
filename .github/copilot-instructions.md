@@ -20,9 +20,9 @@ These instructions are meant to be followed automatically by Copilot/agents when
 
 **You MUST use these MCP servers when working on this project.** Do not skip them.
 
-| Server       | Purpose                                    | When to Use (REQUIRED)                                                                              |
-| ------------ | ------------------------------------------ | --------------------------------------------------------------------------------------------------- |
-| **context7** | Up-to-date library docs and code examples  | **ALWAYS** before implementing anything that depends on external library APIs (.NET, Redis, etc.)    |
+| Server       | Purpose                                    | When to Use (REQUIRED)                                                                                        |
+| ------------ | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| **context7** | Up-to-date library docs and code examples  | **ALWAYS** before implementing anything that depends on external library APIs (.NET, Redis, etc.)             |
 | **serena**   | Semantic code exploration + safe refactors | **ALWAYS** before reading large files or refactoring. Use for symbol search, references, targeted reads/edits |
 
 **MANDATORY Rules:**
@@ -85,6 +85,7 @@ All queue state transitions MUST go through a centralized state machine. Never m
 Valid states: `Empty`, `Playing`, `Paused`, `Buffering`, `Error`, `Stopped`
 
 State transitions must be:
+
 - **Deterministic** — same input always produces same output
 - **Centralized** — one service owns all transitions
 - **Logged** — every transition emits a structured log event
@@ -96,6 +97,7 @@ All player commands (play, pause, skip) MUST be idempotent. Sending the same com
 ### Security (Even Without Auth in v1)
 
 Since auth is deferred:
+
 - **Network boundaries must be restricted** — API behind trusted network/VPN only
 - **No public write endpoints** unless explicitly required
 - **Never hardcode secrets** — use environment variables or Vault
@@ -183,12 +185,12 @@ Program.cs (Host)
 
 Follow these key conventions:
 
-| Key Pattern | Type | Purpose |
-|-------------|------|---------|
-| `media:queue` | List | Ordered playback queue |
-| `media:now-playing` | Hash | Current playback state |
-| `media:history` | List | Recently played items |
-| `media:events` | Stream/Channel | State change events |
+| Key Pattern         | Type           | Purpose                |
+| ------------------- | -------------- | ---------------------- |
+| `media:queue`       | List           | Ordered playback queue |
+| `media:now-playing` | Hash           | Current playback state |
+| `media:history`     | List           | Recently played items  |
+| `media:events`      | Stream/Channel | State change events    |
 
 All Redis operations must go through `IQueueRepository` — never access Redis directly from endpoints.
 
@@ -196,16 +198,16 @@ All Redis operations must go through `IQueueRepository` — never access Redis d
 
 ## API Endpoints
 
-| Method | Path | Purpose |
-|--------|------|---------|
-| `POST` | `/queue/add` | Add video to queue |
-| `DELETE` | `/queue/{id}` | Remove from queue |
-| `GET` | `/queue` | Get current queue |
-| `POST` | `/player/play` | Start/resume playback |
-| `POST` | `/player/pause` | Pause playback |
-| `POST` | `/player/skip` | Skip to next in queue |
-| `GET` | `/now-playing` | Get current playback state |
-| `GET` | `/health` | Health check |
+| Method   | Path            | Purpose                    |
+| -------- | --------------- | -------------------------- |
+| `POST`   | `/queue/add`    | Add video to queue         |
+| `DELETE` | `/queue/{id}`   | Remove from queue          |
+| `GET`    | `/queue`        | Get current queue          |
+| `POST`   | `/player/play`  | Start/resume playback      |
+| `POST`   | `/player/pause` | Pause playback             |
+| `POST`   | `/player/skip`  | Skip to next in queue      |
+| `GET`    | `/now-playing`  | Get current playback state |
+| `GET`    | `/health`       | Health check               |
 
 ### Endpoint Rules
 
@@ -245,14 +247,14 @@ Never disable Roslyn analyzers. If code violates a rule, fix the code.
 
 ## Error Handling
 
-| Scenario | Behavior |
-| -------- | -------- |
-| Invalid YouTube URL | Return 400 with validation error |
-| Queue item not found | Return 404 |
-| Player unreachable | Return 503, log error, retry with backoff |
-| Redis connection lost | Return 503, health check reports unhealthy |
-| Duplicate queue add | Idempotent — return existing item |
-| State transition invalid | Return 409 Conflict with current state |
+| Scenario                 | Behavior                                   |
+| ------------------------ | ------------------------------------------ |
+| Invalid YouTube URL      | Return 400 with validation error           |
+| Queue item not found     | Return 404                                 |
+| Player unreachable       | Return 503, log error, retry with backoff  |
+| Redis connection lost    | Return 503, health check reports unhealthy |
+| Duplicate queue add      | Idempotent — return existing item          |
+| State transition invalid | Return 409 Conflict with current state     |
 
 ---
 
@@ -294,6 +296,7 @@ Never disable Roslyn analyzers. If code violates a rule, fix the code.
 The player worker runs on the Raspberry Pi as a TypeScript/Node.js service. It is NOT part of this .NET solution.
 
 Communication between API and worker:
+
 - API sends commands to worker via HTTP or WebSocket
 - Worker reports state back to API
 - Worker executes playback via mpv + yt-dlp
@@ -304,12 +307,12 @@ The worker will be developed separately. This API must define clear contracts fo
 
 ## Infrastructure Integration
 
-| Service | Role | How |
-|---------|------|-----|
-| Redis | Queue state + now-playing | StackExchange.Redis via `docker-compose.yml` |
-| Caddy | Reverse proxy | External (infrastructure stack) |
-| Keycloak | Auth (future) | External network `keycloak-public` |
-| Vault | Secret storage (future) | VaultSharp + `.vault-env` |
+| Service  | Role                      | How                                          |
+| -------- | ------------------------- | -------------------------------------------- |
+| Redis    | Queue state + now-playing | StackExchange.Redis via `docker-compose.yml` |
+| Caddy    | Reverse proxy             | External (infrastructure stack)              |
+| Keycloak | Auth (future)             | External network `keycloak-public`           |
+| Vault    | Secret storage (future)   | VaultSharp + `.vault-env`                    |
 
 ---
 

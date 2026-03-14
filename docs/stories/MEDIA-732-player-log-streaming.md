@@ -41,36 +41,41 @@ GET /admin/players/{id}/logs  (admin view)
 
 ```typescript
 // src/composables/useLogCollector.ts
-const logBuffer: LogEntry[] = []
+const logBuffer: LogEntry[] = [];
 
 interface LogEntry {
-  timestamp: string
-  level: 'debug' | 'info' | 'warn' | 'error'
-  message: string
-  source: 'tv' | 'cec' | 'sse' | 'player'
+  timestamp: string;
+  level: "debug" | "info" | "warn" | "error";
+  message: string;
+  source: "tv" | "cec" | "sse" | "player";
 }
 
 // Intercept console methods
-const originalLog = console.log
+const originalLog = console.log;
 console.log = (...args) => {
-  logBuffer.push({ timestamp: new Date().toISOString(), level: 'info', message: args.join(' '), source: 'tv' })
-  originalLog.apply(console, args)
-}
+  logBuffer.push({
+    timestamp: new Date().toISOString(),
+    level: "info",
+    message: args.join(" "),
+    source: "tv",
+  });
+  originalLog.apply(console, args);
+};
 
 // Flush periodically
-setInterval(flushLogs, 30_000)
+setInterval(flushLogs, 30_000);
 
 async function flushLogs() {
-  if (logBuffer.length === 0) return
-  const batch = logBuffer.splice(0, logBuffer.length)
-  await fetch('/diagnostics/logs', {
-    method: 'POST',
-    headers: { 'X-Worker-Key': workerKey, 'Content-Type': 'application/json' },
+  if (logBuffer.length === 0) return;
+  const batch = logBuffer.splice(0, logBuffer.length);
+  await fetch("/diagnostics/logs", {
+    method: "POST",
+    headers: { "X-Worker-Key": workerKey, "Content-Type": "application/json" },
     body: JSON.stringify({ playerId, entries: batch }),
   }).catch(() => {
     // On failure, put entries back (up to max buffer)
-    logBuffer.unshift(...batch.slice(-200))
-  })
+    logBuffer.unshift(...batch.slice(-200));
+  });
 }
 ```
 

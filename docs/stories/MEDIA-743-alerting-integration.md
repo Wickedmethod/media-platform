@@ -59,6 +59,7 @@ Alert Dispatcher
 ### Cooldown
 
 To prevent alert fatigue, alerts of the same type are throttled:
+
 - Same anomaly type → max 1 alert per 5 minutes
 - Different anomaly types → each has its own cooldown
 
@@ -68,18 +69,20 @@ To prevent alert fatigue, alerts of the same type are throttled:
 
 ```json
 {
-  "embeds": [{
-    "title": "⚠️ Media Platform Anomaly",
-    "description": "Unusual request spike detected",
-    "color": 16744448,
-    "fields": [
-      { "name": "Type", "value": "RequestSpike", "inline": true },
-      { "name": "Severity", "value": "Warning", "inline": true },
-      { "name": "Details", "value": "42 requests in 60s (threshold: 20)" },
-      { "name": "Source IP", "value": "192.168.1.42" }
-    ],
-    "timestamp": "2026-03-16T14:32:00Z"
-  }]
+  "embeds": [
+    {
+      "title": "⚠️ Media Platform Anomaly",
+      "description": "Unusual request spike detected",
+      "color": 16744448,
+      "fields": [
+        { "name": "Type", "value": "RequestSpike", "inline": true },
+        { "name": "Severity", "value": "Warning", "inline": true },
+        { "name": "Details", "value": "42 requests in 60s (threshold: 20)" },
+        { "name": "Source IP", "value": "192.168.1.42" }
+      ],
+      "timestamp": "2026-03-16T14:32:00Z"
+    }
+  ]
 }
 ```
 

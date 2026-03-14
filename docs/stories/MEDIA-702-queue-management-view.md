@@ -76,15 +76,15 @@ Same content, but wider cards + now-playing as a persistent sidebar or top bar.
 
 ## Components
 
-| Component | Purpose |
-|-----------|---------|
-| `QueueView.vue` | Main page layout |
-| `NowPlaying.vue` | Current track card with progress |
-| `QueueList.vue` | Scrollable queue with items |
-| `QueueItem.vue` | Single queue item (title, user, actions) |
-| `AddToQueue.vue` | URL input + optional title |
-| `QueueModeSelector.vue` | Normal/Shuffle/PlayNext toggle |
-| `PlayerControls.vue` | Play/Pause/Skip/Stop bar (admin only) |
+| Component               | Purpose                                  |
+| ----------------------- | ---------------------------------------- |
+| `QueueView.vue`         | Main page layout                         |
+| `NowPlaying.vue`        | Current track card with progress         |
+| `QueueList.vue`         | Scrollable queue with items              |
+| `QueueItem.vue`         | Single queue item (title, user, actions) |
+| `AddToQueue.vue`        | URL input + optional title               |
+| `QueueModeSelector.vue` | Normal/Shuffle/PlayNext toggle           |
+| `PlayerControls.vue`    | Play/Pause/Skip/Stop bar (admin only)    |
 
 ---
 
@@ -94,9 +94,13 @@ The queue updates in real-time via SSE:
 
 ```typescript
 // composables/useSSE.ts
-const eventSource = new EventSource('/events')
-eventSource.addEventListener('queue-updated', () => queryClient.invalidateQueries(['queue']))
-eventSource.addEventListener('playback-state', (e) => playerStore.updateState(JSON.parse(e.data)))
+const eventSource = new EventSource("/events");
+eventSource.addEventListener("queue-updated", () =>
+  queryClient.invalidateQueries(["queue"]),
+);
+eventSource.addEventListener("playback-state", (e) =>
+  playerStore.updateState(JSON.parse(e.data)),
+);
 ```
 
 No polling needed. SSE handles all updates.
@@ -105,19 +109,19 @@ No polling needed. SSE handles all updates.
 
 ## API Endpoints Used
 
-| Method | Path | Purpose |
-|--------|------|---------|
-| GET | `/queue` | List queue items |
-| POST | `/queue/add` | Add item |
-| DELETE | `/queue/{id}` | Remove item |
-| GET | `/queue/mode` | Get current mode |
-| POST | `/queue/mode` | Set mode (admin) |
-| GET | `/now-playing` | Current playback state |
-| POST | `/player/play` | Play (admin) |
-| POST | `/player/pause` | Pause (admin) |
-| POST | `/player/skip` | Skip (admin) |
-| POST | `/player/stop` | Stop (admin) |
-| GET | `/events` | SSE stream |
+| Method | Path            | Purpose                |
+| ------ | --------------- | ---------------------- |
+| GET    | `/queue`        | List queue items       |
+| POST   | `/queue/add`    | Add item               |
+| DELETE | `/queue/{id}`   | Remove item            |
+| GET    | `/queue/mode`   | Get current mode       |
+| POST   | `/queue/mode`   | Set mode (admin)       |
+| GET    | `/now-playing`  | Current playback state |
+| POST   | `/player/play`  | Play (admin)           |
+| POST   | `/player/pause` | Pause (admin)          |
+| POST   | `/player/skip`  | Skip (admin)           |
+| POST   | `/player/stop`  | Stop (admin)           |
+| GET    | `/events`       | SSE stream             |
 
 ---
 

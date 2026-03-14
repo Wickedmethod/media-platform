@@ -18,15 +18,15 @@ Map the TV remote's CEC (Consumer Electronics Control) signals over HDMI to medi
 
 ## CEC Button Mapping
 
-| TV Remote Button | CEC Code | Action | API Call |
-|-----------------|----------|--------|----------|
-| **Play/Pause** | `play` / `pause` | Toggle play/pause | `POST /player/play` or `POST /player/pause` |
-| **Right →** | `right` | Skip to next track | `POST /player/skip` |
-| **Left ←** | `left` | Restart current track | `POST /player/play` (with position 0) |
-| **Back / Return** | `back` | Stop playback | `POST /player/stop` |
-| **OK / Select** | `select` | Toggle overlay bar | Local (no API call) |
-| **Up ↑** | `up` | Navigate up (search) | Local navigation |
-| **Down ↓** | `down` | Navigate down (search) | Local navigation |
+| TV Remote Button  | CEC Code         | Action                 | API Call                                    |
+| ----------------- | ---------------- | ---------------------- | ------------------------------------------- |
+| **Play/Pause**    | `play` / `pause` | Toggle play/pause      | `POST /player/play` or `POST /player/pause` |
+| **Right →**       | `right`          | Skip to next track     | `POST /player/skip`                         |
+| **Left ←**        | `left`           | Restart current track  | `POST /player/play` (with position 0)       |
+| **Back / Return** | `back`           | Stop playback          | `POST /player/stop`                         |
+| **OK / Select**   | `select`         | Toggle overlay bar     | Local (no API call)                         |
+| **Up ↑**          | `up`             | Navigate up (search)   | Local navigation                            |
+| **Down ↓**        | `down`           | Navigate down (search) | Local navigation                            |
 
 ---
 
@@ -117,54 +117,60 @@ For better integration with the TV frontend (WebSocket communication):
 
 ```javascript
 // /opt/media-platform/cec-bridge.js
-import { spawn } from 'child_process'
-import { WebSocketServer } from 'ws'
+import { spawn } from "child_process";
+import { WebSocketServer } from "ws";
 
-const API_BASE = process.env.API_BASE || 'http://localhost:8080'
-const WORKER_KEY = process.env.MEDIA_WORKER_KEY
-const wss = new WebSocketServer({ port: 8089 })
+const API_BASE = process.env.API_BASE || "http://localhost:8080";
+const WORKER_KEY = process.env.MEDIA_WORKER_KEY;
+const wss = new WebSocketServer({ port: 8089 });
 
 // Broadcast to all connected clients (the TV browser)
 function broadcast(message) {
-  wss.clients.forEach(client => {
+  wss.clients.forEach((client) => {
     if (client.readyState === 1) {
-      client.send(JSON.stringify(message))
+      client.send(JSON.stringify(message));
     }
-  })
+  });
 }
 
-const cec = spawn('cec-client', ['-d', '1'])
+const cec = spawn("cec-client", ["-d", "1"]);
 
-cec.stdout.on('data', (data) => {
-  const line = data.toString()
+cec.stdout.on("data", (data) => {
+  const line = data.toString();
 
-  if (line.includes('key pressed: play')) {
+  if (line.includes("key pressed: play")) {
     fetch(`${API_BASE}/player/play`, {
-      method: 'POST',
-      headers: { 'X-Worker-Key': WORKER_KEY },
-    })
-  } else if (line.includes('key pressed: select')) {
-    broadcast({ action: 'toggleOverlay' })
-  } else if (line.includes('key pressed: up')) {
-    broadcast({ action: 'navigateUp' })
+      method: "POST",
+      headers: { "X-Worker-Key": WORKER_KEY },
+    });
+  } else if (line.includes("key pressed: select")) {
+    broadcast({ action: "toggleOverlay" });
+  } else if (line.includes("key pressed: up")) {
+    broadcast({ action: "navigateUp" });
   }
   // ... etc
-})
+});
 ```
 
 The TV frontend connects to the local WebSocket for local-only commands:
 
 ```javascript
 // In tv.js
-const cecWs = new WebSocket('ws://localhost:8089')
+const cecWs = new WebSocket("ws://localhost:8089");
 cecWs.onmessage = (event) => {
-  const { action } = JSON.parse(event.data)
+  const { action } = JSON.parse(event.data);
   switch (action) {
-    case 'toggleOverlay': toggleOverlay(); break
-    case 'navigateUp': searchUI.navigateUp(); break
-    case 'navigateDown': searchUI.navigateDown(); break
+    case "toggleOverlay":
+      toggleOverlay();
+      break;
+    case "navigateUp":
+      searchUI.navigateUp();
+      break;
+    case "navigateDown":
+      searchUI.navigateDown();
+      break;
   }
-}
+};
 ```
 
 ---

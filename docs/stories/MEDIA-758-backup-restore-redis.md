@@ -40,11 +40,11 @@ Redis Container
 
 ## Backup Schedule
 
-| Frequency | Retention | Method | Storage |
-|-----------|-----------|--------|---------|
-| Hourly | Keep last 24 | Copy RDB file | Local backup volume |
-| Daily | Keep last 30 | Copy + gzip | Local backup volume |
-| Weekly | Keep last 12 | rsync to NAS | Offsite |
+| Frequency | Retention    | Method        | Storage             |
+| --------- | ------------ | ------------- | ------------------- |
+| Hourly    | Keep last 24 | Copy RDB file | Local backup volume |
+| Daily     | Keep last 30 | Copy + gzip   | Local backup volume |
+| Weekly    | Keep last 12 | rsync to NAS  | Offsite             |
 
 ---
 
@@ -157,11 +157,11 @@ redis-check-rdb /backups/redis/daily/dump-2026-03-15.rdb.gz
 
 ## Monitoring
 
-| Check | Alert Threshold |
-|-------|----------------|
-| Backup age | No backup in 2 hours |
+| Check       | Alert Threshold            |
+| ----------- | -------------------------- |
+| Backup age  | No backup in 2 hours       |
 | Backup size | Size < 1KB (empty/corrupt) |
-| Disk space | Backup volume > 90% full |
+| Disk space  | Backup volume > 90% full   |
 
 ---
 

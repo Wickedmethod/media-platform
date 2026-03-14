@@ -19,12 +19,14 @@ Admin users can reorder queue items by drag-and-drop on desktop and long-press-d
 ## UI Interaction
 
 ### Desktop
+
 - Grab handle (⠿) on left side of queue item
 - Drag item to new position
 - Drop → item snaps into place
 - Other items animate to fill gaps
 
 ### Mobile
+
 - Long-press (300ms) on queue item activates drag mode
 - Haptic feedback on activation (if available)
 - Drag to new position
@@ -70,39 +72,43 @@ Uses Redis `LREM` + `LINSERT` in a Lua script for atomicity (from MEDIA-728).
 ```vue
 <!-- Enhanced QueueList.vue -->
 <script setup lang="ts">
-import { useSortable } from '@vueuse/integrations/useSortable'
-import { useReorderQueue } from '@/generated/api'
+import { useSortable } from "@vueuse/integrations/useSortable";
+import { useReorderQueue } from "@/generated/api";
 
-const el = ref<HTMLElement>()
+const el = ref<HTMLElement>();
 
 useSortable(el, queueItems, {
-  handle: '.drag-handle',
+  handle: ".drag-handle",
   animation: 200,
   onEnd: async (event) => {
-    const { oldIndex, newIndex } = event
-    if (oldIndex === newIndex) return
+    const { oldIndex, newIndex } = event;
+    if (oldIndex === newIndex) return;
 
     // Optimistic update (instant)
-    const item = queueItems.value.splice(oldIndex!, 1)[0]
-    queueItems.value.splice(newIndex!, 0, item)
+    const item = queueItems.value.splice(oldIndex!, 1)[0];
+    queueItems.value.splice(newIndex!, 0, item);
 
     // Server sync
     try {
       await reorderMutation.mutateAsync({
         itemId: item.id,
         newIndex: newIndex!,
-      })
+      });
     } catch (err) {
       // Revert on conflict
-      queryClient.invalidateQueries({ queryKey: ['queue'] })
+      queryClient.invalidateQueries({ queryKey: ["queue"] });
     }
   },
-})
+});
 </script>
 
 <template>
   <div ref="el">
-    <div v-for="item in queueItems" :key="item.id" class="flex items-center gap-3">
+    <div
+      v-for="item in queueItems"
+      :key="item.id"
+      class="flex items-center gap-3"
+    >
       <span class="drag-handle cursor-grab text-muted-foreground">⠿</span>
       <QueueItem :item="item" />
     </div>

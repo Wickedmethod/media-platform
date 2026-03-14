@@ -95,18 +95,18 @@ API → YouTube Data API v3
 
 ### Frontend (Vue)
 
-| Component | Purpose |
-|-----------|---------|
-| `YouTubeSearch.vue` | Search input + results |
-| `SearchResult.vue` | Single result card |
-| `RecentSearches.vue` | Recent search terms |
+| Component            | Purpose                |
+| -------------------- | ---------------------- |
+| `YouTubeSearch.vue`  | Search input + results |
+| `SearchResult.vue`   | Single result card     |
+| `RecentSearches.vue` | Recent search terms    |
 
 ### TV (HTML)
 
-| Element | Purpose |
-|---------|---------|
-| On-screen keyboard | Letter-by-letter input via CEC |
-| Results list | CEC-navigable (up/down to select, OK to add) |
+| Element            | Purpose                                      |
+| ------------------ | -------------------------------------------- |
+| On-screen keyboard | Letter-by-letter input via CEC               |
+| Results list       | CEC-navigable (up/down to select, OK to add) |
 
 ---
 

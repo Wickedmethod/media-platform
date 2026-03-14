@@ -102,6 +102,7 @@ public bool IsAlive(PlayerHeartbeat heartbeat) =>
 ```
 
 When a zombie is detected:
+
 1. Mark player as offline in Redis
 2. If the zombie was the active player, transition to `Stopped` state
 3. Emit SSE event: `player-offline` with player ID

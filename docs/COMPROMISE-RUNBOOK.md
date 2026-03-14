@@ -5,18 +5,19 @@
 
 ## Severity Classification
 
-| Level    | Description                                    | Response Time |
-|----------|------------------------------------------------|---------------|
-| Critical | Google OAuth token leaked or used maliciously  | Immediate     |
-| High     | Vault secret or API key exposed                | < 15 min      |
-| Medium   | Suspicious access pattern detected             | < 1 hour      |
-| Low      | Failed auth spike from unknown source          | < 4 hours     |
+| Level    | Description                                   | Response Time |
+| -------- | --------------------------------------------- | ------------- |
+| Critical | Google OAuth token leaked or used maliciously | Immediate     |
+| High     | Vault secret or API key exposed               | < 15 min      |
+| Medium   | Suspicious access pattern detected            | < 1 hour      |
+| Low      | Failed auth spike from unknown source         | < 4 hours     |
 
 ## 1. Containment (Immediate)
 
 ### Google Account Compromise
 
 1. **Revoke all OAuth tokens immediately**
+
    ```bash
    # Via VaultFacade API (if accessible)
    curl -X POST http://vaultfacade:5100/api/secrets/rotate \
@@ -30,6 +31,7 @@
    - Change Google account password
 
 3. **Kill switch — disable all YouTube write actions**
+
    ```bash
    # Stop the API to prevent any further actions
    docker stop media-api
@@ -45,6 +47,7 @@
 ### Infrastructure Secret Compromise
 
 1. **Rotate compromised secrets via VaultFacade**
+
    ```bash
    curl -X POST http://vaultfacade:5100/api/secrets/rotate \
      -H "Content-Type: application/json" \
@@ -59,6 +62,7 @@
 ## 2. Investigation
 
 1. **Collect audit logs**
+
    ```bash
    # Check API request logs
    docker logs media-api --since "2h" | grep -E "error|unauthorized|403|401"
@@ -68,6 +72,7 @@
    ```
 
 2. **Review analytics for anomalies**
+
    ```bash
    curl http://localhost:5000/analytics?from=2026-03-13T00:00:00Z
    ```
@@ -80,29 +85,32 @@
 
 After containment, rotate ALL secrets even if only one was confirmed compromised:
 
-| Secret                  | Rotation Method                           |
-|-------------------------|-------------------------------------------|
-| Google OAuth tokens     | Re-authenticate via consent flow          |
-| Redis password          | Update `redis.conf` + restart             |
-| API keys                | `mcp_vaultfacade_rotate_secret`           |
-| JWT signing keys        | `mcp_vaultfacade_rotate_secret`           |
-| Encryption keys         | Generate new + re-encrypt stored data     |
+| Secret              | Rotation Method                       |
+| ------------------- | ------------------------------------- |
+| Google OAuth tokens | Re-authenticate via consent flow      |
+| Redis password      | Update `redis.conf` + restart         |
+| API keys            | `mcp_vaultfacade_rotate_secret`       |
+| JWT signing keys    | `mcp_vaultfacade_rotate_secret`       |
+| Encryption keys     | Generate new + re-encrypt stored data |
 
 ## 4. Restore and Verify
 
 1. **Verify Redis data integrity**
+
    ```bash
    docker exec media-redis redis-cli DBSIZE
    docker exec media-redis redis-cli INFO persistence
    ```
 
 2. **Health check all services**
+
    ```bash
    curl http://localhost:5000/health/ready
    curl http://localhost:5000/health/live
    ```
 
 3. **Re-enable kill switch** (if used)
+
    ```bash
    docker exec media-redis redis-cli DEL media:kill-switch
    docker start media-api
@@ -129,6 +137,7 @@ After containment, rotate ALL secrets even if only one was confirmed compromised
 **Impact**: [What was affected]
 
 ### Timeline
+
 - HH:MM — Detection
 - HH:MM — Containment started
 - HH:MM — Investigation began
@@ -137,18 +146,22 @@ After containment, rotate ALL secrets even if only one was confirmed compromised
 - HH:MM — All-clear confirmed
 
 ### Root Cause
+
 [Description]
 
 ### Actions Taken
+
 1. ...
 2. ...
 
 ### Lessons Learned
+
 - [What worked]
 - [What didn't]
 - [What to improve]
 
 ### Follow-up Actions
+
 - [ ] Action item 1
 - [ ] Action item 2
 ```
@@ -166,8 +179,8 @@ Run a simulated compromise drill **quarterly** to validate this runbook:
 
 ## Emergency Contacts
 
-| Role              | Contact                    |
-|-------------------|----------------------------|
-| System admin      | [Configure in `.vault-env`]|
-| Google account    | [Primary account holder]   |
-| Infrastructure    | [Homelab operator]         |
+| Role           | Contact                     |
+| -------------- | --------------------------- |
+| System admin   | [Configure in `.vault-env`] |
+| Google account | [Primary account holder]    |
+| Infrastructure | [Homelab operator]          |

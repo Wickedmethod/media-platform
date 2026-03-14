@@ -43,13 +43,13 @@ loadVideoById() called
 
 ```typescript
 // src/features/tv/composables/usePlaybackTimeout.ts
-import { ref, watch, onUnmounted } from 'vue'
+import { ref, watch, onUnmounted } from "vue";
 
 interface TimeoutOptions {
-  initialTimeoutMs?: number   // default: 30000
-  retryTimeoutMs?: number     // default: 15000
-  onTimeout: (videoId: string, phase: 'initial' | 'retry') => void
-  onSkip: (videoId: string) => void
+  initialTimeoutMs?: number; // default: 30000
+  retryTimeoutMs?: number; // default: 15000
+  onTimeout: (videoId: string, phase: "initial" | "retry") => void;
+  onSkip: (videoId: string) => void;
 }
 
 export function usePlaybackTimeout(options: TimeoutOptions) {
@@ -58,41 +58,41 @@ export function usePlaybackTimeout(options: TimeoutOptions) {
     retryTimeoutMs = 15_000,
     onTimeout,
     onSkip,
-  } = options
+  } = options;
 
-  let timer: ReturnType<typeof setTimeout> | null = null
-  let currentVideoId: string | null = null
-  let retryAttempted = false
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  let currentVideoId: string | null = null;
+  let retryAttempted = false;
 
   function startWatching(videoId: string) {
-    clearTimer()
-    currentVideoId = videoId
-    retryAttempted = false
+    clearTimer();
+    currentVideoId = videoId;
+    retryAttempted = false;
 
     timer = setTimeout(() => {
-      onTimeout(videoId, 'initial')
-      retryAttempted = true
+      onTimeout(videoId, "initial");
+      retryAttempted = true;
       // Caller should reload video — start retry timer
       timer = setTimeout(() => {
-        onSkip(videoId)
-      }, retryTimeoutMs)
-    }, initialTimeoutMs)
+        onSkip(videoId);
+      }, retryTimeoutMs);
+    }, initialTimeoutMs);
   }
 
   function playbackStarted() {
-    clearTimer()
+    clearTimer();
   }
 
   function clearTimer() {
     if (timer) {
-      clearTimeout(timer)
-      timer = null
+      clearTimeout(timer);
+      timer = null;
     }
   }
 
-  onUnmounted(clearTimer)
+  onUnmounted(clearTimer);
 
-  return { startWatching, playbackStarted }
+  return { startWatching, playbackStarted };
 }
 ```
 
@@ -102,27 +102,30 @@ export function usePlaybackTimeout(options: TimeoutOptions) {
 // Inside TvPlayer.vue setup
 const timeout = usePlaybackTimeout({
   onTimeout: (videoId, phase) => {
-    if (phase === 'initial') {
+    if (phase === "initial") {
       // Retry: reload same video
-      ytPlayer.loadVideoById(videoId)
+      ytPlayer.loadVideoById(videoId);
     }
-    reportError('playback_timeout', videoId, phase)
+    reportError("playback_timeout", videoId, phase);
   },
   onSkip: (videoId) => {
-    reportError('playback_timeout_skip', videoId, 'retry')
-    playerApi.skip() // Move to next track
+    reportError("playback_timeout_skip", videoId, "retry");
+    playerApi.skip(); // Move to next track
   },
-})
+});
 
 // When new track loads
-watch(() => playerStore.currentItem, (item) => {
-  if (item) timeout.startWatching(extractVideoId(item.url))
-})
+watch(
+  () => playerStore.currentItem,
+  (item) => {
+    if (item) timeout.startWatching(extractVideoId(item.url));
+  },
+);
 
 // When YouTube reports PLAYING state
 function onPlayerStateChange(e: YT.OnStateChangeEvent) {
   if (e.data === YT.PlayerState.PLAYING) {
-    timeout.playbackStarted()
+    timeout.playbackStarted();
   }
 }
 ```
@@ -146,11 +149,11 @@ Extend the existing `POST /player/error` to accept timeout errors:
 
 ## Timeout Flow Summary
 
-| Phase | Duration | Outcome |
-|-------|----------|---------|
-| Initial load | 30s | If PLAYING → OK. If not → retry |
-| Retry | 15s | If PLAYING → OK. If not → skip |
-| After skip | — | Next track loads, new timeout starts |
+| Phase        | Duration | Outcome                              |
+| ------------ | -------- | ------------------------------------ |
+| Initial load | 30s      | If PLAYING → OK. If not → retry      |
+| Retry        | 15s      | If PLAYING → OK. If not → skip       |
+| After skip   | —        | Next track loads, new timeout starts |
 
 ---
 

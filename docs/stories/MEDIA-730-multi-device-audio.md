@@ -64,16 +64,16 @@ public enum SessionType { Shared, Personal }
 
 New endpoints under `/sessions/`:
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/sessions/personal` | Create a personal session for the authenticated user |
-| `GET` | `/sessions/mine` | Get the user's active personal session |
-| `POST` | `/sessions/{id}/queue/add` | Add to a specific session's queue |
-| `POST` | `/sessions/{id}/player/play` | Play on a specific session |
-| `POST` | `/sessions/{id}/player/skip` | Skip on a specific session |
-| `POST` | `/sessions/{id}/player/pause` | Pause a specific session |
-| `GET` | `/sessions/{id}/events` | SSE stream for a specific session |
-| `DELETE` | `/sessions/{id}` | End a personal session |
+| Method   | Path                          | Description                                          |
+| -------- | ----------------------------- | ---------------------------------------------------- |
+| `POST`   | `/sessions/personal`          | Create a personal session for the authenticated user |
+| `GET`    | `/sessions/mine`              | Get the user's active personal session               |
+| `POST`   | `/sessions/{id}/queue/add`    | Add to a specific session's queue                    |
+| `POST`   | `/sessions/{id}/player/play`  | Play on a specific session                           |
+| `POST`   | `/sessions/{id}/player/skip`  | Skip on a specific session                           |
+| `POST`   | `/sessions/{id}/player/pause` | Pause a specific session                             |
+| `GET`    | `/sessions/{id}/events`       | SSE stream for a specific session                    |
+| `DELETE` | `/sessions/{id}`              | End a personal session                               |
 
 The existing `/queue/*` and `/player/*` endpoints continue to work — they operate on the **shared** session (backward compatible).
 
@@ -161,46 +161,49 @@ YouTube IFrame API works on mobile but has restrictions:
 
 ```javascript
 // Personal YouTube player (hidden, audio only)
-const personalPlayer = new YT.Player('personal-yt-player', {
-  height: '1',
-  width: '1',
+const personalPlayer = new YT.Player("personal-yt-player", {
+  height: "1",
+  width: "1",
   playerVars: {
-    autoplay: 0,       // User gesture required first time
+    autoplay: 0, // User gesture required first time
     controls: 0,
-    playsinline: 1,    // Don't go fullscreen on mobile
+    playsinline: 1, // Don't go fullscreen on mobile
   },
   events: {
     onStateChange: (e) => {
       if (e.data === YT.PlayerState.ENDED) {
-        playNextInPersonalQueue()
+        playNextInPersonalQueue();
       }
     },
   },
-})
+});
 ```
 
 ---
 
 ## Limitations & Considerations
 
-| Concern | Decision |
-|---------|----------|
-| YouTube ToS | IFrame API is officially supported; hidden player is a gray area but widely used |
-| Mobile background | Tab must stay active; PWA helps but iOS Safari pauses background audio |
-| Bandwidth | Each personal session = separate YouTube stream; 5 users = 5 streams |
-| Complexity | This is the most complex feature; consider phasing (v1 = shared only, v2 = personal) |
+| Concern           | Decision                                                                             |
+| ----------------- | ------------------------------------------------------------------------------------ |
+| YouTube ToS       | IFrame API is officially supported; hidden player is a gray area but widely used     |
+| Mobile background | Tab must stay active; PWA helps but iOS Safari pauses background audio               |
+| Bandwidth         | Each personal session = separate YouTube stream; 5 users = 5 streams                 |
+| Complexity        | This is the most complex feature; consider phasing (v1 = shared only, v2 = personal) |
 
 ---
 
 ## Phased Implementation
 
 ### Phase 1 (v1): Shared Only ← Current
+
 All users share one queue, TV is the only playback device.
 
 ### Phase 2 (v2): Personal Sessions ← This Story
+
 Users can create personal sessions with their own queues and on-device playback.
 
 ### Phase 3 (v3, future): Multi-Room
+
 Multiple TVs, each with their own shared session. Rooms with independent queues.
 
 ---
@@ -208,6 +211,7 @@ Multiple TVs, each with their own shared session. Rooms with independent queues.
 ## Tasks
 
 ### Backend
+
 - [ ] Create `PlaybackSession` entity
 - [ ] Create `SessionRepository` (Redis)
 - [ ] Add `POST /sessions/personal` endpoint
@@ -220,6 +224,7 @@ Multiple TVs, each with their own shared session. Rooms with independent queues.
 - [ ] Update authorization (users can only control their own sessions)
 
 ### Frontend
+
 - [ ] Create `usePersonalSession` composable
 - [ ] Create `PersonalPlayer.vue` with hidden YouTube IFrame
 - [ ] Add Party/Personal queue tab switcher

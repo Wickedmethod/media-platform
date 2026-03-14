@@ -52,13 +52,13 @@ Create the responsive app shell with a bottom tab bar (mobile) and sidebar (desk
 
 ## Routes
 
-| Path | Component | Role | Tab |
-|------|-----------|------|-----|
-| `/` | Redirect to `/queue` | — | — |
-| `/queue` | QueueView | All | 🎵 Queue |
-| `/search` | SearchView | All | 🔍 Search |
-| `/admin` | AdminDashboard | `media-admin` | ⚙ Admin |
-| `/login` | LoginRedirect | — | — |
+| Path      | Component            | Role          | Tab       |
+| --------- | -------------------- | ------------- | --------- |
+| `/`       | Redirect to `/queue` | —             | —         |
+| `/queue`  | QueueView            | All           | 🎵 Queue  |
+| `/search` | SearchView           | All           | 🔍 Search |
+| `/admin`  | AdminDashboard       | `media-admin` | ⚙ Admin   |
+| `/login`  | LoginRedirect        | —             | —         |
 
 ---
 
@@ -88,14 +88,24 @@ Create the responsive app shell with a bottom tab bar (mobile) and sidebar (desk
 
 ```typescript
 const tabs = [
-  { path: '/queue', label: 'Queue', icon: ListMusic, roles: ['media-user', 'media-admin'] },
-  { path: '/search', label: 'Search', icon: Search, roles: ['media-user', 'media-admin'] },
-  { path: '/admin', label: 'Admin', icon: Settings, roles: ['media-admin'] },
-]
+  {
+    path: "/queue",
+    label: "Queue",
+    icon: ListMusic,
+    roles: ["media-user", "media-admin"],
+  },
+  {
+    path: "/search",
+    label: "Search",
+    icon: Search,
+    roles: ["media-user", "media-admin"],
+  },
+  { path: "/admin", label: "Admin", icon: Settings, roles: ["media-admin"] },
+];
 
 const visibleTabs = computed(() =>
-  tabs.filter(tab => tab.roles.some(role => authStore.hasRole(role)))
-)
+  tabs.filter((tab) => tab.roles.some((role) => authStore.hasRole(role))),
+);
 ```
 
 ---
@@ -155,14 +165,14 @@ A persistent bar above the bottom navigation showing:
 
 Following the existing index.html dark theme:
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| `--background` | `#0a0a0f` | App background |
-| `--foreground` | `#e0e0e0` | Primary text |
-| `--card` | `#12121a` | Card/surface |
-| `--primary` | `#ff3366` | Accent, active tab |
-| `--muted` | `#6a6a7a` | Inactive tab icons |
-| `--border` | `#1a1a2e` | Dividers |
+| Token          | Value     | Usage              |
+| -------------- | --------- | ------------------ |
+| `--background` | `#0a0a0f` | App background     |
+| `--foreground` | `#e0e0e0` | Primary text       |
+| `--card`       | `#12121a` | Card/surface       |
+| `--primary`    | `#ff3366` | Accent, active tab |
+| `--muted`      | `#6a6a7a` | Inactive tab icons |
+| `--border`     | `#1a1a2e` | Dividers           |
 
 These map to shadcn-vue CSS variables in `tailwind.config.ts`.
 

@@ -130,17 +130,17 @@ Pi 4/5 (Chromium kiosk)
 ```vue
 <!-- src/features/tv/TvPlayer.vue -->
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue'
-import { usePlayerStore } from '@/stores/player'
+import { ref, onMounted, onUnmounted, watch } from "vue";
+import { usePlayerStore } from "@/stores/player";
 
-const playerStore = usePlayerStore()
-const playerRef = ref<HTMLDivElement>()
-let ytPlayer: YT.Player | null = null
+const playerStore = usePlayerStore();
+const playerRef = ref<HTMLDivElement>();
+let ytPlayer: YT.Player | null = null;
 
 function initPlayer() {
   ytPlayer = new YT.Player(playerRef.value!, {
-    height: '100%',
-    width: '100%',
+    height: "100%",
+    width: "100%",
     playerVars: {
       autoplay: 1,
       controls: 0,
@@ -154,28 +154,31 @@ function initPlayer() {
       onStateChange: onPlayerStateChange,
       onError: onPlayerError,
     },
-  })
+  });
 }
 
 function onPlayerStateChange(e: YT.OnStateChangeEvent) {
   if (e.data === YT.PlayerState.ENDED) {
-    reportTrackEnd()
+    reportTrackEnd();
   }
 }
 
 function onPlayerError(e: YT.OnErrorEvent) {
-  reportPlaybackError(e.data)
+  reportPlaybackError(e.data);
 }
 
 // Watch for track changes from SSE
-watch(() => playerStore.currentItem, (item) => {
-  if (item && ytPlayer) {
-    ytPlayer.loadVideoById({
-      videoId: extractVideoId(item.url),
-      startSeconds: playerStore.position,
-    })
-  }
-})
+watch(
+  () => playerStore.currentItem,
+  (item) => {
+    if (item && ytPlayer) {
+      ytPlayer.loadVideoById({
+        videoId: extractVideoId(item.url),
+        startSeconds: playerStore.position,
+      });
+    }
+  },
+);
 </script>
 
 <template>
@@ -183,28 +186,29 @@ watch(() => playerStore.currentItem, (item) => {
 </template>
 ```
 
-  onPlayerStateChange(event) {
-    if (event.data === YT.PlayerState.ENDED) {
-      // Report to API — triggers next in queue
-      fetch('/player/report-end', { method: 'POST' })
-    }
-  }
-
-  // Position reporting every 5s
-  startPositionReporting() {
-    setInterval(() => {
-      if (this.player?.getPlayerState() === YT.PlayerState.PLAYING) {
-        const pos = Math.floor(this.player.getCurrentTime())
-        fetch('/player/position', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ positionSeconds: pos }),
-        })
-      }
-    }, 5000)
-  }
+onPlayerStateChange(event) {
+if (event.data === YT.PlayerState.ENDED) {
+// Report to API — triggers next in queue
+fetch('/player/report-end', { method: 'POST' })
 }
-```
+}
+
+// Position reporting every 5s
+startPositionReporting() {
+setInterval(() => {
+if (this.player?.getPlayerState() === YT.PlayerState.PLAYING) {
+const pos = Math.floor(this.player.getCurrentTime())
+fetch('/player/position', {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({ positionSeconds: pos }),
+})
+}
+}, 5000)
+}
+}
+
+````
 
 ---
 
@@ -250,7 +254,7 @@ class TVEventSource {
     }
   }
 }
-```
+````
 
 ---
 

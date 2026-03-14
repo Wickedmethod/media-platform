@@ -18,15 +18,15 @@ Validate and sanitize all queue item input before storing. Prevents malformed UR
 
 ## Validation Rules
 
-| Field | Rule | Error |
-|-------|------|-------|
-| `url` | Required | 400: "URL is required" |
-| `url` | Must be valid URI | 400: "Invalid URL format" |
-| `url` | Must match YouTube URL pattern | 400: "Only YouTube URLs are supported" |
-| `url` | Must contain extractable videoId | 400: "Could not extract video ID from URL" |
-| `url` | Max 2048 chars | 400: "URL exceeds maximum length" |
-| `title` | Optional, max 200 chars | 400: "Title exceeds 200 characters" |
-| `title` | HTML stripped | (silent sanitization) |
+| Field   | Rule                             | Error                                      |
+| ------- | -------------------------------- | ------------------------------------------ |
+| `url`   | Required                         | 400: "URL is required"                     |
+| `url`   | Must be valid URI                | 400: "Invalid URL format"                  |
+| `url`   | Must match YouTube URL pattern   | 400: "Only YouTube URLs are supported"     |
+| `url`   | Must contain extractable videoId | 400: "Could not extract video ID from URL" |
+| `url`   | Max 2048 chars                   | 400: "URL exceeds maximum length"          |
+| `title` | Optional, max 200 chars          | 400: "Title exceeds 200 characters"        |
+| `title` | HTML stripped                    | (silent sanitization)                      |
 
 ### YouTube URL Patterns
 

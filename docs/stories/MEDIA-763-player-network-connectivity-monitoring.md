@@ -46,15 +46,15 @@ API stores in Redis → available via GET /admin/players/{id}/network
 ```typescript
 // player/src/network/latency-probe.ts
 export async function measureLatency(apiBaseUrl: string): Promise<number> {
-  const start = performance.now()
+  const start = performance.now();
   const response = await fetch(`${apiBaseUrl}/health/live`, {
-    method: 'GET',
+    method: "GET",
     signal: AbortSignal.timeout(5000),
-  })
-  const rtt = performance.now() - start
+  });
+  const rtt = performance.now() - start;
 
-  if (!response.ok) throw new Error(`Health check failed: ${response.status}`)
-  return Math.round(rtt)
+  if (!response.ok) throw new Error(`Health check failed: ${response.status}`);
+  return Math.round(rtt);
 }
 ```
 
@@ -62,17 +62,17 @@ export async function measureLatency(apiBaseUrl: string): Promise<number> {
 
 ```typescript
 // player/src/network/dns-probe.ts
-import { promises as dns } from 'node:dns'
+import { promises as dns } from "node:dns";
 
 export async function measureDns(hostname: string): Promise<{
-  resolveTimeMs: number
-  addresses: string[]
+  resolveTimeMs: number;
+  addresses: string[];
 }> {
-  const start = performance.now()
-  const addresses = await dns.resolve4(hostname)
-  const resolveTimeMs = Math.round(performance.now() - start)
+  const start = performance.now();
+  const addresses = await dns.resolve4(hostname);
+  const resolveTimeMs = Math.round(performance.now() - start);
 
-  return { resolveTimeMs, addresses }
+  return { resolveTimeMs, addresses };
 }
 ```
 
@@ -81,26 +81,26 @@ export async function measureDns(hostname: string): Promise<{
 ```typescript
 // player/src/network/bandwidth-probe.ts
 export async function estimateBandwidth(apiBaseUrl: string): Promise<{
-  downloadMbps: number
-  payloadBytes: number
-  durationMs: number
+  downloadMbps: number;
+  payloadBytes: number;
+  durationMs: number;
 }> {
   // API serves a known-size payload (e.g., 100KB of zeros)
-  const start = performance.now()
+  const start = performance.now();
   const response = await fetch(`${apiBaseUrl}/diagnostics/bandwidth-test`, {
     signal: AbortSignal.timeout(10000),
-  })
-  const blob = await response.blob()
-  const durationMs = performance.now() - start
+  });
+  const blob = await response.blob();
+  const durationMs = performance.now() - start;
 
-  const payloadBytes = blob.size
-  const downloadMbps = (payloadBytes * 8) / (durationMs * 1000) // bits/ms → Mbps
+  const payloadBytes = blob.size;
+  const downloadMbps = (payloadBytes * 8) / (durationMs * 1000); // bits/ms → Mbps
 
   return {
     downloadMbps: Math.round(downloadMbps * 100) / 100,
     payloadBytes,
     durationMs: Math.round(durationMs),
-  }
+  };
 }
 ```
 
@@ -111,34 +111,34 @@ export async function estimateBandwidth(apiBaseUrl: string): Promise<{
 ```typescript
 // player/src/network/metrics-aggregator.ts
 interface NetworkMetrics {
-  timestamp: string
+  timestamp: string;
   latency: {
-    avgMs: number
-    minMs: number
-    maxMs: number
-    p95Ms: number
-    samples: number
-    failures: number
-  }
+    avgMs: number;
+    minMs: number;
+    maxMs: number;
+    p95Ms: number;
+    samples: number;
+    failures: number;
+  };
   dns: {
-    avgResolveMs: number
-    failures: number
-  }
+    avgResolveMs: number;
+    failures: number;
+  };
   bandwidth: {
-    lastMbps: number
-    measuredAt: string
-  }
+    lastMbps: number;
+    measuredAt: string;
+  };
 }
 ```
 
 ### Collection Schedule
 
-| Probe | Interval | Timeout | Notes |
-|-------|----------|---------|-------|
-| Latency | Every 15s | 5s | Lightweight, uses /health/live |
-| DNS | Every 60s | 5s | Minimal overhead |
-| Bandwidth | Every 5 min | 10s | Heavier, runs less frequently |
-| Report to API | Every 60s | 5s | Aggregated metrics batch |
+| Probe         | Interval    | Timeout | Notes                          |
+| ------------- | ----------- | ------- | ------------------------------ |
+| Latency       | Every 15s   | 5s      | Lightweight, uses /health/live |
+| DNS           | Every 60s   | 5s      | Minimal overhead               |
+| Bandwidth     | Every 5 min | 10s     | Heavier, runs less frequently  |
+| Report to API | Every 60s   | 5s      | Aggregated metrics batch       |
 
 ---
 
@@ -204,12 +204,12 @@ public IActionResult BandwidthTest()
 
 ## Alert Thresholds
 
-| Metric | Warning | Critical | Action |
-|--------|---------|----------|--------|
-| Latency avg | > 200ms | > 500ms | Log warning / alert |
-| Latency p95 | > 500ms | > 1000ms | Alert |
-| DNS resolve | > 100ms | > 500ms | Alert + check DNS config |
-| Bandwidth | < 10 Mbps | < 5 Mbps | Alert — buffering likely |
+| Metric         | Warning         | Critical        | Action                     |
+| -------------- | --------------- | --------------- | -------------------------- |
+| Latency avg    | > 200ms         | > 500ms         | Log warning / alert        |
+| Latency p95    | > 500ms         | > 1000ms        | Alert                      |
+| DNS resolve    | > 100ms         | > 500ms         | Alert + check DNS config   |
+| Bandwidth      | < 10 Mbps       | < 5 Mbps        | Alert — buffering likely   |
 | Probe failures | > 2 consecutive | > 5 consecutive | Alert — connectivity issue |
 
 Alerts integrate with the existing anomaly detection system (MEDIA-631, MEDIA-743).

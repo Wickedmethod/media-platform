@@ -19,11 +19,15 @@ Implement robust SSE reconnection for the TV Vue app with exponential backoff, h
 ## Current Problem
 
 The existing `tv.html` has a simple 3-second reconnect:
+
 ```javascript
-eventSource.onerror = () => { setTimeout(connectSSE, 3000) }
+eventSource.onerror = () => {
+  setTimeout(connectSSE, 3000);
+};
 ```
 
 This fails when:
+
 - Network is down for extended periods (floods reconnect attempts)
 - Server restarts (loses event history, client gets stale)
 - Connection silently dies (no error event, just stops receiving)
@@ -36,12 +40,12 @@ The TV Vue app reuses `useSSE` from the shared composables (MEDIA-704) with TV-s
 
 ```typescript
 // src/features/tv/useTvSSE.ts
-import { useSSE } from '@/composables/useSSE'
-import { usePlayerStore } from '@/stores/player'
+import { useSSE } from "@/composables/useSSE";
+import { usePlayerStore } from "@/stores/player";
 
 export function useTvSSE() {
-  const playerStore = usePlayerStore()
-  const { isConnected, lastEvent, connect, disconnect } = useSSE('/events', {
+  const playerStore = usePlayerStore();
+  const { isConnected, lastEvent, connect, disconnect } = useSSE("/events", {
     reconnect: {
       baseDelay: 1000,
       maxDelay: 30000,
@@ -50,12 +54,12 @@ export function useTvSSE() {
     heartbeatTimeout: 60_000, // Reconnect if no event in 60s
     onReconnect: async () => {
       // Fetch full state on every reconnect
-      const snapshot = await fetch('/sync').then(r => r.json())
-      playerStore.applySnapshot(snapshot)
+      const snapshot = await fetch("/sync").then((r) => r.json());
+      playerStore.applySnapshot(snapshot);
     },
-  })
+  });
 
-  return { isConnected, lastEvent, connect, disconnect }
+  return { isConnected, lastEvent, connect, disconnect };
 }
 ```
 
@@ -66,22 +70,22 @@ export function useTvSSE() {
 Server sends `heartbeat` events every 30s (MEDIA-712). If no event arrives in 60s, the connection is assumed dead:
 
 ```typescript
-let heartbeatTimer: ReturnType<typeof setTimeout>
+let heartbeatTimer: ReturnType<typeof setTimeout>;
 
 function resetHeartbeatTimer() {
-  clearTimeout(heartbeatTimer)
+  clearTimeout(heartbeatTimer);
   heartbeatTimer = setTimeout(() => {
     // No event in 60s — connection is dead
-    eventSource.close()
-    scheduleReconnect()
-  }, 60_000)
+    eventSource.close();
+    scheduleReconnect();
+  }, 60_000);
 }
 
 // Reset on every event (including heartbeat)
 eventSource.onmessage = (event) => {
-  resetHeartbeatTimer()
-  handleEvent(JSON.parse(event.data))
-}
+  resetHeartbeatTimer();
+  handleEvent(JSON.parse(event.data));
+};
 ```
 
 ---
@@ -90,13 +94,13 @@ eventSource.onmessage = (event) => {
 
 After reconnecting, the TV fetches `/sync` and applies the snapshot:
 
-| Server State | TV Action |
-|-------------|-----------|
-| Playing (same video) | Seek to server position |
+| Server State              | TV Action                         |
+| ------------------------- | --------------------------------- |
+| Playing (same video)      | Seek to server position           |
 | Playing (different video) | Load new video at server position |
-| Paused | Load video, pause at position |
-| Idle | Show idle screen |
-| Kill switch active | Show blocked screen |
+| Paused                    | Load video, pause at position     |
+| Idle                      | Show idle screen                  |
+| Kill switch active        | Show blocked screen               |
 
 ---
 

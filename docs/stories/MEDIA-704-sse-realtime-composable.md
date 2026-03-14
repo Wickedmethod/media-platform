@@ -44,44 +44,44 @@ Vue Components (reactive via storeToRefs)
 ```typescript
 // src/composables/useSSE.ts
 export function useSSE(url: string, options?: UseSSEOptions) {
-  const isConnected = ref(false)
-  const lastEvent = ref<SSEEvent | null>(null)
-  const error = ref<string | null>(null)
-  let eventSource: EventSource | null = null
-  let reconnectTimer: ReturnType<typeof setTimeout> | null = null
+  const isConnected = ref(false);
+  const lastEvent = ref<SSEEvent | null>(null);
+  const error = ref<string | null>(null);
+  let eventSource: EventSource | null = null;
+  let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
   function connect() {
-    eventSource = new EventSource(url)
+    eventSource = new EventSource(url);
 
     eventSource.onopen = () => {
-      isConnected.value = true
-      error.value = null
-    }
+      isConnected.value = true;
+      error.value = null;
+    };
 
     eventSource.onmessage = (event) => {
-      lastEvent.value = JSON.parse(event.data)
-    }
+      lastEvent.value = JSON.parse(event.data);
+    };
 
     eventSource.onerror = () => {
-      isConnected.value = false
-      eventSource?.close()
+      isConnected.value = false;
+      eventSource?.close();
       // Exponential backoff: 1s, 2s, 4s, 8s, max 30s
-      scheduleReconnect()
-    }
+      scheduleReconnect();
+    };
   }
 
   function disconnect() {
-    eventSource?.close()
-    eventSource = null
-    isConnected.value = false
-    if (reconnectTimer) clearTimeout(reconnectTimer)
+    eventSource?.close();
+    eventSource = null;
+    isConnected.value = false;
+    if (reconnectTimer) clearTimeout(reconnectTimer);
   }
 
   // Auto-connect on mount, disconnect on unmount
-  onMounted(connect)
-  onUnmounted(disconnect)
+  onMounted(connect);
+  onUnmounted(disconnect);
 
-  return { isConnected, lastEvent, error, connect, disconnect }
+  return { isConnected, lastEvent, error, connect, disconnect };
 }
 ```
 
@@ -98,67 +98,74 @@ export function useSSE(url: string, options?: UseSSEOptions) {
 
 ```typescript
 // src/stores/usePlayerStore.ts
-export const usePlayerStore = defineStore('player', () => {
+export const usePlayerStore = defineStore("player", () => {
   // State
-  const currentItem = ref<QueueItem | null>(null)
-  const playerState = ref<PlayerState>('Idle')
-  const queueMode = ref<QueueMode>('Sequential')
-  const position = ref(0)
-  const duration = ref(0)
-  const isKillSwitchActive = ref(false)
-  const lastUpdate = ref<Date>(new Date())
+  const currentItem = ref<QueueItem | null>(null);
+  const playerState = ref<PlayerState>("Idle");
+  const queueMode = ref<QueueMode>("Sequential");
+  const position = ref(0);
+  const duration = ref(0);
+  const isKillSwitchActive = ref(false);
+  const lastUpdate = ref<Date>(new Date());
 
   // Computed
-  const isPlaying = computed(() => playerState.value === 'Playing')
-  const isPaused = computed(() => playerState.value === 'Paused')
+  const isPlaying = computed(() => playerState.value === "Playing");
+  const isPaused = computed(() => playerState.value === "Paused");
   const progress = computed(() =>
-    duration.value > 0 ? (position.value / duration.value) * 100 : 0
-  )
+    duration.value > 0 ? (position.value / duration.value) * 100 : 0,
+  );
 
   // Actions — called by SSE handler
   function handleSSEEvent(event: SSEEvent) {
     switch (event.type) {
-      case 'state-changed':
-        playerState.value = event.data.state
-        break
-      case 'track-changed':
-        currentItem.value = event.data.item
-        position.value = 0
-        break
-      case 'position-updated':
-        position.value = event.data.position
-        duration.value = event.data.duration
-        break
-      case 'queue-updated':
+      case "state-changed":
+        playerState.value = event.data.state;
+        break;
+      case "track-changed":
+        currentItem.value = event.data.item;
+        position.value = 0;
+        break;
+      case "position-updated":
+        position.value = event.data.position;
+        duration.value = event.data.duration;
+        break;
+      case "queue-updated":
         // Invalidate TanStack Query cache for queue
-        queryClient.invalidateQueries({ queryKey: ['queue'] })
-        break
-      case 'item-added':
+        queryClient.invalidateQueries({ queryKey: ["queue"] });
+        break;
+      case "item-added":
         // Show toast: "@jonas added Bohemian Rhapsody"
         if (event.data.addedByName && event.data.title) {
           useToast().show({
-            type: 'info',
+            type: "info",
             title: `${event.data.addedByName} added a song`,
             message: event.data.title,
             duration: 4000,
-          })
+          });
         }
-        queryClient.invalidateQueries({ queryKey: ['queue'] })
-        break
-      case 'kill-switch':
-        isKillSwitchActive.value = event.data.active
-        break
+        queryClient.invalidateQueries({ queryKey: ["queue"] });
+        break;
+      case "kill-switch":
+        isKillSwitchActive.value = event.data.active;
+        break;
     }
-    lastUpdate.value = new Date()
+    lastUpdate.value = new Date();
   }
 
   return {
-    currentItem, playerState, queueMode, position, duration,
-    isKillSwitchActive, lastUpdate,
-    isPlaying, isPaused, progress,
+    currentItem,
+    playerState,
+    queueMode,
+    position,
+    duration,
+    isKillSwitchActive,
+    lastUpdate,
+    isPlaying,
+    isPaused,
+    progress,
     handleSSEEvent,
-  }
-})
+  };
+});
 ```
 
 ---
@@ -167,20 +174,20 @@ export const usePlayerStore = defineStore('player', () => {
 
 The SSE composable does **not** replace TanStack Query. Instead:
 
-| Data | Source | Reason |
-|------|--------|--------|
-| Player state | SSE → Pinia store | Real-time, push |
-| Queue list | TanStack Query | Paginated, cached |
+| Data              | Source                           | Reason                             |
+| ----------------- | -------------------------------- | ---------------------------------- |
+| Player state      | SSE → Pinia store                | Real-time, push                    |
+| Queue list        | TanStack Query                   | Paginated, cached                  |
 | Item-added events | SSE → Toast + Query invalidation | Real-time "@user added Song" toast |
-| Analytics | TanStack Query | Polled, admin-only |
-| Policies | TanStack Query | Rarely changes |
-| Audit log | TanStack Query | On-demand fetch |
+| Analytics         | TanStack Query                   | Polled, admin-only                 |
+| Policies          | TanStack Query                   | Rarely changes                     |
+| Audit log         | TanStack Query                   | On-demand fetch                    |
 
 When SSE receives `queue-updated`, it **invalidates** the TanStack Query cache:
 
 ```typescript
-const queryClient = useQueryClient()
-queryClient.invalidateQueries({ queryKey: ['queue'] })
+const queryClient = useQueryClient();
+queryClient.invalidateQueries({ queryKey: ["queue"] });
 ```
 
 This triggers a refetch only if the component is currently mounted and watching that query.
@@ -192,13 +199,13 @@ This triggers a refetch only if the component is currently mounted and watching 
 If SSE fails to connect after 3 retries, fall back to polling:
 
 ```typescript
-const POLL_INTERVAL = 5_000 // 5 seconds
+const POLL_INTERVAL = 5_000; // 5 seconds
 
 function startPolling() {
   pollTimer = setInterval(async () => {
-    const state = await api.getNowPlaying()
-    handleSSEEvent({ type: 'state-changed', data: state })
-  }, POLL_INTERVAL)
+    const state = await api.getNowPlaying();
+    handleSSEEvent({ type: "state-changed", data: state });
+  }, POLL_INTERVAL);
 }
 ```
 

@@ -20,19 +20,19 @@ The project lives at `projects/media-platform/frontend/` and follows the same te
 
 ## Tech Stack
 
-| Tool | Version | Purpose |
-|------|---------|---------|
-| Vue 3 | 3.5+ | UI framework |
-| Vite | 6+ | Build tool |
-| TypeScript | 5.5+ | Type safety |
-| TailwindCSS v4 | 4+ | Utility CSS |
-| shadcn-vue (new-york) | latest | Component library |
-| Pinia | 3+ | State management |
-| TanStack Vue Query | 5+ | Server state / caching |
-| Vue Router | 4+ | Client-side routing |
-| Orval | latest | OpenAPI → generated API client |
-| keycloak-js | 26+ | Auth |
-| pnpm | 10+ | Package manager |
+| Tool                  | Version | Purpose                        |
+| --------------------- | ------- | ------------------------------ |
+| Vue 3                 | 3.5+    | UI framework                   |
+| Vite                  | 6+      | Build tool                     |
+| TypeScript            | 5.5+    | Type safety                    |
+| TailwindCSS v4        | 4+      | Utility CSS                    |
+| shadcn-vue (new-york) | latest  | Component library              |
+| Pinia                 | 3+      | State management               |
+| TanStack Vue Query    | 5+      | Server state / caching         |
+| Vue Router            | 4+      | Client-side routing            |
+| Orval                 | latest  | OpenAPI → generated API client |
+| keycloak-js           | 26+     | Auth                           |
+| pnpm                  | 10+     | Package manager                |
 
 ---
 
@@ -103,15 +103,16 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        main: resolve(__dirname, 'index.html'),
-        tv: resolve(__dirname, 'tv.html'),
+        main: resolve(__dirname, "index.html"),
+        tv: resolve(__dirname, "tv.html"),
       },
     },
   },
-})
+});
 ```
 
 **Benefits of shared project:**
+
 - `useSSE` composable reused by both SPA and TV
 - Orval-generated API client shared
 - Shared TypeScript types and utilities

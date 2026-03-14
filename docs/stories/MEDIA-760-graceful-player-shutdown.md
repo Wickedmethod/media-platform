@@ -45,12 +45,12 @@ No crash alert triggered
 
 ## Shutdown vs. Crash — How the API Differentiates
 
-| Scenario | API sees | Player status | Alert? |
-|----------|----------|---------------|--------|
-| **Graceful shutdown** | `POST /worker/disconnect` with `reason: "shutdown"` | `offline` | No |
-| **Unexpected crash** | Heartbeat timeout (no disconnect call) | `unreachable` | Yes |
-| **Network loss** | Heartbeat timeout (no disconnect call) | `unreachable` | Yes |
-| **Manual restart** | Disconnect → re-register within timeout | `offline` → `online` | No |
+| Scenario              | API sees                                            | Player status        | Alert? |
+| --------------------- | --------------------------------------------------- | -------------------- | ------ |
+| **Graceful shutdown** | `POST /worker/disconnect` with `reason: "shutdown"` | `offline`            | No     |
+| **Unexpected crash**  | Heartbeat timeout (no disconnect call)              | `unreachable`        | Yes    |
+| **Network loss**      | Heartbeat timeout (no disconnect call)              | `unreachable`        | Yes    |
+| **Manual restart**    | Disconnect → re-register within timeout             | `offline` → `online` | No     |
 
 ---
 
@@ -60,52 +60,52 @@ No crash alert triggered
 
 ```typescript
 // player/src/shutdown.ts
-import { playerApi } from './api-client'
-import { logBuffer } from './log-buffer'
-import { playbackState } from './playback'
+import { playerApi } from "./api-client";
+import { logBuffer } from "./log-buffer";
+import { playbackState } from "./playback";
 
-let isShuttingDown = false
+let isShuttingDown = false;
 
 export function registerShutdownHandlers() {
-  const signals: NodeJS.Signals[] = ['SIGTERM', 'SIGINT', 'SIGHUP']
+  const signals: NodeJS.Signals[] = ["SIGTERM", "SIGINT", "SIGHUP"];
 
   for (const signal of signals) {
-    process.on(signal, () => gracefulShutdown(signal))
+    process.on(signal, () => gracefulShutdown(signal));
   }
 }
 
 async function gracefulShutdown(signal: string) {
-  if (isShuttingDown) return
-  isShuttingDown = true
+  if (isShuttingDown) return;
+  isShuttingDown = true;
 
-  console.log(`[shutdown] Received ${signal}, starting graceful shutdown...`)
+  console.log(`[shutdown] Received ${signal}, starting graceful shutdown...`);
 
   const timeout = setTimeout(() => {
-    console.error('[shutdown] Timeout reached, forcing exit')
-    process.exit(1)
-  }, 10_000) // 10s max for cleanup
+    console.error("[shutdown] Timeout reached, forcing exit");
+    process.exit(1);
+  }, 10_000); // 10s max for cleanup
 
   try {
     // 1. Save current playback position
     if (playbackState.isPlaying) {
-      await playerApi.reportPosition(playbackState.position)
+      await playerApi.reportPosition(playbackState.position);
     }
 
     // 2. Flush pending logs
-    await logBuffer.flush()
+    await logBuffer.flush();
 
     // 3. Notify API of planned disconnect
-    await playerApi.disconnect({ reason: 'shutdown', signal })
+    await playerApi.disconnect({ reason: "shutdown", signal });
 
     // 4. Close SSE connection
-    playerApi.closeEventStream()
+    playerApi.closeEventStream();
 
-    console.log('[shutdown] Clean shutdown complete')
+    console.log("[shutdown] Clean shutdown complete");
   } catch (err) {
-    console.error('[shutdown] Error during cleanup:', err)
+    console.error("[shutdown] Error during cleanup:", err);
   } finally {
-    clearTimeout(timeout)
-    process.exit(0)
+    clearTimeout(timeout);
+    process.exit(0);
   }
 }
 ```

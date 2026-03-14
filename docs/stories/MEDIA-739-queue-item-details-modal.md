@@ -55,16 +55,21 @@ Tapping a queue item opens a details modal showing full metadata: title, URL, du
 ```vue
 <!-- src/features/queue/QueueItemModal.vue -->
 <script setup lang="ts">
-import { Dialog, DialogContent, DialogHeader } from '@/shared/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+} from "@/shared/components/ui/dialog";
 
-const props = defineProps<{ item: QueueItem; isAdmin: boolean }>()
-const emit = defineEmits<{ close: [] }>()
+const props = defineProps<{ item: QueueItem; isAdmin: boolean }>();
+const emit = defineEmits<{ close: [] }>();
 
-const thumbnailUrl = computed(() =>
-  `https://img.youtube.com/vi/${extractVideoId(props.item.url)}/mqdefault.jpg`
-)
+const thumbnailUrl = computed(
+  () =>
+    `https://img.youtube.com/vi/${extractVideoId(props.item.url)}/mqdefault.jpg`,
+);
 
-const addedAgo = computed(() => formatRelativeTime(props.item.addedAt))
+const addedAgo = computed(() => formatRelativeTime(props.item.addedAt));
 </script>
 
 <template>
@@ -78,13 +83,15 @@ const addedAgo = computed(() => formatRelativeTime(props.item.addedAt))
       <div class="space-y-2 text-sm text-muted-foreground">
         <p>🔗 {{ item.url }}</p>
         <p>⏱ {{ formatDuration(item.duration) }}</p>
-        <p>👤 Added by {{ item.addedByName ?? 'Unknown' }}</p>
+        <p>👤 Added by {{ item.addedByName ?? "Unknown" }}</p>
         <p>🕐 {{ addedAgo }}</p>
       </div>
 
       <div v-if="isAdmin" class="flex gap-2 mt-4">
         <Button @click="playNext(item.id)">▶ Play Next</Button>
-        <Button variant="destructive" @click="removeItem(item.id)">🗑 Remove</Button>
+        <Button variant="destructive" @click="removeItem(item.id)"
+          >🗑 Remove</Button
+        >
       </div>
     </DialogContent>
   </Dialog>

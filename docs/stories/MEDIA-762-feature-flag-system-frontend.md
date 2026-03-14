@@ -34,41 +34,41 @@ Flag Resolution Order (first match wins):
 ```typescript
 // src/config/flags.config.ts
 export interface FeatureFlag {
-  key: string
-  description: string
-  defaultValue: boolean
+  key: string;
+  description: string;
+  defaultValue: boolean;
   /** When true, flag is available for localStorage override */
-  overridable: boolean
+  overridable: boolean;
 }
 
 export const FLAGS = {
   newSearch: {
-    key: 'ff_newSearch',
-    description: 'New Invidious search UI with filters',
+    key: "ff_newSearch",
+    description: "New Invidious search UI with filters",
     defaultValue: false,
     overridable: true,
   },
   dragReorder: {
-    key: 'ff_dragReorder',
-    description: 'Drag & drop queue reordering',
+    key: "ff_dragReorder",
+    description: "Drag & drop queue reordering",
     defaultValue: false,
     overridable: true,
   },
   adminDashboard: {
-    key: 'ff_adminDashboard',
-    description: 'Admin dashboard with analytics',
+    key: "ff_adminDashboard",
+    description: "Admin dashboard with analytics",
     defaultValue: true,
     overridable: true,
   },
   multiDevice: {
-    key: 'ff_multiDevice',
-    description: 'Multi-device personal playback sessions (v2)',
+    key: "ff_multiDevice",
+    description: "Multi-device personal playback sessions (v2)",
     defaultValue: false,
     overridable: false,
   },
-} as const satisfies Record<string, FeatureFlag>
+} as const satisfies Record<string, FeatureFlag>;
 
-export type FlagKey = keyof typeof FLAGS
+export type FlagKey = keyof typeof FLAGS;
 ```
 
 ---
@@ -77,62 +77,62 @@ export type FlagKey = keyof typeof FLAGS
 
 ```typescript
 // src/composables/useFeatureFlags.ts
-import { computed, ref, watch } from 'vue'
-import { FLAGS, type FlagKey } from '@/config/flags.config'
+import { computed, ref, watch } from "vue";
+import { FLAGS, type FlagKey } from "@/config/flags.config";
 
-const overrides = ref<Record<string, boolean>>(loadOverrides())
+const overrides = ref<Record<string, boolean>>(loadOverrides());
 
 function loadOverrides(): Record<string, boolean> {
   try {
-    const stored = localStorage.getItem('feature-flags')
-    return stored ? JSON.parse(stored) : {}
+    const stored = localStorage.getItem("feature-flags");
+    return stored ? JSON.parse(stored) : {};
   } catch {
-    return {}
+    return {};
   }
 }
 
 function saveOverrides() {
-  localStorage.setItem('feature-flags', JSON.stringify(overrides.value))
+  localStorage.setItem("feature-flags", JSON.stringify(overrides.value));
 }
 
 export function useFeatureFlags() {
   function isEnabled(flag: FlagKey): boolean {
-    const config = FLAGS[flag]
+    const config = FLAGS[flag];
 
     // 1. Check localStorage override
     if (config.overridable && config.key in overrides.value) {
-      return overrides.value[config.key]
+      return overrides.value[config.key];
     }
 
     // 2. Check URL query param (dev convenience)
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search)
-      const urlValue = params.get(config.key)
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const urlValue = params.get(config.key);
       if (urlValue !== null) {
-        return urlValue === 'true' || urlValue === '1'
+        return urlValue === "true" || urlValue === "1";
       }
     }
 
     // 3. Build-time default
-    return config.defaultValue
+    return config.defaultValue;
   }
 
   function setOverride(flag: FlagKey, value: boolean) {
-    const config = FLAGS[flag]
-    if (!config.overridable) return
+    const config = FLAGS[flag];
+    if (!config.overridable) return;
 
-    overrides.value[config.key] = value
-    saveOverrides()
+    overrides.value[config.key] = value;
+    saveOverrides();
   }
 
   function clearOverride(flag: FlagKey) {
-    delete overrides.value[FLAGS[flag].key]
-    saveOverrides()
+    delete overrides.value[FLAGS[flag].key];
+    saveOverrides();
   }
 
   function clearAllOverrides() {
-    overrides.value = {}
-    saveOverrides()
+    overrides.value = {};
+    saveOverrides();
   }
 
   return {
@@ -141,7 +141,7 @@ export function useFeatureFlags() {
     clearOverride,
     clearAllOverrides,
     flags: FLAGS,
-  }
+  };
 }
 ```
 
@@ -158,7 +158,7 @@ export function useFeatureFlags() {
 </template>
 
 <script setup lang="ts">
-const { isEnabled } = useFeatureFlags()
+const { isEnabled } = useFeatureFlags();
 </script>
 ```
 
@@ -189,7 +189,11 @@ A hidden panel accessible via `/admin/flags` (or keyboard shortcut `Ctrl+Shift+F
 <template>
   <div class="space-y-4 p-6">
     <h2 class="text-lg font-semibold">Feature Flags</h2>
-    <div v-for="(config, key) in flags" :key="key" class="flex items-center justify-between">
+    <div
+      v-for="(config, key) in flags"
+      :key="key"
+      class="flex items-center justify-between"
+    >
       <div>
         <p class="font-medium">{{ key }}</p>
         <p class="text-sm text-muted-foreground">{{ config.description }}</p>
@@ -200,7 +204,9 @@ A hidden panel accessible via `/admin/flags` (or keyboard shortcut `Ctrl+Shift+F
         @update:checked="(val: boolean) => setOverride(key as FlagKey, val)"
       />
     </div>
-    <Button variant="outline" size="sm" @click="clearAllOverrides">Reset All</Button>
+    <Button variant="outline" size="sm" @click="clearAllOverrides"
+      >Reset All</Button
+    >
   </div>
 </template>
 ```

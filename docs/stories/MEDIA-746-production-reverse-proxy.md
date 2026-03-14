@@ -83,11 +83,11 @@ media.homelab.local {
 
 Server-Sent Events require special proxy configuration:
 
-| Setting | Value | Reason |
-|---------|-------|--------|
-| `flush_interval` | `-1` | Flush immediately, don't buffer |
-| `read_timeout` | `0` | No timeout, keep connection open |
-| Response buffering | Disabled | SSE is a stream, not a response |
+| Setting            | Value    | Reason                           |
+| ------------------ | -------- | -------------------------------- |
+| `flush_interval`   | `-1`     | Flush immediately, don't buffer  |
+| `read_timeout`     | `0`      | No timeout, keep connection open |
+| Response buffering | Disabled | SSE is a stream, not a response  |
 
 Without these, SSE events are buffered by the proxy and delivered in batches.
 

@@ -106,13 +106,13 @@ public record QueueItem
 
 ## Enrichment Strategy
 
-| Scenario | Behavior |
-|----------|----------|
-| User provides URL only | Fetch metadata from Invidious |
-| User provides URL + title | Keep user's title, fetch remaining fields |
-| Invidious unavailable | Store item without metadata (graceful degradation) |
-| Invalid videoId | Return 400 (after URL validation in MEDIA-749) |
-| Timeout (>3s) | Skip enrichment, log warning |
+| Scenario                  | Behavior                                           |
+| ------------------------- | -------------------------------------------------- |
+| User provides URL only    | Fetch metadata from Invidious                      |
+| User provides URL + title | Keep user's title, fetch remaining fields          |
+| Invidious unavailable     | Store item without metadata (graceful degradation) |
+| Invalid videoId           | Return 400 (after URL validation in MEDIA-749)     |
+| Timeout (>3s)             | Skip enrichment, log warning                       |
 
 ### Caching
 

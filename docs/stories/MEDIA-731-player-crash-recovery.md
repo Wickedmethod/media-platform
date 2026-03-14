@@ -43,10 +43,10 @@ The TV app persists minimal state to `localStorage` for crash recovery:
 
 ```typescript
 interface PersistedState {
-  lastVideoId: string | null
-  lastPosition: number
-  lastState: PlayerState
-  timestamp: number // when this was saved
+  lastVideoId: string | null;
+  lastPosition: number;
+  lastState: PlayerState;
+  timestamp: number; // when this was saved
 }
 
 // Save every 10s while playing
@@ -56,8 +56,8 @@ function persistState() {
     lastPosition: playerStore.position,
     lastState: playerStore.playerState,
     timestamp: Date.now(),
-  }
-  localStorage.setItem('tv-state', JSON.stringify(state))
+  };
+  localStorage.setItem("tv-state", JSON.stringify(state));
 }
 ```
 
@@ -69,22 +69,28 @@ On startup, compare local persisted state with server state from `/sync`:
 
 ```typescript
 async function reconcile() {
-  const local = loadPersistedState()
-  const server = await fetch('/sync').then(r => r.json())
+  const local = loadPersistedState();
+  const server = await fetch("/sync").then((r) => r.json());
 
   if (!server.nowPlaying.currentItem) {
     // Server is idle — show idle screen
-    return showIdle()
+    return showIdle();
   }
 
-  if (server.nowPlaying.state === 'Playing') {
+  if (server.nowPlaying.state === "Playing") {
     // Resume playback at server's position
-    return playVideo(server.nowPlaying.currentItem.videoId, server.nowPlaying.position)
+    return playVideo(
+      server.nowPlaying.currentItem.videoId,
+      server.nowPlaying.position,
+    );
   }
 
-  if (server.nowPlaying.state === 'Paused') {
+  if (server.nowPlaying.state === "Paused") {
     // Load video but don't auto-play
-    return loadVideo(server.nowPlaying.currentItem.videoId, server.nowPlaying.position)
+    return loadVideo(
+      server.nowPlaying.currentItem.videoId,
+      server.nowPlaying.position,
+    );
   }
 }
 ```
@@ -94,22 +100,22 @@ async function reconcile() {
 ## SSE Reconnect with Exponential Backoff
 
 ```typescript
-const MAX_RETRIES = 10
-const BASE_DELAY = 1000 // 1s
-const MAX_DELAY = 30000 // 30s
+const MAX_RETRIES = 10;
+const BASE_DELAY = 1000; // 1s
+const MAX_DELAY = 30000; // 30s
 
 function connectSSE(retryCount = 0) {
-  const source = new EventSource('/events')
+  const source = new EventSource("/events");
 
   source.onopen = () => {
-    retryCount = 0 // Reset on success
-  }
+    retryCount = 0; // Reset on success
+  };
 
   source.onerror = () => {
-    source.close()
-    const delay = Math.min(BASE_DELAY * 2 ** retryCount, MAX_DELAY)
-    setTimeout(() => connectSSE(retryCount + 1), delay)
-  }
+    source.close();
+    const delay = Math.min(BASE_DELAY * 2 ** retryCount, MAX_DELAY);
+    setTimeout(() => connectSSE(retryCount + 1), delay);
+  };
 }
 ```
 
@@ -119,13 +125,13 @@ After `MAX_RETRIES`, fall back to polling `/sync` every 10s.
 
 ## Crash Detection Signals
 
-| Signal | How Detected | Recovery Action |
-|--------|-------------|-----------------|
-| Chromium crash | systemd restarts it | Full recovery flow |
-| Network drop | SSE `onerror` | Reconnect + `/sync` |
-| API restart | SSE connection drops | Reconnect + `/sync` |
-| Power loss | Pi reboots | Full recovery flow |
-| JavaScript error | `window.onerror` | Log + attempt recovery |
+| Signal           | How Detected         | Recovery Action        |
+| ---------------- | -------------------- | ---------------------- |
+| Chromium crash   | systemd restarts it  | Full recovery flow     |
+| Network drop     | SSE `onerror`        | Reconnect + `/sync`    |
+| API restart      | SSE connection drops | Reconnect + `/sync`    |
+| Power loss       | Pi reboots           | Full recovery flow     |
+| JavaScript error | `window.onerror`     | Log + attempt recovery |
 
 ---
 

@@ -18,13 +18,13 @@ Protect the queue against race conditions when multiple users mutate state simul
 
 ## Race Condition Scenarios
 
-| Scenario | Risk | Solution |
-|----------|------|----------|
-| Two users skip at the same time | Double-skip (skips 2 tracks) | Lua script: atomic check-and-advance |
-| User adds item while admin reorders | Item inserted at wrong position | Queue version + optimistic lock |
-| User deletes item that's currently playing | Now-playing points to deleted item | Atomic delete-and-advance |
-| Two users add at the same time | Duplicate position numbers | Redis RPUSH (naturally atomic append) |
-| Admin toggles kill switch during playback | Partial state (playing + killed) | Lua script: atomic state transition |
+| Scenario                                   | Risk                               | Solution                              |
+| ------------------------------------------ | ---------------------------------- | ------------------------------------- |
+| Two users skip at the same time            | Double-skip (skips 2 tracks)       | Lua script: atomic check-and-advance  |
+| User adds item while admin reorders        | Item inserted at wrong position    | Queue version + optimistic lock       |
+| User deletes item that's currently playing | Now-playing points to deleted item | Atomic delete-and-advance             |
+| Two users add at the same time             | Duplicate position numbers         | Redis RPUSH (naturally atomic append) |
+| Admin toggles kill switch during playback  | Partial state (playing + killed)   | Lua script: atomic state transition   |
 
 ---
 

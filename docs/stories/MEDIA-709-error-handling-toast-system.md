@@ -42,16 +42,20 @@ ToastContainer (renders toasts)
 Toasts are triggered from two sources:
 
 ### 1. API Error Toasts (automatic)
+
 All API errors surface as toasts via the global error handler (see below).
 
 ### 2. SSE Event Toasts (real-time)
+
 When another user adds a song, all connected clients see a toast:
+
 ```
 ┌──────────────────────────────┐
 │ 🎵 @jonas added a song       │
 │ Bohemian Rhapsody — Queen    │
 └──────────────────────────────┘
 ```
+
 This is triggered by the `item-added` SSE event in `usePlayerStore` (see MEDIA-704).
 
 ---
@@ -61,41 +65,41 @@ This is triggered by the `item-added` SSE event in `usePlayerStore` (see MEDIA-7
 ```typescript
 // src/composables/useToast.ts
 interface Toast {
-  id: string
-  type: 'success' | 'error' | 'warning' | 'info'
-  title: string
-  message?: string
-  duration?: number    // ms, default 5000. 0 = persistent
-  action?: { label: string; onClick: () => void }
+  id: string;
+  type: "success" | "error" | "warning" | "info";
+  title: string;
+  message?: string;
+  duration?: number; // ms, default 5000. 0 = persistent
+  action?: { label: string; onClick: () => void };
 }
 
-const toasts = ref<Toast[]>([])
+const toasts = ref<Toast[]>([]);
 
 export function useToast() {
-  function show(toast: Omit<Toast, 'id'>) {
-    const id = crypto.randomUUID()
-    toasts.value.push({ ...toast, id })
+  function show(toast: Omit<Toast, "id">) {
+    const id = crypto.randomUUID();
+    toasts.value.push({ ...toast, id });
 
     if (toast.duration !== 0) {
-      setTimeout(() => dismiss(id), toast.duration ?? 5000)
+      setTimeout(() => dismiss(id), toast.duration ?? 5000);
     }
   }
 
   function dismiss(id: string) {
-    toasts.value = toasts.value.filter(t => t.id !== id)
+    toasts.value = toasts.value.filter((t) => t.id !== id);
   }
 
   // Convenience methods
   const success = (title: string, message?: string) =>
-    show({ type: 'success', title, message })
+    show({ type: "success", title, message });
 
   const error = (title: string, message?: string) =>
-    show({ type: 'error', title, message, duration: 8000 })
+    show({ type: "error", title, message, duration: 8000 });
 
   const warning = (title: string, message?: string) =>
-    show({ type: 'warning', title, message })
+    show({ type: "warning", title, message });
 
-  return { toasts: readonly(toasts), show, dismiss, success, error, warning }
+  return { toasts: readonly(toasts), show, dismiss, success, error, warning };
 }
 ```
 
@@ -110,31 +114,45 @@ export class ApiError extends Error {
     public status: number,
     public body: { detail?: string; errors?: Record<string, string[]> },
   ) {
-    super(body.detail ?? `HTTP ${status}`)
+    super(body.detail ?? `HTTP ${status}`);
   }
 
-  get isValidation() { return this.status === 400 }
-  get isUnauthorized() { return this.status === 401 }
-  get isForbidden() { return this.status === 403 }
-  get isNotFound() { return this.status === 404 }
-  get isConflict() { return this.status === 409 }
-  get isRateLimited() { return this.status === 429 }
-  get isServerError() { return this.status >= 500 }
+  get isValidation() {
+    return this.status === 400;
+  }
+  get isUnauthorized() {
+    return this.status === 401;
+  }
+  get isForbidden() {
+    return this.status === 403;
+  }
+  get isNotFound() {
+    return this.status === 404;
+  }
+  get isConflict() {
+    return this.status === 409;
+  }
+  get isRateLimited() {
+    return this.status === 429;
+  }
+  get isServerError() {
+    return this.status >= 500;
+  }
 }
 ```
 
 ### Error → Toast Mapping
 
-| HTTP Status | Toast Type | Message | Action |
-|-------------|-----------|---------|--------|
-| 400 | `warning` | Validation details from `errors` field | — |
-| 401 | `error` | "Session expired" | "Log in" → redirect |
-| 403 | `error` | "Not authorized for this action" | — |
-| 404 | `warning` | "Item not found" | — |
-| 409 | `warning` | "Conflict — item already exists" | — |
-| 429 | `warning` | "Too many requests. Retry in {n}s" | Auto-retry button |
-| 500+ | `error` | "Server error. Try again later." | "Retry" button |
-| Network | `error` | "No connection to server" | "Retry" button |
+| HTTP Status | Toast Type | Message                                | Action              |
+| ----------- | ---------- | -------------------------------------- | ------------------- |
+| 400         | `warning`  | Validation details from `errors` field | —                   |
+| 401         | `error`    | "Session expired"                      | "Log in" → redirect |
+| 403         | `error`    | "Not authorized for this action"       | —                   |
+| 404         | `warning`  | "Item not found"                       | —                   |
+| 409         | `warning`  | "Conflict — item already exists"       | —                   |
+| 429         | `warning`  | "Too many requests. Retry in {n}s"     | Auto-retry button   |
+| 500+        | `error`    | "Server error. Try again later."       | "Retry" button      |
+| Network     | `error`    | "No connection to server"              | "Retry" button      |
 
 ---
 
@@ -143,56 +161,59 @@ export class ApiError extends Error {
 ```typescript
 // src/plugins/error-handler.ts
 export function setupGlobalErrorHandler(app: App) {
-  const { error: showError } = useToast()
+  const { error: showError } = useToast();
 
   // Vue error boundary
   app.config.errorHandler = (err, instance, info) => {
-    console.error('Vue error:', err, info)
-    showError('Something went wrong', err instanceof Error ? err.message : 'Unknown error')
-  }
+    console.error("Vue error:", err, info);
+    showError(
+      "Something went wrong",
+      err instanceof Error ? err.message : "Unknown error",
+    );
+  };
 
   // Unhandled promise rejections
-  window.addEventListener('unhandledrejection', (event) => {
+  window.addEventListener("unhandledrejection", (event) => {
     if (event.reason instanceof ApiError) {
-      handleApiError(event.reason)
-      event.preventDefault() // Don't pollute console
+      handleApiError(event.reason);
+      event.preventDefault(); // Don't pollute console
     }
-  })
+  });
 }
 
 function handleApiError(err: ApiError) {
-  const { error: showError, warning: showWarning } = useToast()
-  const authStore = useAuthStore()
+  const { error: showError, warning: showWarning } = useToast();
+  const authStore = useAuthStore();
 
   if (err.isUnauthorized) {
-    showError('Session expired', 'Please log in again')
-    authStore.logout()
-    return
+    showError("Session expired", "Please log in again");
+    authStore.logout();
+    return;
   }
 
   if (err.isRateLimited) {
-    const retryAfter = parseInt(err.body.detail?.match(/\d+/)?.[0] ?? '5')
-    showWarning('Too many requests', `Try again in ${retryAfter} seconds`)
-    return
+    const retryAfter = parseInt(err.body.detail?.match(/\d+/)?.[0] ?? "5");
+    showWarning("Too many requests", `Try again in ${retryAfter} seconds`);
+    return;
   }
 
   if (err.isForbidden) {
-    showError('Not authorized', 'You don\'t have permission for this action')
-    return
+    showError("Not authorized", "You don't have permission for this action");
+    return;
   }
 
   if (err.isServerError) {
-    showError('Server error', 'Something went wrong. Try again later.')
-    return
+    showError("Server error", "Something went wrong. Try again later.");
+    return;
   }
 
   if (err.isValidation && err.body.errors) {
-    const messages = Object.values(err.body.errors).flat().join(', ')
-    showWarning('Validation error', messages)
-    return
+    const messages = Object.values(err.body.errors).flat().join(", ");
+    showWarning("Validation error", messages);
+    return;
   }
 
-  showError('Error', err.message)
+  showError("Error", err.message);
 }
 ```
 
@@ -217,12 +238,20 @@ Using shadcn-vue Toast (or Sonner):
           ]"
         >
           <div class="flex items-start gap-3">
-            <component :is="typeIcons[toast.type]" class="h-5 w-5 shrink-0 mt-0.5" />
+            <component
+              :is="typeIcons[toast.type]"
+              class="h-5 w-5 shrink-0 mt-0.5"
+            />
             <div class="flex-1 min-w-0">
               <p class="font-medium text-sm">{{ toast.title }}</p>
-              <p v-if="toast.message" class="text-xs mt-1 opacity-80">{{ toast.message }}</p>
+              <p v-if="toast.message" class="text-xs mt-1 opacity-80">
+                {{ toast.message }}
+              </p>
             </div>
-            <button @click="dismiss(toast.id)" class="shrink-0 opacity-50 hover:opacity-100">
+            <button
+              @click="dismiss(toast.id)"
+              class="shrink-0 opacity-50 hover:opacity-100"
+            >
               <X class="h-4 w-4" />
             </button>
           </div>
@@ -242,12 +271,12 @@ Using shadcn-vue Toast (or Sonner):
 
 ### Style by Type
 
-| Type | Background | Border | Icon |
-|------|-----------|--------|------|
-| `success` | `bg-emerald-500/10` | `border-emerald-500/20` | CheckCircle |
-| `error` | `bg-red-500/10` | `border-red-500/20` | AlertCircle |
-| `warning` | `bg-amber-500/10` | `border-amber-500/20` | AlertTriangle |
-| `info` | `bg-blue-500/10` | `border-blue-500/20` | Info |
+| Type      | Background          | Border                  | Icon          |
+| --------- | ------------------- | ----------------------- | ------------- |
+| `success` | `bg-emerald-500/10` | `border-emerald-500/20` | CheckCircle   |
+| `error`   | `bg-red-500/10`     | `border-red-500/20`     | AlertCircle   |
+| `warning` | `bg-amber-500/10`   | `border-amber-500/20`   | AlertTriangle |
+| `info`    | `bg-blue-500/10`    | `border-blue-500/20`    | Info          |
 
 ---
 
@@ -260,10 +289,13 @@ export const queryClient = new QueryClient({
     queries: {
       retry: (failureCount, error) => {
         // Don't retry auth errors
-        if (error instanceof ApiError && (error.isUnauthorized || error.isForbidden)) {
-          return false
+        if (
+          error instanceof ApiError &&
+          (error.isUnauthorized || error.isForbidden)
+        ) {
+          return false;
         }
-        return failureCount < 2
+        return failureCount < 2;
       },
       staleTime: 10_000, // 10s
     },
@@ -271,12 +303,12 @@ export const queryClient = new QueryClient({
       onError: (error) => {
         // Global mutation error handler
         if (error instanceof ApiError) {
-          handleApiError(error)
+          handleApiError(error);
         }
       },
     },
   },
-})
+});
 ```
 
 ---
@@ -288,18 +320,18 @@ Vue's `onErrorCaptured` lifecycle hook enables component-level error boundaries.
 ```vue
 <!-- src/shared/components/ErrorBoundary.vue -->
 <script setup lang="ts">
-import { ref, onErrorCaptured } from 'vue'
-import FallbackError from './FallbackError.vue'
+import { ref, onErrorCaptured } from "vue";
+import FallbackError from "./FallbackError.vue";
 
-const error = ref<Error | null>(null)
+const error = ref<Error | null>(null);
 
 onErrorCaptured((err: Error) => {
-  error.value = err
-  return false // prevent propagation
-})
+  error.value = err;
+  return false; // prevent propagation
+});
 
 function retry() {
-  error.value = null
+  error.value = null;
 }
 </script>
 
@@ -312,12 +344,14 @@ function retry() {
 ```vue
 <!-- src/shared/components/FallbackError.vue -->
 <script setup lang="ts">
-defineProps<{ error: Error }>()
-defineEmits<{ retry: [] }>()
+defineProps<{ error: Error }>();
+defineEmits<{ retry: [] }>();
 </script>
 
 <template>
-  <div class="flex flex-col items-center justify-center min-h-[200px] gap-4 p-8 text-center">
+  <div
+    class="flex flex-col items-center justify-center min-h-[200px] gap-4 p-8 text-center"
+  >
     <AlertCircle class="h-12 w-12 text-destructive" />
     <h2 class="text-lg font-semibold">Something went wrong</h2>
     <p class="text-sm text-muted-foreground max-w-md">{{ error.message }}</p>

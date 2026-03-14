@@ -124,11 +124,12 @@ Vite env vars are baked at build time. For runtime configuration:
 ```typescript
 // src/config.ts
 export const config = {
-  apiBaseUrl: import.meta.env.VITE_API_BASE_URL || '/api',
-  keycloakUrl: import.meta.env.VITE_KEYCLOAK_URL || 'http://keycloak:8080',
-  keycloakRealm: import.meta.env.VITE_KEYCLOAK_REALM || 'media-platform',
-  keycloakClientId: import.meta.env.VITE_KEYCLOAK_CLIENT_ID || 'media-platform-web',
-}
+  apiBaseUrl: import.meta.env.VITE_API_BASE_URL || "/api",
+  keycloakUrl: import.meta.env.VITE_KEYCLOAK_URL || "http://keycloak:8080",
+  keycloakRealm: import.meta.env.VITE_KEYCLOAK_REALM || "media-platform",
+  keycloakClientId:
+    import.meta.env.VITE_KEYCLOAK_CLIENT_ID || "media-platform-web",
+};
 ```
 
 For docker deployment, nginx proxies `/api/` to the backend, so `apiBaseUrl` defaults to `/api` (relative).
@@ -138,13 +139,13 @@ For docker deployment, nginx proxies `/api/` to the backend, so `apiBaseUrl` def
 ## Build Arguments
 
 ```yaml
-  media-platform-web:
-    build:
-      context: ./frontend
-      args:
-        VITE_KEYCLOAK_URL: http://keycloak:8080
-        VITE_KEYCLOAK_REALM: media-platform
-        VITE_KEYCLOAK_CLIENT_ID: media-platform-web
+media-platform-web:
+  build:
+    context: ./frontend
+    args:
+      VITE_KEYCLOAK_URL: http://keycloak:8080
+      VITE_KEYCLOAK_REALM: media-platform
+      VITE_KEYCLOAK_CLIENT_ID: media-platform-web
 ```
 
 ---

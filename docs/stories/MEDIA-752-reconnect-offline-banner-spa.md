@@ -28,8 +28,10 @@ When disconnected, existing data is still visible but marked as potentially stal
 <!-- src/shared/components/StaleDataOverlay.vue -->
 <template>
   <div v-if="!isConnected" class="relative">
-    <div class="absolute inset-0 bg-background/50 backdrop-blur-[1px] z-10
-                flex items-center justify-center pointer-events-none">
+    <div
+      class="absolute inset-0 bg-background/50 backdrop-blur-[1px] z-10
+                flex items-center justify-center pointer-events-none"
+    >
       <Badge variant="outline" class="bg-background pointer-events-auto">
         <WifiOff class="h-3 w-3 mr-1" /> Data may be outdated
       </Badge>
@@ -46,26 +48,26 @@ When disconnected, existing data is still visible but marked as potentially stal
 
 ```typescript
 // src/composables/useOfflineRecovery.ts
-import { watch } from 'vue'
-import { useQueryClient } from '@tanstack/vue-query'
-import { useSSE } from '@/composables/useSSE'
+import { watch } from "vue";
+import { useQueryClient } from "@tanstack/vue-query";
+import { useSSE } from "@/composables/useSSE";
 
 export function useOfflineRecovery() {
-  const { isConnected } = useSSE()
-  const queryClient = useQueryClient()
+  const { isConnected } = useSSE();
+  const queryClient = useQueryClient();
 
   // On reconnect: invalidate all queries to fetch fresh data
   watch(isConnected, (connected, wasConnected) => {
     if (connected && wasConnected === false) {
-      queryClient.invalidateQueries()
+      queryClient.invalidateQueries();
     }
-  })
+  });
 
   function manualRetry() {
-    queryClient.invalidateQueries()
+    queryClient.invalidateQueries();
   }
 
-  return { manualRetry }
+  return { manualRetry };
 }
 ```
 
@@ -74,9 +76,11 @@ export function useOfflineRecovery() {
 ```vue
 <!-- ConnectionStatusBar extended state -->
 <template>
-  <div v-if="state === 'disconnected'"
-       class="fixed top-0 inset-x-0 z-50 bg-destructive/95 text-destructive-foreground
-              flex items-center justify-between px-4 py-2 text-sm">
+  <div
+    v-if="state === 'disconnected'"
+    class="fixed top-0 inset-x-0 z-50 bg-destructive/95 text-destructive-foreground
+              flex items-center justify-between px-4 py-2 text-sm"
+  >
     <div class="flex items-center gap-2">
       <WifiOff class="h-4 w-4" />
       <span>You're offline. Changes won't be saved.</span>
@@ -95,29 +99,34 @@ export function useOfflineRecovery() {
 
 ```typescript
 // src/composables/useNetworkStatus.ts
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from "vue";
 
 export function useNetworkStatus() {
-  const isOnline = ref(navigator.onLine)
+  const isOnline = ref(navigator.onLine);
 
-  function handleOnline() { isOnline.value = true }
-  function handleOffline() { isOnline.value = false }
+  function handleOnline() {
+    isOnline.value = true;
+  }
+  function handleOffline() {
+    isOnline.value = false;
+  }
 
   onMounted(() => {
-    window.addEventListener('online', handleOnline)
-    window.addEventListener('offline', handleOffline)
-  })
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+  });
 
   onUnmounted(() => {
-    window.removeEventListener('online', handleOnline)
-    window.removeEventListener('offline', handleOffline)
-  })
+    window.removeEventListener("online", handleOnline);
+    window.removeEventListener("offline", handleOffline);
+  });
 
-  return { isOnline }
+  return { isOnline };
 }
 ```
 
 Combine with SSE status for full picture:
+
 - `navigator.onLine === false` → definitely offline
 - SSE disconnected + navigator.onLine → API might be down
 
@@ -125,12 +134,12 @@ Combine with SSE status for full picture:
 
 ## Data Freshness
 
-| Data Source | Offline Behavior |
-|-------------|-----------------|
-| Queue list | Show cached, mark stale |
-| Now playing | Show last known state |
-| Admin dashboard | Show cached stats |
-| Search results | Show "Search unavailable offline" |
+| Data Source     | Offline Behavior                             |
+| --------------- | -------------------------------------------- |
+| Queue list      | Show cached, mark stale                      |
+| Now playing     | Show last known state                        |
+| Admin dashboard | Show cached stats                            |
+| Search results  | Show "Search unavailable offline"            |
 | Player commands | Disable buttons, show "Reconnect to control" |
 
 ---

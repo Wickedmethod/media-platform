@@ -19,17 +19,17 @@ Create a centralized environment configuration schema with `.env.example` files,
 
 ## Configuration Categories
 
-| Category | Example Variables | Where Used |
-|----------|------------------|-----------|
-| **API** | `ASPNETCORE_URLS`, `ASPNETCORE_ENVIRONMENT` | API container |
-| **Redis** | `Redis__ConnectionString`, `Redis__InstanceName` | API → Redis |
-| **Keycloak** | `Keycloak__Authority`, `Keycloak__ClientId`, `Keycloak__Audience` | API auth |
-| **CORS** | `Cors__AllowedOrigins` | API CORS policy |
-| **Worker** | `WorkerAuth__Key` | API ↔ Pi auth |
-| **Frontend** | `VITE_API_URL`, `VITE_KEYCLOAK_URL`, `VITE_KEYCLOAK_REALM` | Vue build |
-| **TV** | `VITE_API_URL` (shared) | TV Vue entry |
-| **Alerting** | `Alerting__Discord__WebhookUrl` | Alert dispatcher |
-| **Metrics** | `Metrics__Enabled` | Prometheus export |
+| Category     | Example Variables                                                 | Where Used        |
+| ------------ | ----------------------------------------------------------------- | ----------------- |
+| **API**      | `ASPNETCORE_URLS`, `ASPNETCORE_ENVIRONMENT`                       | API container     |
+| **Redis**    | `Redis__ConnectionString`, `Redis__InstanceName`                  | API → Redis       |
+| **Keycloak** | `Keycloak__Authority`, `Keycloak__ClientId`, `Keycloak__Audience` | API auth          |
+| **CORS**     | `Cors__AllowedOrigins`                                            | API CORS policy   |
+| **Worker**   | `WorkerAuth__Key`                                                 | API ↔ Pi auth     |
+| **Frontend** | `VITE_API_URL`, `VITE_KEYCLOAK_URL`, `VITE_KEYCLOAK_REALM`        | Vue build         |
+| **TV**       | `VITE_API_URL` (shared)                                           | TV Vue entry      |
+| **Alerting** | `Alerting__Discord__WebhookUrl`                                   | Alert dispatcher  |
+| **Metrics**  | `Metrics__Enabled`                                                | Prometheus export |
 
 ---
 
@@ -148,7 +148,7 @@ builder.Services.Configure<WorkerAuthOptions>(builder.Configuration.GetSection("
 ## Tasks
 
 - [ ] Create `.env.example` in project root with all variables
-- [ ] Create `frontend/.env.example` with VITE_ variables
+- [ ] Create `frontend/.env.example` with VITE\_ variables
 - [ ] Create `.vault-env` for secret mapping
 - [ ] Generate initial secrets in VaultFacade (`worker-key`, `discord-webhook`)
 - [ ] Ensure `.env` is in `.gitignore` (never committed)

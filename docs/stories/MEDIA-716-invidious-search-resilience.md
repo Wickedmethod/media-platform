@@ -36,79 +36,84 @@ Public Invidious instances go down regularly — they're community-run with rate
 ```typescript
 // src/lib/invidious.ts
 const INVIDIOUS_INSTANCES = [
-  'https://vid.puffyan.us',
-  'https://invidious.nerdvpn.de',
-  'https://inv.nadeko.net',
-  'https://invidious.privacyredirect.com',
-  'https://invidious.protokolla.fi',
-]
+  "https://vid.puffyan.us",
+  "https://invidious.nerdvpn.de",
+  "https://inv.nadeko.net",
+  "https://invidious.privacyredirect.com",
+  "https://invidious.protokolla.fi",
+];
 
 interface InstanceState {
-  url: string
-  healthy: boolean
-  lastCheck: number
-  failCount: number
+  url: string;
+  healthy: boolean;
+  lastCheck: number;
+  failCount: number;
 }
 
 class InvidiousClient {
-  private instances: InstanceState[]
-  private currentIndex = 0
+  private instances: InstanceState[];
+  private currentIndex = 0;
 
   constructor(urls: string[]) {
-    this.instances = urls.map(url => ({
-      url, healthy: true, lastCheck: 0, failCount: 0,
-    }))
+    this.instances = urls.map((url) => ({
+      url,
+      healthy: true,
+      lastCheck: 0,
+      failCount: 0,
+    }));
   }
 
   /** Get next healthy instance (round-robin) */
   private getNextInstance(): InstanceState | null {
-    const now = Date.now()
+    const now = Date.now();
     for (let i = 0; i < this.instances.length; i++) {
-      const idx = (this.currentIndex + i) % this.instances.length
-      const inst = this.instances[idx]
+      const idx = (this.currentIndex + i) % this.instances.length;
+      const inst = this.instances[idx];
 
       // Skip unhealthy instances unless 60s cooldown passed
-      if (!inst.healthy && now - inst.lastCheck < 60_000) continue
+      if (!inst.healthy && now - inst.lastCheck < 60_000) continue;
 
-      this.currentIndex = (idx + 1) % this.instances.length
-      return inst
+      this.currentIndex = (idx + 1) % this.instances.length;
+      return inst;
     }
-    return null // All instances down
+    return null; // All instances down
   }
 
   /** Search with automatic failover */
   async search(query: string, maxRetries = 3): Promise<SearchResult[]> {
     for (let attempt = 0; attempt < maxRetries; attempt++) {
-      const instance = this.getNextInstance()
-      if (!instance) break
+      const instance = this.getNextInstance();
+      if (!instance) break;
 
       try {
-        const url = `${instance.url}/api/v1/search?q=${encodeURIComponent(query)}&type=video`
+        const url = `${instance.url}/api/v1/search?q=${encodeURIComponent(query)}&type=video`;
         const response = await fetch(url, {
           signal: AbortSignal.timeout(5000), // 5s timeout per instance
-        })
+        });
 
-        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-        const data = await response.json()
-        instance.healthy = true
-        instance.failCount = 0
-        return data
+        const data = await response.json();
+        instance.healthy = true;
+        instance.failCount = 0;
+        return data;
       } catch {
-        instance.failCount++
-        instance.lastCheck = Date.now()
+        instance.failCount++;
+        instance.lastCheck = Date.now();
         if (instance.failCount >= 3) {
-          instance.healthy = false
+          instance.healthy = false;
         }
         // Try next instance
       }
     }
 
-    throw new InvidiousUnavailableError('All Invidious instances are unavailable')
+    throw new InvidiousUnavailableError(
+      "All Invidious instances are unavailable",
+    );
   }
 }
 
-export const invidiousClient = new InvidiousClient(INVIDIOUS_INSTANCES)
+export const invidiousClient = new InvidiousClient(INVIDIOUS_INSTANCES);
 ```
 
 ---

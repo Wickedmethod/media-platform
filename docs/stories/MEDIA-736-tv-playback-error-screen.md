@@ -18,13 +18,13 @@ When a video fails to play on the TV (geo-blocked, removed, embedding disabled, 
 
 ## Error Sources
 
-| Error | YouTube Error Code | User Message |
-|-------|-------------------|--------------|
-| Video not found | 100 | "Video not found or removed" |
-| Embedding disabled | 101, 150 | "This video can't be played on TV" |
-| Playback error | 2, 5 | "Playback error — skipping..." |
-| Network timeout | (none) | "Network error — retrying..." |
-| API unreachable | (none) | "Can't reach server — retrying..." |
+| Error              | YouTube Error Code | User Message                       |
+| ------------------ | ------------------ | ---------------------------------- |
+| Video not found    | 100                | "Video not found or removed"       |
+| Embedding disabled | 101, 150           | "This video can't be played on TV" |
+| Playback error     | 2, 5               | "Playback error — skipping..."     |
+| Network timeout    | (none)             | "Network error — retrying..."      |
+| API unreachable    | (none)             | "Can't reach server — retrying..." |
 
 ---
 
@@ -55,40 +55,40 @@ When a video fails to play on the TV (geo-blocked, removed, embedding disabled, 
 
 ```typescript
 // src/features/tv/TvError.vue
-const RETRY_DELAY = 3_000   // Retry once after 3s
-const SKIP_DELAY = 10_000   // Auto-skip after 10s
+const RETRY_DELAY = 3_000; // Retry once after 3s
+const SKIP_DELAY = 10_000; // Auto-skip after 10s
 
 async function handlePlaybackError(error: PlaybackError) {
   // 1. Report error to API
-  await reportError(error)
+  await reportError(error);
 
   // 2. Retry once for transient errors (network, timeout)
   if (isRetryable(error) && retryCount < 1) {
-    retryCount++
-    setTimeout(() => retryPlayback(), RETRY_DELAY)
-    return
+    retryCount++;
+    setTimeout(() => retryPlayback(), RETRY_DELAY);
+    return;
   }
 
   // 3. Show error screen with countdown
-  showErrorScreen(error)
-  startSkipCountdown(SKIP_DELAY)
+  showErrorScreen(error);
+  startSkipCountdown(SKIP_DELAY);
 }
 
 function startSkipCountdown(duration: number) {
-  const start = Date.now()
+  const start = Date.now();
   const timer = setInterval(() => {
-    const elapsed = Date.now() - start
-    progress.value = elapsed / duration
-    remaining.value = Math.ceil((duration - elapsed) / 1000)
+    const elapsed = Date.now() - start;
+    progress.value = elapsed / duration;
+    remaining.value = Math.ceil((duration - elapsed) / 1000);
     if (elapsed >= duration) {
-      clearInterval(timer)
-      skipToNext()
+      clearInterval(timer);
+      skipToNext();
     }
-  }, 100)
+  }, 100);
 }
 
 function isRetryable(error: PlaybackError): boolean {
-  return error.code === undefined || error.code === 2 || error.code === 5
+  return error.code === undefined || error.code === 2 || error.code === 5;
 }
 ```
 

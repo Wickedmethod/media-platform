@@ -64,81 +64,87 @@ class OnScreenKeyboard {
   constructor() {
     this.layouts = {
       alpha: [
-        ['Q','W','E','R','T','Y','U','I','O','P'],
-        ['A','S','D','F','G','H','J','K','L',"'"],
-        ['⇧','Z','X','C','V','B','N','M','⌫'],
-        ['123','SPACE','Search'],
+        ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
+        ["A", "S", "D", "F", "G", "H", "J", "K", "L", "'"],
+        ["⇧", "Z", "X", "C", "V", "B", "N", "M", "⌫"],
+        ["123", "SPACE", "Search"],
       ],
       numeric: [
-        ['1','2','3','4','5','6','7','8','9','0'],
-        ['-','=','.',',','!','?','@','#','⌫'],
-        ['ABC','SPACE','Search'],
+        ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
+        ["-", "=", ".", ",", "!", "?", "@", "#", "⌫"],
+        ["ABC", "SPACE", "Search"],
       ],
-    }
-    this.currentLayout = 'alpha'
-    this.focusRow = 0
-    this.focusCol = 0
-    this.isShift = false
-    this.query = ''
+    };
+    this.currentLayout = "alpha";
+    this.focusRow = 0;
+    this.focusCol = 0;
+    this.isShift = false;
+    this.query = "";
   }
 
   navigate(direction) {
-    const layout = this.layouts[this.currentLayout]
+    const layout = this.layouts[this.currentLayout];
     switch (direction) {
-      case 'up':
-        this.focusRow = Math.max(0, this.focusRow - 1)
+      case "up":
+        this.focusRow = Math.max(0, this.focusRow - 1);
         // Clamp column to row length
-        this.focusCol = Math.min(this.focusCol, layout[this.focusRow].length - 1)
-        break
-      case 'down':
-        this.focusRow = Math.min(layout.length - 1, this.focusRow + 1)
-        this.focusCol = Math.min(this.focusCol, layout[this.focusRow].length - 1)
-        break
-      case 'left':
-        this.focusCol = Math.max(0, this.focusCol - 1)
-        break
-      case 'right':
+        this.focusCol = Math.min(
+          this.focusCol,
+          layout[this.focusRow].length - 1,
+        );
+        break;
+      case "down":
+        this.focusRow = Math.min(layout.length - 1, this.focusRow + 1);
+        this.focusCol = Math.min(
+          this.focusCol,
+          layout[this.focusRow].length - 1,
+        );
+        break;
+      case "left":
+        this.focusCol = Math.max(0, this.focusCol - 1);
+        break;
+      case "right":
         this.focusCol = Math.min(
           this.layouts[this.currentLayout][this.focusRow].length - 1,
-          this.focusCol + 1
-        )
-        break
+          this.focusCol + 1,
+        );
+        break;
     }
-    this.render()
+    this.render();
   }
 
   select() {
-    const key = this.layouts[this.currentLayout][this.focusRow][this.focusCol]
+    const key = this.layouts[this.currentLayout][this.focusRow][this.focusCol];
 
     switch (key) {
-      case '⌫':
-        this.query = this.query.slice(0, -1)
-        break
-      case 'SPACE':
-        this.query += ' '
-        break
-      case '⇧':
-        this.isShift = !this.isShift
-        break
-      case 'Search':
-        this.performSearch()
-        break
-      case '123':
-        this.currentLayout = 'numeric'
-        this.focusRow = 0
-        break
-      case 'ABC':
-        this.currentLayout = 'alpha'
-        this.focusRow = 0
-        break
+      case "⌫":
+        this.query = this.query.slice(0, -1);
+        break;
+      case "SPACE":
+        this.query += " ";
+        break;
+      case "⇧":
+        this.isShift = !this.isShift;
+        break;
+      case "Search":
+        this.performSearch();
+        break;
+      case "123":
+        this.currentLayout = "numeric";
+        this.focusRow = 0;
+        break;
+      case "ABC":
+        this.currentLayout = "alpha";
+        this.focusRow = 0;
+        break;
       default:
-        this.query += this.isShift ? key : key.toLowerCase()
-        if (this.isShift) this.isShift = false
-        break
+        this.query += this.isShift ? key : key.toLowerCase();
+        if (this.isShift) this.isShift = false;
+        break;
     }
 
-    this.render()
-    this.autoSearch() // Debounced search as user types
+    this.render();
+    this.autoSearch(); // Debounced search as user types
   }
 }
 ```
@@ -153,7 +159,7 @@ class OnScreenKeyboard {
   padding: 12px 16px;
   color: #e0e0e0;
   font-size: 24px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: "JetBrains Mono", monospace;
   transition: all 0.15s ease;
 }
 

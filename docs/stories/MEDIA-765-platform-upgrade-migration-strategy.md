@@ -213,11 +213,11 @@ echo "Rollback complete"
 
 Document in `docs/COMPATIBILITY.md`:
 
-| API Version | Redis Schema | Frontend | Player | Notes |
-|-------------|-------------|----------|--------|-------|
-| 1.0.0 | v1 | 1.0.x | 1.0.x | Initial release |
-| 1.1.0 | v2 | 1.0.x | 1.0.x | New player status field (backward compatible) |
-| 2.0.0 | v3 | 2.0.x | 1.1.x+ | Queue key rename (breaking, migration required) |
+| API Version | Redis Schema | Frontend | Player | Notes                                           |
+| ----------- | ------------ | -------- | ------ | ----------------------------------------------- |
+| 1.0.0       | v1           | 1.0.x    | 1.0.x  | Initial release                                 |
+| 1.1.0       | v2           | 1.0.x    | 1.0.x  | New player status field (backward compatible)   |
+| 2.0.0       | v3           | 2.0.x    | 1.1.x+ | Queue key rename (breaking, migration required) |
 
 ---
 
@@ -238,12 +238,12 @@ Before any upgrade, the script validates:
 
 ## Backup Strategy
 
-| What | How | Retention | When |
-|------|-----|-----------|------|
-| Redis RDB | `BGSAVE` → copy dump.rdb | 7 days, rolling | Before every upgrade |
-| Redis AOF | Continuous | Current | Always on |
-| Docker images | Tag with version | 3 previous versions | On build |
-| Migration scripts | Git versioned | Forever | Committed with code |
+| What              | How                      | Retention           | When                 |
+| ----------------- | ------------------------ | ------------------- | -------------------- |
+| Redis RDB         | `BGSAVE` → copy dump.rdb | 7 days, rolling     | Before every upgrade |
+| Redis AOF         | Continuous               | Current             | Always on            |
+| Docker images     | Tag with version         | 3 previous versions | On build             |
+| Migration scripts | Git versioned            | Forever             | Committed with code  |
 
 ---
 

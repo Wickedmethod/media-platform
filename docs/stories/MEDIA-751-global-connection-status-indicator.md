@@ -18,12 +18,12 @@ Add a persistent, non-intrusive connection status indicator to the SPA showing w
 
 ## States
 
-| State | Visual | Trigger |
-|-------|--------|---------|
-| Connected | Hidden (no indicator) | SSE open + last API response < 30s |
-| Connecting | 🟡 pulsing dot + "Connecting..." | SSE reconnecting |
-| Disconnected | 🔴 dot + "Offline" | SSE closed + API unreachable |
-| Reconnected | 🟢 dot + "Back online" (2s then hide) | SSE reconnected after disconnect |
+| State        | Visual                                | Trigger                            |
+| ------------ | ------------------------------------- | ---------------------------------- |
+| Connected    | Hidden (no indicator)                 | SSE open + last API response < 30s |
+| Connecting   | 🟡 pulsing dot + "Connecting..."      | SSE reconnecting                   |
+| Disconnected | 🔴 dot + "Offline"                    | SSE closed + API unreachable       |
+| Reconnected  | 🟢 dot + "Back online" (2s then hide) | SSE reconnected after disconnect   |
 
 ---
 
@@ -32,9 +32,9 @@ Add a persistent, non-intrusive connection status indicator to the SPA showing w
 ```vue
 <!-- src/shared/components/ConnectionStatusBar.vue -->
 <script setup lang="ts">
-import { useSSEStatus } from '@/composables/useSSEStatus'
+import { useSSEStatus } from "@/composables/useSSEStatus";
 
-const { state, message } = useSSEStatus()
+const { state, message } = useSSEStatus();
 </script>
 
 <template>
@@ -44,7 +44,8 @@ const { state, message } = useSSEStatus()
       class="fixed top-0 inset-x-0 z-50 flex items-center justify-center gap-2 py-1.5 text-sm font-medium"
       :class="{
         'bg-yellow-500/90 text-yellow-950': state === 'connecting',
-        'bg-destructive/90 text-destructive-foreground': state === 'disconnected',
+        'bg-destructive/90 text-destructive-foreground':
+          state === 'disconnected',
         'bg-green-500/90 text-green-950': state === 'reconnected',
       }"
     >
@@ -68,44 +69,54 @@ const { state, message } = useSSEStatus()
 
 ```typescript
 // src/composables/useSSEStatus.ts
-import { computed, ref, watch } from 'vue'
-import { useSSE } from '@/composables/useSSE'
+import { computed, ref, watch } from "vue";
+import { useSSE } from "@/composables/useSSE";
 
-type ConnectionState = 'connected' | 'connecting' | 'disconnected' | 'reconnected'
+type ConnectionState =
+  | "connected"
+  | "connecting"
+  | "disconnected"
+  | "reconnected";
 
 export function useSSEStatus() {
-  const { isConnected, isReconnecting } = useSSE()
-  const wasDisconnected = ref(false)
-  const showReconnected = ref(false)
+  const { isConnected, isReconnecting } = useSSE();
+  const wasDisconnected = ref(false);
+  const showReconnected = ref(false);
 
   const state = computed<ConnectionState>(() => {
-    if (showReconnected.value) return 'reconnected'
-    if (isReconnecting.value) return 'connecting'
-    if (!isConnected.value) return 'disconnected'
-    return 'connected'
-  })
+    if (showReconnected.value) return "reconnected";
+    if (isReconnecting.value) return "connecting";
+    if (!isConnected.value) return "disconnected";
+    return "connected";
+  });
 
   // Track disconnect → reconnect transition
   watch(isConnected, (connected) => {
     if (!connected) {
-      wasDisconnected.value = true
+      wasDisconnected.value = true;
     } else if (wasDisconnected.value) {
-      showReconnected.value = true
-      wasDisconnected.value = false
-      setTimeout(() => { showReconnected.value = false }, 2000)
+      showReconnected.value = true;
+      wasDisconnected.value = false;
+      setTimeout(() => {
+        showReconnected.value = false;
+      }, 2000);
     }
-  })
+  });
 
   const message = computed(() => {
     switch (state.value) {
-      case 'connecting': return 'Connecting...'
-      case 'disconnected': return 'Offline — changes may not be visible'
-      case 'reconnected': return 'Back online'
-      default: return ''
+      case "connecting":
+        return "Connecting...";
+      case "disconnected":
+        return "Offline — changes may not be visible";
+      case "reconnected":
+        return "Back online";
+      default:
+        return "";
     }
-  })
+  });
 
-  return { state, message }
+  return { state, message };
 }
 ```
 

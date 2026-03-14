@@ -33,12 +33,16 @@ Compose into domain-specific skeletons:
 <!-- src/shared/components/QueueItemSkeleton.vue -->
 <template>
   <div class="flex items-center gap-3 p-3 rounded-lg">
-    <Skeleton class="h-12 w-12 rounded" />        <!-- thumbnail -->
+    <Skeleton class="h-12 w-12 rounded" />
+    <!-- thumbnail -->
     <div class="flex-1 space-y-2">
-      <Skeleton class="h-4 w-3/4" />              <!-- title -->
-      <Skeleton class="h-3 w-1/3" />              <!-- added by -->
+      <Skeleton class="h-4 w-3/4" />
+      <!-- title -->
+      <Skeleton class="h-3 w-1/3" />
+      <!-- added by -->
     </div>
-    <Skeleton class="h-8 w-8 rounded-full" />     <!-- action button -->
+    <Skeleton class="h-8 w-8 rounded-full" />
+    <!-- action button -->
   </div>
 </template>
 ```
@@ -47,12 +51,16 @@ Compose into domain-specific skeletons:
 <!-- src/shared/components/NowPlayingSkeleton.vue -->
 <template>
   <div class="flex items-center gap-3 p-4">
-    <Skeleton class="h-10 w-10 rounded-full" />  <!-- play/pause -->
+    <Skeleton class="h-10 w-10 rounded-full" />
+    <!-- play/pause -->
     <div class="flex-1 space-y-2">
-      <Skeleton class="h-4 w-2/3" />             <!-- song title -->
-      <Skeleton class="h-1 w-full rounded" />     <!-- progress bar -->
+      <Skeleton class="h-4 w-2/3" />
+      <!-- song title -->
+      <Skeleton class="h-1 w-full rounded" />
+      <!-- progress bar -->
     </div>
-    <Skeleton class="h-3 w-12" />                 <!-- time -->
+    <Skeleton class="h-3 w-12" />
+    <!-- time -->
   </div>
 </template>
 ```
@@ -72,6 +80,7 @@ Compose into domain-specific skeletons:
 ```
 
 Usage:
+
 ```vue
 <EmptyState
   :icon="ListMusic"
@@ -112,8 +121,10 @@ Every data-fetching component follows this pattern:
   <ErrorState v-else-if="error" :error="error" @retry="refetch" />
 
   <!-- Empty -->
-  <EmptyState v-else-if="data?.length === 0"
-    :icon="ListMusic" title="Queue is empty"
+  <EmptyState
+    v-else-if="data?.length === 0"
+    :icon="ListMusic"
+    title="Queue is empty"
     description="Add a song to get started"
   />
 
@@ -126,13 +137,13 @@ Every data-fetching component follows this pattern:
 
 ## Standardized Empty States
 
-| View | Icon | Title | Description | Action |
-|------|------|-------|-------------|--------|
-| Queue (empty) | ListMusic | Queue is empty | Search for a song to get started | → Search |
-| Search (no results) | SearchX | No results | Try a different search term | — |
-| Search (initial) | Search | Search YouTube | Type to search for music | — |
-| Admin audit (empty) | FileText | No audit entries | System actions will appear here | — |
-| Policies (empty) | Shield | No policies | Add a playback policy to get started | + Add Policy |
+| View                | Icon      | Title            | Description                          | Action       |
+| ------------------- | --------- | ---------------- | ------------------------------------ | ------------ |
+| Queue (empty)       | ListMusic | Queue is empty   | Search for a song to get started     | → Search     |
+| Search (no results) | SearchX   | No results       | Try a different search term          | —            |
+| Search (initial)    | Search    | Search YouTube   | Type to search for music             | —            |
+| Admin audit (empty) | FileText  | No audit entries | System actions will appear here      | —            |
+| Policies (empty)    | Shield    | No policies      | Add a playback policy to get started | + Add Policy |
 
 ---
 

@@ -105,11 +105,11 @@ This file is consumed by the frontend's `orval.config.ts`:
 ```typescript
 export default defineConfig({
   mediaPlatform: {
-    input: '../../openapi.json',  // relative path to spec
+    input: "../../openapi.json", // relative path to spec
     output: {
-      target: './src/generated/api.ts',
-      client: 'vue-query',
-      mode: 'tags-split',
+      target: "./src/generated/api.ts",
+      client: "vue-query",
+      mode: "tags-split",
     },
   },
 });
@@ -150,31 +150,49 @@ export default defineConfig({
 
 ### Event Types
 
-| Event Name | Payload | Trigger | Consumers |
-|-----------|---------|---------|-----------|
-| `state-changed` | `{ state: PlayerState }` | Play, pause, stop, skip | SPA, TV |
-| `track-changed` | `{ item: QueueItem, position: number }` | New track starts playing | SPA, TV |
-| `position-updated` | `{ position: number, duration: number }` | Periodic (every 5s) | SPA, TV |
-| `queue-updated` | `{ action: 'add'\|'remove'\|'reorder', count: number }` | Queue mutation | SPA, TV |
-| `item-added` | `{ id, title, url, addedByUserId, addedByName }` | New item added to queue | SPA (toast), TV |
-| `kill-switch` | `{ active: boolean }` | Kill switch toggled | SPA, TV |
-| `playback-error` | `{ error: string, videoId: string, retryCount: number }` | Player error | SPA, TV |
-| `heartbeat` | `{}` | Every 30s (keepalive) | SPA, TV |
-| `policy-changed` | `{ action: 'add'\|'remove'\|'toggle' }` | Policy mutation | SPA (admin) |
+| Event Name         | Payload                                                  | Trigger                  | Consumers       |
+| ------------------ | -------------------------------------------------------- | ------------------------ | --------------- |
+| `state-changed`    | `{ state: PlayerState }`                                 | Play, pause, stop, skip  | SPA, TV         |
+| `track-changed`    | `{ item: QueueItem, position: number }`                  | New track starts playing | SPA, TV         |
+| `position-updated` | `{ position: number, duration: number }`                 | Periodic (every 5s)      | SPA, TV         |
+| `queue-updated`    | `{ action: 'add'\|'remove'\|'reorder', count: number }`  | Queue mutation           | SPA, TV         |
+| `item-added`       | `{ id, title, url, addedByUserId, addedByName }`         | New item added to queue  | SPA (toast), TV |
+| `kill-switch`      | `{ active: boolean }`                                    | Kill switch toggled      | SPA, TV         |
+| `playback-error`   | `{ error: string, videoId: string, retryCount: number }` | Player error             | SPA, TV         |
+| `heartbeat`        | `{}`                                                     | Every 30s (keepalive)    | SPA, TV         |
+| `policy-changed`   | `{ action: 'add'\|'remove'\|'toggle' }`                  | Policy mutation          | SPA (admin)     |
 
 ### Payload Schema (TypeScript)
 
 ```typescript
 type SSEEvent =
-  | { type: 'state-changed'; data: { state: 'Playing' | 'Paused' | 'Stopped' | 'Idle' } }
-  | { type: 'track-changed'; data: { item: QueueItem; position: number } }
-  | { type: 'position-updated'; data: { position: number; duration: number } }
-  | { type: 'queue-updated'; data: { action: 'add' | 'remove' | 'reorder'; count: number } }
-  | { type: 'item-added'; data: { id: string; title: string; url: string; addedByUserId: string; addedByName: string } }
-  | { type: 'kill-switch'; data: { active: boolean } }
-  | { type: 'playback-error'; data: { error: string; videoId: string; retryCount: number } }
-  | { type: 'heartbeat'; data: Record<string, never> }
-  | { type: 'policy-changed'; data: { action: 'add' | 'remove' | 'toggle' } }
+  | {
+      type: "state-changed";
+      data: { state: "Playing" | "Paused" | "Stopped" | "Idle" };
+    }
+  | { type: "track-changed"; data: { item: QueueItem; position: number } }
+  | { type: "position-updated"; data: { position: number; duration: number } }
+  | {
+      type: "queue-updated";
+      data: { action: "add" | "remove" | "reorder"; count: number };
+    }
+  | {
+      type: "item-added";
+      data: {
+        id: string;
+        title: string;
+        url: string;
+        addedByUserId: string;
+        addedByName: string;
+      };
+    }
+  | { type: "kill-switch"; data: { active: boolean } }
+  | {
+      type: "playback-error";
+      data: { error: string; videoId: string; retryCount: number };
+    }
+  | { type: "heartbeat"; data: Record<string, never> }
+  | { type: "policy-changed"; data: { action: "add" | "remove" | "toggle" } };
 ```
 
 ### Delivery Semantics

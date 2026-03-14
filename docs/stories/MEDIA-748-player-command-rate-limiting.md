@@ -24,38 +24,56 @@ Prevent rapid-fire player commands from the SPA. When users hammer play/pause/sk
 
 ```typescript
 // src/composables/usePlayerCommands.ts
-import { ref } from 'vue'
-import { useMutation } from '@tanstack/vue-query'
-import { playerApi } from '@/api/generated'
+import { ref } from "vue";
+import { useMutation } from "@tanstack/vue-query";
+import { playerApi } from "@/api/generated";
 
 export function usePlayerCommands() {
-  const pendingCommand = ref<string | null>(null)
+  const pendingCommand = ref<string | null>(null);
 
   const playMutation = useMutation({
     mutationFn: () => playerApi.play(),
-    onMutate: () => { pendingCommand.value = 'play' },
-    onSettled: () => { pendingCommand.value = null },
-  })
+    onMutate: () => {
+      pendingCommand.value = "play";
+    },
+    onSettled: () => {
+      pendingCommand.value = null;
+    },
+  });
 
   const pauseMutation = useMutation({
     mutationFn: () => playerApi.pause(),
-    onMutate: () => { pendingCommand.value = 'pause' },
-    onSettled: () => { pendingCommand.value = null },
-  })
+    onMutate: () => {
+      pendingCommand.value = "pause";
+    },
+    onSettled: () => {
+      pendingCommand.value = null;
+    },
+  });
 
   const skipMutation = useMutation({
     mutationFn: () => playerApi.skip(),
-    onMutate: () => { pendingCommand.value = 'skip' },
-    onSettled: () => { pendingCommand.value = null },
-  })
+    onMutate: () => {
+      pendingCommand.value = "skip";
+    },
+    onSettled: () => {
+      pendingCommand.value = null;
+    },
+  });
 
   return {
-    play: () => { if (!pendingCommand.value) playMutation.mutate() },
-    pause: () => { if (!pendingCommand.value) pauseMutation.mutate() },
-    skip: () => { if (!pendingCommand.value) skipMutation.mutate() },
+    play: () => {
+      if (!pendingCommand.value) playMutation.mutate();
+    },
+    pause: () => {
+      if (!pendingCommand.value) pauseMutation.mutate();
+    },
+    skip: () => {
+      if (!pendingCommand.value) skipMutation.mutate();
+    },
     pendingCommand,
     isDisabled: computed(() => !!pendingCommand.value),
-  }
+  };
 }
 ```
 
@@ -74,6 +92,7 @@ export function usePlayerCommands() {
 ```
 
 Behavior:
+
 - Button shows spinner while command is in-flight
 - All other buttons disabled until response arrives
 - Prevents double-tap and rapid toggling
@@ -118,12 +137,12 @@ app.MapPost("/player/skip", ...).AddEndpointFilter<CommandDeduplicationFilter>()
 
 ## Debounce Timing
 
-| Layer | Mechanism | Window |
-|-------|-----------|--------|
-| Frontend (SPA) | `pendingCommand` gate | Until response arrives |
-| Frontend (TV/CEC) | CEC key repeat filter | 300ms (MEDIA-721) |
-| Backend | Redis `SETNX` dedup | 500ms per endpoint |
-| Backend | Rate limiter (MEDIA-604) | 30 req/min per IP |
+| Layer             | Mechanism                | Window                 |
+| ----------------- | ------------------------ | ---------------------- |
+| Frontend (SPA)    | `pendingCommand` gate    | Until response arrives |
+| Frontend (TV/CEC) | CEC key repeat filter    | 300ms (MEDIA-721)      |
+| Backend           | Redis `SETNX` dedup      | 500ms per endpoint     |
+| Backend           | Rate limiter (MEDIA-604) | 30 req/min per IP      |
 
 ---
 
