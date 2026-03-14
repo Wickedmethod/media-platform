@@ -66,6 +66,13 @@ public class MediaPlatformFactory : WebApplicationFactory<Program>
         var registry = Substitute.For<IPlayerRegistry>();
         registry.GetAllPlayersAsync(Arg.Any<CancellationToken>())
             .Returns(Array.Empty<PlayerStatus>());
+        registry.RegisterAsync(Arg.Any<WorkerRegistration>(), Arg.Any<CancellationToken>())
+            .Returns(callInfo =>
+            {
+                var reg = callInfo.Arg<WorkerRegistration>();
+                var playerId = reg.Name.ToLowerInvariant().Replace(' ', '-');
+                return new WorkerRegistrationResult(playerId, DateTimeOffset.UtcNow, new WorkerConfig());
+            });
         return registry;
     }
 }

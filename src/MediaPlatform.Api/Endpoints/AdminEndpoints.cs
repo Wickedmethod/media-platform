@@ -14,7 +14,8 @@ public static class AdminEndpoints
         {
             var players = await registry.GetAllPlayersAsync(ct);
             return Results.Ok(players.Select(p => new PlayerStatusResponse(
-                p.Id, p.LastSeen, p.State, p.IsAlive, p.Uptime, p.Version)));
+                p.Id, p.LastSeen, p.State, p.IsAlive, p.Uptime, p.Version,
+                p.Name, p.Capabilities, p.RegisteredAt)));
         })
         .WithName("GetPlayers")
         .Produces<IEnumerable<PlayerStatusResponse>>()

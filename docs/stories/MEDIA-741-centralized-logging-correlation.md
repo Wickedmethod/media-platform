@@ -5,7 +5,7 @@
 **Epic:** Infrastructure & Security  
 **Priority:** Medium  
 **Effort:** 3 points  
-**Status:** ⏳ Planned  
+**Status:** ✅ Done  
 **Depends on:** None (existing API)
 
 ---
@@ -96,13 +96,13 @@ builder.Host.UseSerilog((context, config) =>
 
 The correlation ID propagates to:
 
-| Component | How |
-|-----------|-----|
-| API log entries | Serilog `LogContext.PushProperty` |
-| Redis audit log | Include `correlationId` field in audit entries |
-| SSE events | Include `correlationId` in event metadata |
+| Component          | How                                            |
+| ------------------ | ---------------------------------------------- |
+| API log entries    | Serilog `LogContext.PushProperty`              |
+| Redis audit log    | Include `correlationId` field in audit entries |
+| SSE events         | Include `correlationId` in event metadata      |
 | Webhook deliveries | `X-Correlation-Id` header on outgoing webhooks |
-| Player heartbeats | Pi includes API's correlation ID in heartbeat |
+| Player heartbeats  | Pi includes API's correlation ID in heartbeat  |
 
 ---
 

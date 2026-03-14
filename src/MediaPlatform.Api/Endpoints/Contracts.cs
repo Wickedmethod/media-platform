@@ -47,4 +47,32 @@ public sealed record PlayerStatusResponse(
     string State,
     bool IsAlive,
     long Uptime,
-    string? Version);
+    string? Version,
+    string? Name = null,
+    object? Capabilities = null,
+    DateTimeOffset? RegisteredAt = null);
+
+// ── MEDIA-729: Worker Registration ─────────────────────────
+
+public sealed record WorkerRegistrationRequest(
+    string Name,
+    WorkerCapabilitiesDto? Capabilities = null,
+    string? Version = null,
+    string? Os = null);
+
+public sealed record WorkerCapabilitiesDto(
+    bool Cec = false,
+    string? AudioOutput = null,
+    string? MaxResolution = null,
+    IReadOnlyList<string>? Codecs = null,
+    string? ChromiumVersion = null);
+
+public sealed record WorkerRegistrationResponse(
+    string PlayerId,
+    DateTimeOffset ServerTime,
+    WorkerConfigResponse Config);
+
+public sealed record WorkerConfigResponse(
+    int HeartbeatInterval,
+    int PositionReportInterval,
+    string SseUrl);

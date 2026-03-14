@@ -5,7 +5,7 @@
 **Epic:** Infrastructure & Security  
 **Priority:** Medium  
 **Effort:** 2 points  
-**Status:** ⏳ Planned  
+**Status:** ✅ Done  
 **Depends on:** None (existing API)
 
 ---
@@ -20,23 +20,23 @@ Expose a `/metrics` endpoint in Prometheus scrape format so the media platform c
 
 ### Application Metrics
 
-| Metric | Type | Description |
-|--------|------|-------------|
-| `mediaplatform_queue_depth` | Gauge | Current number of items in queue |
-| `mediaplatform_player_state` | Gauge | Current state (0=Idle, 1=Playing, 2=Paused, 3=Stopped) |
-| `mediaplatform_tracks_played_total` | Counter | Total tracks played since startup |
-| `mediaplatform_playback_errors_total` | Counter | Total playback errors |
-| `mediaplatform_queue_adds_total` | Counter | Total items added to queue |
-| `mediaplatform_active_sse_connections` | Gauge | Number of active SSE clients |
-| `mediaplatform_active_players` | Gauge | Number of alive player nodes |
-| `mediaplatform_kill_switch_active` | Gauge | 1 if kill switch is on, 0 otherwise |
+| Metric                                 | Type    | Description                                            |
+| -------------------------------------- | ------- | ------------------------------------------------------ |
+| `mediaplatform_queue_depth`            | Gauge   | Current number of items in queue                       |
+| `mediaplatform_player_state`           | Gauge   | Current state (0=Idle, 1=Playing, 2=Paused, 3=Stopped) |
+| `mediaplatform_tracks_played_total`    | Counter | Total tracks played since startup                      |
+| `mediaplatform_playback_errors_total`  | Counter | Total playback errors                                  |
+| `mediaplatform_queue_adds_total`       | Counter | Total items added to queue                             |
+| `mediaplatform_active_sse_connections` | Gauge   | Number of active SSE clients                           |
+| `mediaplatform_active_players`         | Gauge   | Number of alive player nodes                           |
+| `mediaplatform_kill_switch_active`     | Gauge   | 1 if kill switch is on, 0 otherwise                    |
 
 ### HTTP Metrics (automatic via prometheus-net)
 
-| Metric | Type | Description |
-|--------|------|-------------|
-| `http_requests_total` | Counter | Total requests by method, path, status |
-| `http_request_duration_seconds` | Histogram | Request latency distribution |
+| Metric                          | Type      | Description                            |
+| ------------------------------- | --------- | -------------------------------------- |
+| `http_requests_total`           | Counter   | Total requests by method, path, status |
+| `http_request_duration_seconds` | Histogram | Request latency distribution           |
 
 ### Runtime Metrics (automatic)
 
@@ -98,10 +98,10 @@ public class MediaPlatformMetrics
 ```yaml
 # prometheus.yml
 scrape_configs:
-  - job_name: 'media-platform'
+  - job_name: "media-platform"
     scrape_interval: 15s
     static_configs:
-      - targets: ['media-platform-api:5000']
+      - targets: ["media-platform-api:5000"]
 ```
 
 ---

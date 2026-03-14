@@ -8,15 +8,26 @@ using MediaPlatform.Application.Commands;
 using MediaPlatform.Application.Queries;
 using MediaPlatform.Infrastructure.Analytics;
 using MediaPlatform.Infrastructure.Events;
+using MediaPlatform.Infrastructure.Metrics;
 using MediaPlatform.Infrastructure.Notifications;
 using MediaPlatform.Infrastructure.Redis;
 using MediaPlatform.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Prometheus;
 using Scalar.AspNetCore;
+using Serilog;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Structured logging (MEDIA-741)
+builder.Host.UseSerilog((context, config) => config
+    .ReadFrom.Configuration(context.Configuration)
+    .Enrich.FromLogContext()
+    .Enrich.WithProperty("Application", "MediaPlatform")
+    .WriteTo.Console(outputTemplate:
+        "[{Timestamp:HH:mm:ss} {Level:u3}] {CorrelationId} {Message:lj}{NewLine}{Exception}"));
 
 // CORS for local development
 builder.Services.AddCors(options =>
@@ -88,6 +99,7 @@ builder.Services.AddSingleton<IAuditLog, InMemoryAuditLog>();
 builder.Services.AddSingleton<IKillSwitch, InMemoryKillSwitch>();
 builder.Services.AddSingleton<IAnomalyDetector, SlidingWindowAnomalyDetector>();
 builder.Services.AddSingleton<IPolicyEngine, InMemoryPolicyEngine>();
+builder.Services.AddSingleton<MediaPlatformMetrics>();
 builder.Services.AddHttpClient("webhooks");
 
 // OpenAPI spec generation
@@ -120,6 +132,10 @@ var app = builder.Build();
 app.UseCors();
 app.UseDefaultFiles();
 app.UseStaticFiles();
+
+// Correlation ID must be first so all downstream middleware has tracing context
+app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseHttpMetrics();
 
 // Security middleware pipeline (order matters)
 app.UseMiddleware<WorkerAuthMiddleware>();
@@ -155,6 +171,8 @@ app.MapNotificationEndpoints();
 app.MapAnalyticsEndpoints();
 app.MapAdminEndpoints();
 app.MapPolicyEndpoints();
+app.MapWorkerEndpoints();
+app.MapMetrics();
 
 app.Run();
 

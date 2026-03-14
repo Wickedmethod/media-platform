@@ -488,4 +488,82 @@ public class ApiContractTests : IClassFixture<MediaPlatformFactory>
         var response = await _client.DeleteAsync("/queue/some-id");
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
     }
+
+    // ── Correlation ID (MEDIA-741) ────────────────────────────
+
+    [Fact]
+    public async Task Response_ContainsCorrelationIdHeader()
+    {
+        var response = await _client.GetAsync("/health");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        Assert.True(response.Headers.Contains("X-Correlation-Id"),
+            "Response must contain X-Correlation-Id header");
+        var correlationId = response.Headers.GetValues("X-Correlation-Id").First();
+        Assert.False(string.IsNullOrEmpty(correlationId));
+    }
+
+    [Fact]
+    public async Task CorrelationId_EchoesClientHeader()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "/health");
+        request.Headers.Add("X-Correlation-Id", "client-trace-42");
+
+        var response = await _client.SendAsync(request);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var correlationId = response.Headers.GetValues("X-Correlation-Id").First();
+        Assert.Equal("client-trace-42", correlationId);
+    }
+
+    // ── Prometheus Metrics (MEDIA-742) ────────────────────────
+
+    [Fact]
+    public async Task Metrics_Endpoint_Returns200_WithPrometheusFormat()
+    {
+        var response = await _client.GetAsync("/metrics");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var body = await response.Content.ReadAsStringAsync();
+        // UseHttpMetrics() exposes HTTP request duration metrics in Prometheus text format
+        Assert.Contains("http_request_duration_seconds", body);
+    }
+
+    // ── Worker Registration (MEDIA-729) ───────────────────────
+
+    [Fact]
+    public async Task Worker_Register_ReturnsOk_WithRegistrationResponse()
+    {
+        var response = await _client.PostAsJsonAsync("/worker/register",
+            new { name = "Living Room TV", version = "1.0.0", os = "linux" });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>(JsonOpts);
+        Assert.True(body.TryGetProperty("playerId", out var playerId));
+        Assert.False(string.IsNullOrEmpty(playerId.GetString()));
+        Assert.True(body.TryGetProperty("serverTime", out _));
+        Assert.True(body.TryGetProperty("config", out var config));
+        Assert.True(config.TryGetProperty("heartbeatInterval", out _));
+        Assert.True(config.TryGetProperty("positionReportInterval", out _));
+        Assert.True(config.TryGetProperty("sseUrl", out _));
+    }
+
+    [Fact]
+    public async Task Worker_Register_WithCapabilities_ReturnsOk()
+    {
+        var response = await _client.PostAsJsonAsync("/worker/register",
+            new
+            {
+                name = "Kitchen Pi",
+                capabilities = new { cec = true, audioOutput = "hdmi", maxResolution = "1080p" },
+                version = "2.0.0",
+                os = "linux"
+            });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>(JsonOpts);
+        Assert.True(body.TryGetProperty("playerId", out _));
+    }
 }

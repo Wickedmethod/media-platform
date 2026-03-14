@@ -5,7 +5,7 @@
 **Epic:** MEDIA-003 — Queue and Player API  
 **Priority:** Medium  
 **Effort:** 3 points  
-**Status:** ⏳ Planned  
+**Status:** ✅ Done  
 **Depends on:** MEDIA-622 (Worker Key auth), MEDIA-724 (heartbeat)  
 **Absorbs:** MEDIA-726 (Player Capability Registration)
 

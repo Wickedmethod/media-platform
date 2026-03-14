@@ -13,4 +13,5 @@ public static class SseEvents
     public sealed record PolicyChanged(string Action);
     public sealed record Heartbeat;
     public sealed record PlayerOffline(string PlayerId);
+    public sealed record PlayerOnline(string PlayerId, string Name);
 }
