@@ -1,0 +1,35 @@
+# Production overlay — use with: docker compose -f docker-compose.yml -f docker-compose.production.yml up -d
+services:
+  media-platform-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - Redis__ConnectionString=redis:6379
+      - Keycloak__Authority=http://keycloak:8080/realms/homelab
+      - Keycloak__Audience=media-platform
+      - Keycloak__RequireHttpsMetadata=false
+    env_file:
+      - .env
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.5"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  redis:
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: "0.25"
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"

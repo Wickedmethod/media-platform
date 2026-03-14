@@ -1,0 +1,5 @@
+# .vault-env — Secret mapping for media-platform
+# Format: ENV_VAR_NAME=vault:secret/path#field
+# Resolved by Arcane Vault Bridge → written to .env → used by docker-compose
+
+Worker__ApiKey=vault:secret/data/media-platform/worker-key#value

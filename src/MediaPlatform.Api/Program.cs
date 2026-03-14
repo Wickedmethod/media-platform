@@ -85,6 +85,7 @@ builder.Services.AddSingleton<IAnalyticsTracker, InMemoryAnalyticsTracker>();
 builder.Services.AddSingleton<IAuditLog, InMemoryAuditLog>();
 builder.Services.AddSingleton<IKillSwitch, InMemoryKillSwitch>();
 builder.Services.AddSingleton<IAnomalyDetector, SlidingWindowAnomalyDetector>();
+builder.Services.AddSingleton<IPolicyEngine, InMemoryPolicyEngine>();
 builder.Services.AddHttpClient("webhooks");
 
 // Application handlers
@@ -104,6 +105,7 @@ app.UseDefaultFiles();
 app.UseStaticFiles();
 
 // Security middleware pipeline (order matters)
+app.UseMiddleware<WorkerAuthMiddleware>();
 app.UseAuthentication();
 app.UseMiddleware<KillSwitchMiddleware>();
 app.UseRateLimiter();
@@ -127,6 +129,7 @@ app.MapEventStreamEndpoints();
 app.MapNotificationEndpoints();
 app.MapAnalyticsEndpoints();
 app.MapAdminEndpoints();
+app.MapPolicyEndpoints();
 
 app.Run();
 

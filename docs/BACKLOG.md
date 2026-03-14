@@ -1,6 +1,6 @@
 # Media Platform — Backlog
 
-> Last updated: 2026-03-14
+> Last updated: 2026-03-15
 
 ## Legend
 
@@ -12,9 +12,9 @@
 
 ## Summary
 
-- **21 stories done** (all tested, committed)
-- **107 tests** (83 unit + 24 integration), 0 failures
-- **24 stories blocked** by external dependencies
+- **23 stories done** (all tested, committed)
+- **123 tests** (93 unit + 30 integration), 0 failures
+- **22 stories blocked** by external dependencies
 - **0 stories remaining** that can be implemented without infrastructure
 
 ---
@@ -81,7 +81,7 @@
 | Story | Title | Status | Notes |
 |-------|-------|--------|-------|
 | MEDIA-611 | TV On-Screen Overlay | ✅ Done | `/tv.html` with SSE |
-| MEDIA-617 | Playback Policy Engine | 🔶 Blocked | Needs MEDIA-604 roles |
+| MEDIA-617 | Playback Policy Engine | ✅ Done | BlockedChannel, TimeWindow, BlockedUrlPattern, MaxQueueSize, MaxDuration |
 | MEDIA-632 | Device & Session Management | 🔶 Blocked | Needs Keycloak |
 
 ## Epic: MEDIA-007 — Queue Logic
@@ -107,7 +107,7 @@
 | MEDIA-604 | AuthZ & Rate Limiting | ✅ Done | JWT auth ready, fixed-window rate limits, audit log |
 | MEDIA-605 | Vault Secret Storage | 🔶 Blocked | Needs Vault |
 | MEDIA-621 | Internal Network Restrictions | ✅ Done | Audit middleware, request logging, anomaly detection |
-| MEDIA-622 | Trusted Worker Communication | 🔶 Blocked | Needs MEDIA-621 |
+| MEDIA-622 | Trusted Worker Communication | ✅ Done | X-Worker-Key header auth, audit logging |
 | MEDIA-626 | Keycloak Gate for YouTube | 🔶 Blocked | Needs Keycloak + OAuth |
 
 ---
@@ -139,12 +139,21 @@
 | GET | `/health/ready` | Readiness probe (Redis) |
 | GET | `/index.html` | Control deck UI |
 | GET | `/tv.html` | TV overlay UI |
+| GET | `/policies` | List playback policies |
+| POST | `/policies` | Add playback policy |
+| DELETE | `/policies/{id}` | Remove policy |
+| POST | `/policies/{id}/toggle` | Enable/disable policy |
+| POST | `/policies/evaluate` | Dry-run policy evaluation |
+| POST | `/admin/kill-switch` | Toggle emergency kill switch |
+| GET | `/admin/kill-switch` | Get kill switch status |
+| GET | `/admin/audit` | Get audit log entries |
+| GET | `/admin/anomalies` | Check for anomalies |
 
 ## Next Steps to Unblock
 
 To unlock the remaining 28 stories, set up in this order:
 
-1. **Keycloak** — Enables auth stories (604, 610, 617, 621–622, 626, 630–632)
+1. **Keycloak** — Enables auth stories (610, 626, 630, 632)
 2. **Vault + VaultFacade** — Enables secret stories (605, 629)
-3. **Google OAuth** — Enables YouTube stories (401–404, 625, 627–628)
+3. **Google OAuth** — Enables YouTube stories (401–404, 625, 627)
 4. **Raspberry Pi** — Enables player node stories (201–205, 501–503, 612, 615–616)

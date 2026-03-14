@@ -316,4 +316,68 @@ public class ApiContractTests : IClassFixture<MediaPlatformFactory>
         Assert.True(body.TryGetProperty("hasAnomalies", out _));
         Assert.True(body.TryGetProperty("alerts", out _));
     }
+
+    // ── Policy Endpoints ──────────────────────────────────────
+
+    [Fact]
+    public async Task Policies_Get_ReturnsArray()
+    {
+        var response = await _client.GetAsync("/policies");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var body = await response.Content.ReadAsStringAsync();
+        var arr = JsonSerializer.Deserialize<JsonElement>(body);
+        Assert.Equal(JsonValueKind.Array, arr.ValueKind);
+    }
+
+    [Fact]
+    public async Task Policies_Add_ReturnsCreated()
+    {
+        var response = await _client.PostAsJsonAsync("/policies",
+            new { name = "Test Block", type = "BlockedChannel", value = "blocked123" });
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.True(body.TryGetProperty("id", out _));
+        Assert.True(body.TryGetProperty("name", out _));
+    }
+
+    [Fact]
+    public async Task Policies_Add_InvalidType_ReturnsBadRequest()
+    {
+        var response = await _client.PostAsJsonAsync("/policies",
+            new { name = "Bad", type = "InvalidType", value = "x" });
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Policies_Evaluate_ReturnsResult()
+    {
+        var response = await _client.PostAsJsonAsync("/policies/evaluate",
+            new { action = "queue-add", videoUrl = "https://youtube.com/watch?v=test" });
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.True(body.TryGetProperty("allowed", out _));
+    }
+
+    [Fact]
+    public async Task Policies_Delete_ReturnsNoContent()
+    {
+        var response = await _client.DeleteAsync("/policies/nonexistent");
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
+
+    // ── Worker Auth ───────────────────────────────────────────
+
+    [Fact]
+    public async Task WorkerAuth_InvalidKey_Returns403()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Post, "/player/play");
+        request.Headers.Add("X-Worker-Key", "wrong-key");
+
+        var response = await _client.SendAsync(request);
+        // No worker key configured in test — should reject
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
 }

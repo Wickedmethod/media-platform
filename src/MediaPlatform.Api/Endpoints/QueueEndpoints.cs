@@ -18,10 +18,23 @@ public static class QueueEndpoints
             return Results.Ok(items.Select(MapItem));
         });
 
-        group.MapPost("/add", async (AddToQueueRequest request, AddToQueueHandler handler, IEventBroadcaster events, CancellationToken ct) =>
+        group.MapPost("/add", async (AddToQueueRequest request, AddToQueueHandler handler, IEventBroadcaster events, IPolicyEngine policyEngine, IAuditLog auditLog, HttpContext http, CancellationToken ct) =>
         {
             try
             {
+                // Evaluate playback policies before adding to queue
+                var policyResult = policyEngine.Evaluate(new PolicyContext("queue-add", request.Url, null, DateTimeOffset.UtcNow));
+                if (!policyResult.Allowed)
+                {
+                    auditLog.Record(new AuditEntry(
+                        "POLICY_DENIED",
+                        null,
+                        http.Connection.RemoteIpAddress?.ToString(),
+                        $"queue-add denied: {policyResult.DeniedReason}",
+                        DateTimeOffset.UtcNow));
+                    return Results.Json(new ApiError(policyResult.DeniedReason ?? "Policy denied", policyResult.DeniedByPolicy), statusCode: 403);
+                }
+
                 var command = new AddToQueueCommand(request.Url, request.Title, request.StartAtSeconds);
                 var item = await handler.HandleAsync(command, ct);
                 events.Broadcast("queue-updated", new { action = "added", item = MapItem(item) });
