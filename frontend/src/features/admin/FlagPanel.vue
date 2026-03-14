@@ -1,17 +1,19 @@
 <script setup lang="ts">
-import { useFeatureFlags } from '@/composables/useFeatureFlags'
-import { Switch } from '@/shared/components/ui/switch'
-import { Button } from '@/shared/components/ui/button'
-import type { FlagKey } from '@/config/flags.config'
+import { useFeatureFlags } from "@/composables/useFeatureFlags";
+import { Switch } from "@/shared/components/ui/switch";
+import { Button } from "@/shared/components/ui/button";
+import type { FlagKey } from "@/config/flags.config";
 
-const { isEnabled, setOverride, clearAllOverrides, flags } = useFeatureFlags()
+const { isEnabled, setOverride, clearAllOverrides, flags } = useFeatureFlags();
 </script>
 
 <template>
   <div class="mx-auto max-w-2xl space-y-6 p-6">
     <div class="flex items-center justify-between">
       <h2 class="text-lg font-semibold">Feature Flags</h2>
-      <Button variant="outline" size="sm" @click="clearAllOverrides">Reset All</Button>
+      <Button variant="outline" size="sm" @click="clearAllOverrides"
+        >Reset All</Button
+      >
     </div>
 
     <div class="divide-y rounded-lg border">

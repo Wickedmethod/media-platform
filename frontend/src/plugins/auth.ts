@@ -1,52 +1,52 @@
-import Keycloak from 'keycloak-js'
-import { config } from '@/config'
-import { useAuthStore } from '@/stores/auth'
+import Keycloak from "keycloak-js";
+import { config } from "@/config";
+import { useAuthStore } from "@/stores/auth";
 
-const DEV_BYPASS = import.meta.env.VITE_AUTH_BYPASS === 'true'
+const DEV_BYPASS = import.meta.env.VITE_AUTH_BYPASS === "true";
 
 export async function initAuth(): Promise<void> {
-  const auth = useAuthStore()
+  const auth = useAuthStore();
 
   if (DEV_BYPASS) {
     auth.setDevUser({
-      id: 'dev-user-001',
-      name: 'Dev Admin',
-      email: 'dev@localhost',
-      roles: ['media-admin', 'media-user'],
-    })
-    return
+      id: "dev-user-001",
+      name: "Dev Admin",
+      email: "dev@localhost",
+      roles: ["media-admin", "media-user"],
+    });
+    return;
   }
 
   const keycloak = new Keycloak({
     url: config.keycloakUrl,
     realm: config.keycloakRealm,
     clientId: config.keycloakClientId,
-  })
+  });
 
   try {
     const authenticated = await keycloak.init({
-      onLoad: 'login-required',
+      onLoad: "login-required",
       checkLoginIframe: false,
-      pkceMethod: 'S256',
-    })
+      pkceMethod: "S256",
+    });
 
-    auth.setKeycloak(keycloak)
+    auth.setKeycloak(keycloak);
 
     if (!authenticated) {
-      keycloak.login()
-      return
+      keycloak.login();
+      return;
     }
 
     // Silent token refresh
     setInterval(async () => {
       try {
-        await keycloak.updateToken(60)
+        await keycloak.updateToken(60);
       } catch {
-        keycloak.login()
+        keycloak.login();
       }
-    }, 30_000)
+    }, 30_000);
   } catch (err) {
-    console.error('[auth] Keycloak init failed:', err)
-    throw err
+    console.error("[auth] Keycloak init failed:", err);
+    throw err;
   }
 }

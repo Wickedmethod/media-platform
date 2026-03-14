@@ -204,12 +204,12 @@ To unlock the remaining 22 blocked stories, set up in this order:
 |-------|-------|--------|--------|------------|
 | MEDIA-700 | Admin Frontend Project Setup | 3 pts | ✅ Done | — |
 | MEDIA-701 | Keycloak Auth Flow | 3 pts | ✅ Done | MEDIA-700 |
-| MEDIA-702 | Queue Management View & Now Playing Panel | 3 pts | ⏳ Planned | MEDIA-700, MEDIA-701, MEDIA-704 |
+| MEDIA-702 | Queue Management View & Now Playing Panel | 3 pts | ✅ Done | MEDIA-700, MEDIA-701, MEDIA-704 |
 | MEDIA-703 | Admin Dashboard View | 3 pts | ⏳ Planned | MEDIA-700, MEDIA-701 |
 | MEDIA-704 | SSE Real-Time Composable & Player Store | 3 pts | ✅ Done | MEDIA-700 |
 | MEDIA-705 | PWA Configuration | 2 pts | ✅ Done | MEDIA-700 |
 | MEDIA-706 | Frontend Docker & Deployment | 2 pts | ✅ Done | MEDIA-700 |
-| MEDIA-707 | Mobile Navigation & App Layout | 2 pts | ⏳ Planned | MEDIA-700, MEDIA-701 |
+| MEDIA-707 | Mobile Navigation & App Layout | 2 pts | ✅ Done | MEDIA-700, MEDIA-701 |
 | MEDIA-708 | Orval Client Generation Pipeline | 2 pts | ✅ Done | MEDIA-700, MEDIA-712 |
 | MEDIA-709 | Error Handling & Toast Notification System | 2 pts | ✅ Done | MEDIA-700 |
 | MEDIA-710 | YouTube Search Integration (Invidious) | 3 pts | ⏳ Planned | MEDIA-700, MEDIA-701 |
