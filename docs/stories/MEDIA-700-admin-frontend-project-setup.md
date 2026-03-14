@@ -5,7 +5,7 @@
 **Epic:** MEDIA-FE-ADMIN — Admin & User Frontend  
 **Priority:** Critical (foundation for all other frontend stories)  
 **Effort:** 3 points  
-**Status:** ⏳ Planned  
+**Status:** ✅ Done  
 **Depends on:** None
 
 ---

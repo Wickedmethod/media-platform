@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Media Platform — Queue, playback & admin control" />
+    <meta name="theme-color" content="#0f172a" />
+
+    <!-- Prevent flash of wrong theme -->
+    <script>
+      ;(function () {
+        const stored = localStorage.getItem('media-theme')
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+
+        if (stored === 'light') {
+          document.documentElement.classList.remove('dark')
+        } else if (
+          stored === 'dark' ||
+          (!stored && prefersDark) ||
+          (stored === 'system' && prefersDark)
+        ) {
+          document.documentElement.classList.add('dark')
+        } else if (!stored) {
+          document.documentElement.classList.add('dark')
+        }
+      })()
+    </script>
+
+    <!-- PWA meta tags -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Media Platform" />
+
+    <title>Media Platform</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

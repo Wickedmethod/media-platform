@@ -1,19 +1,19 @@
 # Media Platform — Backlog
 
-> Last updated: 2026-03-15
+> Last updated: 2026-03-16
 
 ## Legend
 
 | Status    | Meaning |
-|-----------|---------|
+|-----------|---------|----|
 | ✅ Done   | Implemented, tested, merged |
 | 🔶 Blocked | Requires external service (Keycloak, Vault, Google OAuth, Raspberry Pi) |
 | ⏳ Planned | Can be implemented independently |
 
 ## Summary
 
-- **38 stories done** (all tested, committed)
-- **251 tests** (194 unit + 57 integration), 0 failures
+- **42 stories done** (all tested, committed)
+- **273 tests** (194 unit + 79 integration), 0 failures
 - **22 stories blocked** by external dependencies
 - **50 new frontend/integration/infra stories** planned across 9 epics
 
@@ -202,7 +202,7 @@ To unlock the remaining 22 blocked stories, set up in this order:
 
 | Story | Title | Effort | Status | Depends on |
 |-------|-------|--------|--------|------------|
-| MEDIA-700 | Admin Frontend Project Setup | 3 pts | ⏳ Planned | — |
+| MEDIA-700 | Admin Frontend Project Setup | 3 pts | ✅ Done | — |
 | MEDIA-701 | Keycloak Auth Flow | 3 pts | ⏳ Planned | MEDIA-700 |
 | MEDIA-702 | Queue Management View & Now Playing Panel | 3 pts | ⏳ Planned | MEDIA-700, MEDIA-701, MEDIA-704 |
 | MEDIA-703 | Admin Dashboard View | 3 pts | ⏳ Planned | MEDIA-700, MEDIA-701 |
