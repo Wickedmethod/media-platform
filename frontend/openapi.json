@@ -1,0 +1,2226 @@
+{
+  "openapi": "3.1.1",
+  "info": {
+    "title": "Media Platform API",
+    "description": "Queue-based media playback controller for homelab",
+    "version": "v1"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000/"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "MediaPlatform.Api"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/now-playing": {
+      "get": {
+        "tags": [
+          "Player"
+        ],
+        "description": "Get current playback state",
+        "operationId": "GetNowPlaying",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaybackStateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sync": {
+      "get": {
+        "tags": [
+          "Sync"
+        ],
+        "description": "Atomic snapshot of all client-relevant state for fast sync",
+        "operationId": "GetSyncSnapshot",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncSnapshot"
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "Not Modified"
+          }
+        }
+      }
+    },
+    "/queue": {
+      "get": {
+        "tags": [
+          "Queue"
+        ],
+        "description": "List all pending queue items",
+        "operationId": "GetQueue",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/QueueItemResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/queue/add": {
+      "post": {
+        "tags": [
+          "Queue"
+        ],
+        "description": "Add a media item to the queue",
+        "operationId": "AddToQueue",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddToQueueRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueItemResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/queue/{id}": {
+      "delete": {
+        "tags": [
+          "Queue"
+        ],
+        "description": "Remove an item from the queue",
+        "operationId": "RemoveFromQueue",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/queue/mode": {
+      "get": {
+        "tags": [
+          "Queue"
+        ],
+        "description": "Get the current queue mode",
+        "operationId": "GetQueueMode",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueModeResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Queue"
+        ],
+        "description": "Set queue mode (Normal, Shuffle, PlayNext)",
+        "operationId": "SetQueueMode",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetQueueModeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueModeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/player/heartbeat": {
+      "post": {
+        "tags": [
+          "Player"
+        ],
+        "description": "Report player liveness heartbeat",
+        "operationId": "PlayerHeartbeat",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HeartbeatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/player/play": {
+      "post": {
+        "tags": [
+          "Player"
+        ],
+        "description": "Start or resume playback",
+        "operationId": "Play",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaybackStateResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/player/pause": {
+      "post": {
+        "tags": [
+          "Player"
+        ],
+        "description": "Pause playback",
+        "operationId": "Pause",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaybackStateResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/player/skip": {
+      "post": {
+        "tags": [
+          "Player"
+        ],
+        "description": "Skip to the next track",
+        "operationId": "Skip",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaybackStateResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/player/stop": {
+      "post": {
+        "tags": [
+          "Player"
+        ],
+        "description": "Stop playback",
+        "operationId": "Stop",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaybackStateResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/player/position": {
+      "post": {
+        "tags": [
+          "Player"
+        ],
+        "description": "Report current playback position",
+        "operationId": "ReportPosition",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportPositionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaybackStateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/player/error": {
+      "post": {
+        "tags": [
+          "Player"
+        ],
+        "description": "Report a playback error",
+        "operationId": "ReportError",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportErrorRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaybackStateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/webhooks": {
+      "get": {
+        "tags": [
+          "Notifications"
+        ],
+        "description": "List all registered webhooks",
+        "operationId": "GetWebhooks",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Notifications"
+        ],
+        "description": "Register a new webhook",
+        "operationId": "RegisterWebhook",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterWebhookRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/webhooks/{id}": {
+      "delete": {
+        "tags": [
+          "Notifications"
+        ],
+        "description": "Remove a webhook by ID",
+        "operationId": "RemoveWebhook",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/analytics": {
+      "get": {
+        "tags": [
+          "Analytics"
+        ],
+        "description": "Get analytics snapshot with optional time range",
+        "operationId": "GetAnalytics",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/analytics/export": {
+      "get": {
+        "tags": [
+          "Analytics"
+        ],
+        "description": "Export analytics as formatted JSON",
+        "operationId": "ExportAnalytics",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/admin/players": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "List all registered players with liveness status",
+        "operationId": "GetPlayers",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlayerStatusResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/players/{id}/logs": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "Get diagnostic logs for a specific player",
+        "operationId": "GetPlayerLogs",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "level",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayerLogResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/players/versions": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "List all players with version comparison against expected version",
+        "operationId": "GetVersionMatrix",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionMatrixResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/players/expected-version": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "Set the expected player software version",
+        "operationId": "SetExpectedVersion",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetExpectedVersionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/admin/players/notify-update": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "Broadcast an update-available SSE event to all connected players",
+        "operationId": "NotifyPlayerUpdate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotifyUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/admin/kill-switch": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "Activate the emergency kill switch — blocks all writes",
+        "operationId": "ActivateKillSwitch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KillSwitchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "Deactivate the emergency kill switch",
+        "operationId": "DeactivateKillSwitch",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "Get kill switch status",
+        "operationId": "GetKillSwitchStatus",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/admin/audit": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "Get recent audit log entries",
+        "operationId": "GetAuditLog",
+        "parameters": [
+          {
+            "name": "count",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/admin/anomalies": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "Evaluate current anomaly detection status",
+        "operationId": "GetAnomalies",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/admin/players/{id}/network": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "Get network connectivity metrics and trend for a specific player",
+        "operationId": "GetPlayerNetworkMetrics",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NetworkMetricsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/alerts/config": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "Get current alerting configuration status",
+        "operationId": "GetAlertConfig",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertConfigResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/policies": {
+      "get": {
+        "tags": [
+          "Policies"
+        ],
+        "description": "List all playback policies",
+        "operationId": "GetPolicies",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Policies"
+        ],
+        "description": "Add a new playback policy",
+        "operationId": "AddPolicy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddPolicyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/policies/{id}": {
+      "delete": {
+        "tags": [
+          "Policies"
+        ],
+        "description": "Remove a policy by ID",
+        "operationId": "RemovePolicy",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/policies/{id}/toggle": {
+      "post": {
+        "tags": [
+          "Policies"
+        ],
+        "description": "Enable or disable a policy",
+        "operationId": "TogglePolicy",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TogglePolicyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/policies/evaluate": {
+      "post": {
+        "tags": [
+          "Policies"
+        ],
+        "description": "Dry-run policy evaluation against a URL",
+        "operationId": "EvaluatePolicy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EvaluatePolicyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/worker/register": {
+      "post": {
+        "tags": [
+          "Worker"
+        ],
+        "description": "Register a player node with the API",
+        "operationId": "RegisterWorker",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkerRegistrationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkerRegistrationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/worker/disconnect": {
+      "post": {
+        "tags": [
+          "Worker"
+        ],
+        "description": "Notify API of a planned player disconnect (graceful shutdown)",
+        "operationId": "DisconnectWorker",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DisconnectRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/diagnostics/logs": {
+      "post": {
+        "tags": [
+          "Diagnostics"
+        ],
+        "description": "Submit a batch of player diagnostic logs",
+        "operationId": "SubmitPlayerLogs",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitLogsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/diagnostics/network": {
+      "post": {
+        "tags": [
+          "Diagnostics"
+        ],
+        "description": "Submit aggregated network connectivity metrics from a player",
+        "operationId": "SubmitNetworkMetrics",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitNetworkMetricsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/diagnostics/bandwidth-test": {
+      "get": {
+        "tags": [
+          "Diagnostics"
+        ],
+        "description": "Returns a 100 KB payload for player-side bandwidth estimation",
+        "operationId": "BandwidthTest",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AddPolicyRequest": {
+        "required": [
+          "name",
+          "type",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      },
+      "AddToQueueRequest": {
+        "required": [
+          "url",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "startAtSeconds": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double",
+            "default": 0
+          }
+        }
+      },
+      "AlertConfigResponse": {
+        "required": [
+          "enabled",
+          "cooldownMinutes",
+          "channelCount"
+        ],
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "cooldownMinutes": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "channelCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "ApiError": {
+        "required": [
+          "error"
+        ],
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "detail": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "BandwidthMetricsDto": {
+        "required": [
+          "lastMbps",
+          "measuredAt"
+        ],
+        "type": "object",
+        "properties": {
+          "lastMbps": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "measuredAt": {
+            "type": "string"
+          }
+        }
+      },
+      "DisconnectRequest": {
+        "required": [
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string"
+          },
+          "signal": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "DnsMetricsDto": {
+        "required": [
+          "avgResolveMs",
+          "failures"
+        ],
+        "type": "object",
+        "properties": {
+          "avgResolveMs": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "failures": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "EvaluatePolicyRequest": {
+        "required": [
+          "action",
+          "videoUrl"
+        ],
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "videoUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "HeartbeatRequest": {
+        "required": [
+          "playerId",
+          "state"
+        ],
+        "type": "object",
+        "properties": {
+          "playerId": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "position": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double",
+            "default": 0
+          },
+          "videoId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "uptime": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64",
+            "default": 0
+          },
+          "version": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "KillSwitchRequest": {
+        "required": [
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "LatencyMetricsDto": {
+        "required": [
+          "avgMs",
+          "minMs",
+          "maxMs",
+          "p95Ms",
+          "samples",
+          "failures"
+        ],
+        "type": "object",
+        "properties": {
+          "avgMs": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "minMs": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "maxMs": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "p95Ms": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "samples": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "failures": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "LogEntryRequest": {
+        "required": [
+          "timestamp",
+          "level",
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "string"
+          },
+          "level": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "source": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "LogEntryResponse": {
+        "required": [
+          "timestamp",
+          "level",
+          "message",
+          "source"
+        ],
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "string"
+          },
+          "level": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "source": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "NetworkMetricsCurrentDto": {
+        "required": [
+          "playerId",
+          "timestamp",
+          "latency",
+          "dns",
+          "bandwidth"
+        ],
+        "type": "object",
+        "properties": {
+          "playerId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string"
+          },
+          "latency": {
+            "$ref": "#/components/schemas/LatencyMetricsDto"
+          },
+          "dns": {
+            "$ref": "#/components/schemas/DnsMetricsDto"
+          },
+          "bandwidth": {
+            "$ref": "#/components/schemas/BandwidthMetricsDto"
+          }
+        }
+      },
+      "NetworkMetricsResponse": {
+        "required": [
+          "current",
+          "trend"
+        ],
+        "type": "object",
+        "properties": {
+          "current": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/NetworkMetricsCurrentDto"
+              }
+            ]
+          },
+          "trend": {
+            "$ref": "#/components/schemas/NetworkTrendDto"
+          }
+        }
+      },
+      "NetworkTrendDto": {
+        "required": [
+          "latencyTrend",
+          "avgLatency1h",
+          "bandwidthTrend",
+          "avgBandwidth1h"
+        ],
+        "type": "object",
+        "properties": {
+          "latencyTrend": {
+            "type": "string"
+          },
+          "avgLatency1h": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "bandwidthTrend": {
+            "type": "string"
+          },
+          "avgBandwidth1h": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "NotifyUpdateRequest": {
+        "required": [
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "PlaybackStateResponse": {
+        "required": [
+          "state",
+          "currentItem",
+          "startedAt",
+          "positionSeconds",
+          "retryCount",
+          "lastError"
+        ],
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "string"
+          },
+          "currentItem": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/QueueItemResponse"
+              }
+            ]
+          },
+          "startedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "positionSeconds": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "retryCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "lastError": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "PlayerLogResponse": {
+        "required": [
+          "playerId",
+          "entries",
+          "totalCount"
+        ],
+        "type": "object",
+        "properties": {
+          "playerId": {
+            "type": "string"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LogEntryResponse"
+            }
+          },
+          "totalCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "PlayerStatusResponse": {
+        "required": [
+          "id",
+          "lastSeen",
+          "state",
+          "isAlive",
+          "uptime",
+          "version"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "lastSeen": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "state": {
+            "type": "string"
+          },
+          "isAlive": {
+            "type": "boolean"
+          },
+          "uptime": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "version": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "capabilities": { },
+          "registeredAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "PlayerVersionInfo": {
+        "required": [
+          "id",
+          "version",
+          "upToDate"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "version": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "upToDate": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PolicySnapshot": {
+        "required": [
+          "id",
+          "name",
+          "type",
+          "enabled"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "QueueItemResponse": {
+        "required": [
+          "id",
+          "url",
+          "title",
+          "status",
+          "addedAt",
+          "startAtSeconds"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "addedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "startAtSeconds": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "addedByUserId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "addedByName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "QueueModeResponse": {
+        "required": [
+          "mode"
+        ],
+        "type": "object",
+        "properties": {
+          "mode": {
+            "type": "string"
+          }
+        }
+      },
+      "RegisterWebhookRequest": {
+        "required": [
+          "id",
+          "url",
+          "eventTypes"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "url": {
+            "type": "string"
+          },
+          "eventTypes": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ReportErrorRequest": {
+        "required": [
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "ReportPositionRequest": {
+        "required": [
+          "positionSeconds"
+        ],
+        "type": "object",
+        "properties": {
+          "positionSeconds": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "SetExpectedVersionRequest": {
+        "required": [
+          "version"
+        ],
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string"
+          }
+        }
+      },
+      "SetQueueModeRequest": {
+        "required": [
+          "mode"
+        ],
+        "type": "object",
+        "properties": {
+          "mode": {
+            "type": "string"
+          }
+        }
+      },
+      "SubmitLogsRequest": {
+        "required": [
+          "playerId",
+          "entries"
+        ],
+        "type": "object",
+        "properties": {
+          "playerId": {
+            "type": "string"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LogEntryRequest"
+            }
+          }
+        }
+      },
+      "SubmitNetworkMetricsRequest": {
+        "required": [
+          "playerId",
+          "timestamp",
+          "latency",
+          "dns",
+          "bandwidth"
+        ],
+        "type": "object",
+        "properties": {
+          "playerId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string"
+          },
+          "latency": {
+            "$ref": "#/components/schemas/LatencyMetricsDto"
+          },
+          "dns": {
+            "$ref": "#/components/schemas/DnsMetricsDto"
+          },
+          "bandwidth": {
+            "$ref": "#/components/schemas/BandwidthMetricsDto"
+          }
+        }
+      },
+      "SyncSnapshot": {
+        "required": [
+          "queue",
+          "nowPlaying",
+          "queueMode",
+          "policies",
+          "killSwitch",
+          "serverTime",
+          "version"
+        ],
+        "type": "object",
+        "properties": {
+          "queue": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QueueItemResponse"
+            }
+          },
+          "nowPlaying": {
+            "$ref": "#/components/schemas/PlaybackStateResponse"
+          },
+          "queueMode": {
+            "type": "string"
+          },
+          "policies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PolicySnapshot"
+            }
+          },
+          "killSwitch": {
+            "type": "boolean"
+          },
+          "serverTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          }
+        }
+      },
+      "TogglePolicyRequest": {
+        "required": [
+          "enabled"
+        ],
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "VersionMatrixResponse": {
+        "required": [
+          "expectedVersion",
+          "players"
+        ],
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "players": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlayerVersionInfo"
+            }
+          }
+        }
+      },
+      "WebhookResponse": {
+        "required": [
+          "id",
+          "url",
+          "eventTypes",
+          "registeredAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "eventTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "registeredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WorkerCapabilitiesDto": {
+        "type": "object",
+        "properties": {
+          "cec": {
+            "type": "boolean",
+            "default": false
+          },
+          "audioOutput": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "maxResolution": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "codecs": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "chromiumVersion": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "WorkerConfigResponse": {
+        "required": [
+          "heartbeatInterval",
+          "positionReportInterval",
+          "sseUrl"
+        ],
+        "type": "object",
+        "properties": {
+          "heartbeatInterval": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "positionReportInterval": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "sseUrl": {
+            "type": "string"
+          }
+        }
+      },
+      "WorkerRegistrationRequest": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "capabilities": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/WorkerCapabilitiesDto"
+              }
+            ]
+          },
+          "version": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "os": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "WorkerRegistrationResponse": {
+        "required": [
+          "playerId",
+          "serverTime",
+          "config"
+        ],
+        "type": "object",
+        "properties": {
+          "playerId": {
+            "type": "string"
+          },
+          "serverTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "config": {
+            "$ref": "#/components/schemas/WorkerConfigResponse"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "MediaPlatform.Api"
+    },
+    {
+      "name": "Player"
+    },
+    {
+      "name": "Sync"
+    },
+    {
+      "name": "Queue"
+    },
+    {
+      "name": "Notifications"
+    },
+    {
+      "name": "Analytics"
+    },
+    {
+      "name": "Admin"
+    },
+    {
+      "name": "Policies"
+    },
+    {
+      "name": "Worker"
+    },
+    {
+      "name": "Diagnostics"
+    }
+  ]
+}
