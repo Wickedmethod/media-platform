@@ -174,6 +174,8 @@ builder.Services.AddSingleton<IPolicyEngine, InMemoryPolicyEngine>();
 builder.Services.AddSingleton<MediaPlatformMetrics>();
 builder.Services.AddHttpClient("webhooks");
 builder.Services.AddHttpClient("alerts");
+builder.Services.AddHttpClient("piped");
+builder.Services.AddHttpClient("youtube");
 
 // Alerting (MEDIA-743)
 builder.Services.Configure<AlertingOptions>(builder.Configuration.GetSection("Alerting"));
@@ -251,6 +253,7 @@ api.MapAdminEndpoints();
 api.MapPolicyEndpoints();
 api.MapWorkerEndpoints();
 api.MapDiagnosticsEndpoints();
+api.MapSearchEndpoints();
 app.MapMetrics();
 
 app.Run();

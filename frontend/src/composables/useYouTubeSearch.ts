@@ -1,6 +1,7 @@
 import { ref, watch, readonly } from "vue";
 import { useQuery, useQueryClient } from "@tanstack/vue-query";
-import { invidiousClient } from "@/lib/invidious";
+import { config } from "@/config";
+import type { SearchResult } from "@/lib/invidious";
 
 export type { SearchResult } from "@/lib/invidious";
 
@@ -53,7 +54,12 @@ export function useYouTubeSearch() {
     error,
   } = useQuery({
     queryKey: ["youtube-search", debouncedQuery],
-    queryFn: ({ signal }) => invidiousClient.search(debouncedQuery.value, signal),
+    queryFn: async ({ signal }): Promise<SearchResult[]> => {
+      const url = `${config.apiBaseUrl}/search/youtube?q=${encodeURIComponent(debouncedQuery.value)}`;
+      const res = await fetch(url, { signal });
+      if (!res.ok) throw new Error(`Search failed (${res.status})`);
+      return res.json() as Promise<SearchResult[]>;
+    },
     enabled: () => debouncedQuery.value.length > 0,
     staleTime: 5 * 60 * 1000,
     retry: 1,
