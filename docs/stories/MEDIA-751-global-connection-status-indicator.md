@@ -5,7 +5,7 @@
 **Epic:** MEDIA-FE-ADMIN — Admin Frontend  
 **Priority:** Medium  
 **Effort:** 2 points  
-**Status:** ⏳ Planned  
+**Status:** ✅ Done  
 **Depends on:** MEDIA-704 (SSE composable — provides `isConnected`), MEDIA-707 (layout shell)
 
 ---

@@ -1,17 +1,41 @@
 <script setup lang="ts">
+import { watch } from "vue";
 import { RouterView } from "vue-router";
 import ErrorBoundary from "@/shared/components/ErrorBoundary.vue";
 import ToastContainer from "@/shared/components/ToastContainer.vue";
 import AppSidebar from "@/shared/components/AppSidebar.vue";
 import BottomTabBar from "@/shared/components/BottomTabBar.vue";
 import NowPlayingBar from "@/shared/components/NowPlayingBar.vue";
+import ConnectionStatusBar from "@/shared/components/ConnectionStatusBar.vue";
 import { usePlayerStore } from "@/stores/player";
+import { useSSE } from "@/composables/useSSE";
+import { config } from "@/config";
 
 const player = usePlayerStore();
+
+// Global SSE connection — pipes events to player store
+const sse = useSSE({
+  url: `${config.apiBaseUrl}/events`,
+  withCredentials: true,
+  onEvent: (event, data) => {
+    player.handleSSEEvent(event, data);
+  },
+});
+
+watch(
+  [sse.connected, sse.isReconnecting],
+  ([connected, reconnecting]) => {
+    player.setSseStatus(connected, reconnecting);
+  },
+  { immediate: true },
+);
+
+sse.connect();
 </script>
 
 <template>
   <div class="min-h-screen bg-background text-foreground">
+    <ConnectionStatusBar />
     <AppSidebar />
 
     <main class="pb-24 md:pb-16 md:pl-56">

@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { useQueryClient } from "@tanstack/vue-query";
+import { onUnmounted } from "vue";
 import { useGetQueue, useAddToQueue, useRemoveFromQueue, useGetQueueMode, useSetQueueMode, getGetQueueQueryKey, getGetQueueModeQueryKey } from "@/generated/queue/queue";
 import { usePlay, usePause, useSkip, useStop } from "@/generated/player/player";
 import { usePlayerStore, type QueueMode } from "@/stores/player";
 import { useAuthStore } from "@/stores/auth";
-import { useSSE } from "@/composables/useSSE";
 import { useToast } from "@/composables/useToast";
-import { config } from "@/config";
 import type { QueueItemResponse } from "@/generated/models";
 import NowPlaying from "./NowPlaying.vue";
 import QueueList from "./QueueList.vue";
@@ -57,19 +56,13 @@ const pauseMutation = usePause();
 const skipMutation = useSkip();
 const stopMutation = useStop();
 
-// --- SSE for real-time updates ---
-useSSE({
-  url: `${config.apiBaseUrl}/events`,
-  withCredentials: true,
-  onEvent: (event, data) => {
-    player.handleSSEEvent(event, data);
-
-    // Invalidate queue on queue-related events
-    if (event === "queue-updated" || event === "item-added") {
-      queryClient.invalidateQueries({ queryKey: getGetQueueQueryKey() });
-    }
-  },
+// --- SSE-driven query invalidation ---
+const unsubscribe = player.onSSEEvent((event) => {
+  if (event === "queue-updated" || event === "item-added") {
+    queryClient.invalidateQueries({ queryKey: getGetQueueQueryKey() });
+  }
 });
+onUnmounted(unsubscribe);
 
 // --- Handlers ---
 function handleAdd(url: string, title: string) {

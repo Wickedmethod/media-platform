@@ -142,6 +142,15 @@ export const usePlayerStore = defineStore("player", () => {
     lastUpdate.value = new Date();
   }
 
+  // SSE connection status
+  const sseConnected = ref(false);
+  const sseReconnecting = ref(false);
+
+  function setSseStatus(connected: boolean, reconnecting: boolean) {
+    sseConnected.value = connected;
+    sseReconnecting.value = reconnecting;
+  }
+
   function reset() {
     currentItem.value = null;
     playerState.value = "Idle";
@@ -167,6 +176,10 @@ export const usePlayerStore = defineStore("player", () => {
     isStopped,
     isIdle,
     progress,
+    // SSE
+    sseConnected,
+    sseReconnecting,
+    setSseStatus,
     // Actions
     handleSSEEvent,
     handlePollState,
