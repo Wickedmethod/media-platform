@@ -153,6 +153,27 @@ export const usePlayerStore = defineStore("player", () => {
     sseReconnecting.value = reconnecting;
   }
 
+  /** Apply a full state snapshot from /sync (used on reconnect) */
+  function applySnapshot(data: unknown) {
+    const d = data as {
+      state?: PlayerState;
+      currentItem?: QueueItemResponse | null;
+      position?: number;
+      duration?: number;
+      isKillSwitchActive?: boolean;
+      queueMode?: QueueMode;
+    };
+    if (d.state) playerState.value = d.state;
+    if (d.currentItem !== undefined) currentItem.value = d.currentItem ?? null;
+    if (d.position !== undefined) position.value = d.position;
+    if (d.duration !== undefined) duration.value = d.duration;
+    if (d.isKillSwitchActive !== undefined)
+      isKillSwitchActive.value = d.isKillSwitchActive;
+    if (d.queueMode) queueMode.value = d.queueMode;
+    lastUpdate.value = new Date();
+    lastError.value = null;
+  }
+
   function reset() {
     currentItem.value = null;
     playerState.value = "Idle";
@@ -185,6 +206,7 @@ export const usePlayerStore = defineStore("player", () => {
     // Actions
     handleSSEEvent,
     handlePollState,
+    applySnapshot,
     onSSEEvent,
     reset,
   };

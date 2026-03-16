@@ -5,7 +5,7 @@
 **Epic:** MEDIA-FE-TV — TV Frontend  
 **Priority:** High  
 **Effort:** 2 points  
-**Status:** ⏳ Planned  
+**Status:** ✅ Done  
 **Depends on:** MEDIA-720 (TV frontend), MEDIA-704 (SSE composable pattern), MEDIA-725 (sync endpoint)
 
 ---

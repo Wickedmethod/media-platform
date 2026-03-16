@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from "vue";
 import { usePlayerStore } from "@/stores/player";
+import { usePlaybackTimeout } from "@/features/tv/composables/usePlaybackTimeout";
 import { config } from "@/config";
 
 const playerStore = usePlayerStore();
@@ -13,6 +14,23 @@ const emit = defineEmits<{
   trackEnd: [];
   error: [code: number];
 }>();
+
+// Playback timeout detection (MEDIA-755)
+const timeout = usePlaybackTimeout({
+  onTimeout: (videoId, phase) => {
+    if (phase === "initial") {
+      // Retry: reload same video
+      ytPlayer?.loadVideoById({ videoId });
+    }
+    reportPlaybackError(0, `playback_timeout_${phase}`);
+  },
+  onSkip: () => {
+    reportPlaybackError(0, "playback_timeout_skip");
+    fetch(`${config.apiBaseUrl}/player/skip`, { method: "POST" }).catch(
+      () => {},
+    );
+  },
+});
 
 function extractVideoId(url: string): string {
   try {
@@ -50,12 +68,16 @@ function initPlayer() {
     },
     events: {
       onStateChange: (e) => {
+        if (e.data === YT.PlayerState.PLAYING) {
+          timeout.playbackStarted();
+        }
         if (e.data === YT.PlayerState.ENDED) {
           emit("trackEnd");
           reportTrackEnd();
         }
       },
       onError: (e) => {
+        timeout.stop();
         emit("error", e.data);
         reportPlaybackError(e.data);
       },
@@ -71,12 +93,12 @@ async function reportTrackEnd() {
   }
 }
 
-async function reportPlaybackError(code: number) {
+async function reportPlaybackError(code: number, reason?: string) {
   try {
     await fetch(`${config.apiBaseUrl}/player/error`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ reason: `YouTube error ${code}` }),
+      body: JSON.stringify({ reason: reason ?? `YouTube error ${code}` }),
     });
   } catch {
     /* ignore */
@@ -115,6 +137,7 @@ watch(
     if (item && ytPlayer) {
       const videoId = extractVideoId(item.url);
       ytPlayer.loadVideoById({ videoId, startSeconds: playerStore.position });
+      timeout.startWatching(videoId);
       emit("trackStart");
     }
   },
@@ -139,6 +162,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   stopPositionReporting();
+  timeout.stop();
   ytPlayer?.destroy();
   ytPlayer = null;
 });

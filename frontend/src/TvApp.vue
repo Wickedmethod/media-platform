@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, watch, onUnmounted } from "vue";
+import { ref, computed, onUnmounted } from "vue";
 import { usePlayerStore } from "@/stores/player";
-import { useSSE } from "@/composables/useSSE";
+import { useTvSSE } from "@/features/tv/composables/useTvSSE";
+import { useCecRemote } from "@/features/tv/composables/useCecRemote";
 import { config } from "@/config";
 import TvPlayer from "@/features/tv/TvPlayer.vue";
 import TvOverlay from "@/features/tv/TvOverlay.vue";
@@ -10,23 +11,10 @@ import TvError from "@/features/tv/TvError.vue";
 
 const player = usePlayerStore();
 const overlayRef = ref<InstanceType<typeof TvOverlay>>();
+const errorRef = ref<InstanceType<typeof TvError>>();
 
-// SSE connection — shared composable piping events into player store
-const sse = useSSE({
-  url: config.apiEventsUrl,
-  onEvent: (event, data) => {
-    player.handleSSEEvent(event, data);
-  },
-});
-
-watch(
-  [sse.connected, sse.isReconnecting],
-  ([connected, reconnecting]) => {
-    player.setSseStatus(connected, reconnecting);
-  },
-  { immediate: true },
-);
-
+// SSE connection — TV-specific with infinite reconnect + /sync recovery
+const sse = useTvSSE();
 sse.connect();
 
 // Screen state
@@ -41,20 +29,45 @@ const screen = computed<TvScreen>(() => {
 // Kill switch overlay
 const killSwitchActive = computed(() => player.isKillSwitchActive);
 
-// Keyboard handler — toggle overlay with space/enter
-function onKeyDown(e: KeyboardEvent) {
-  if (e.key === " " || e.key === "Enter") {
-    e.preventDefault();
+// CEC Remote Control — maps keyboard/CEC events to actions
+useCecRemote({
+  onPlay: () => {
+    fetch(`${config.apiBaseUrl}/player/play`, { method: "POST" }).catch(
+      () => {},
+    );
+  },
+  onPause: () => {
+    fetch(`${config.apiBaseUrl}/player/pause`, { method: "POST" }).catch(
+      () => {},
+    );
+  },
+  onSkip: () => {
+    if (screen.value === "error") {
+      errorRef.value?.skipToNext();
+    } else {
+      fetch(`${config.apiBaseUrl}/player/skip`, { method: "POST" }).catch(
+        () => {},
+      );
+    }
+  },
+  onRestart: () => {
+    fetch(`${config.apiBaseUrl}/player/play`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ startAtSeconds: 0 }),
+    }).catch(() => {});
+  },
+  onStop: () => {
+    fetch(`${config.apiBaseUrl}/player/stop`, { method: "POST" }).catch(
+      () => {},
+    );
+  },
+  onToggleOverlay: () => {
     overlayRef.value?.toggleOverlay();
-  }
-}
-
-if (typeof window !== "undefined") {
-  window.addEventListener("keydown", onKeyDown);
-}
+  },
+});
 
 onUnmounted(() => {
-  window.removeEventListener("keydown", onKeyDown);
   sse.disconnect();
 });
 </script>
@@ -82,7 +95,7 @@ onUnmounted(() => {
     </template>
 
     <!-- Error screen -->
-    <TvError v-else-if="screen === 'error'" />
+    <TvError v-else-if="screen === 'error'" ref="errorRef" @skip="player.lastError = null" />
 
     <!-- Connection indicator -->
     <div

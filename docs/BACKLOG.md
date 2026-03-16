@@ -12,7 +12,7 @@
 
 ## Summary
 
-- **67 stories done** (all tested, committed)
+- **71 stories done** (all tested, committed)
 - **273 tests** (194 unit + 79 integration), 0 failures
 - **22 stories blocked** by external dependencies
 - **44 new frontend/integration/infra stories** planned across 9 epics
@@ -232,11 +232,11 @@ To unlock the remaining 22 blocked stories, set up in this order:
 | Story | Title | Effort | Status | Depends on |
 |-------|-------|--------|--------|------------|
 | MEDIA-720 | TV Frontend — Pi Kiosk Application (Vue) | 5 pts | ✅ Done | MEDIA-700, MEDIA-704 |
-| MEDIA-721 | CEC Remote Control Integration | 3 pts | ⏳ Planned | MEDIA-720 |
+| MEDIA-721 | CEC Remote Control Integration | 3 pts | ✅ Done | MEDIA-720 |
 | MEDIA-722 | TV On-Screen Keyboard & Search (Vue) | 3 pts | ⏳ Planned | MEDIA-720, MEDIA-721, MEDIA-710 |
 | MEDIA-723 | Pi Provisioning & Setup Automation | 3 pts | ⏳ Planned | MEDIA-720, MEDIA-721 |
-| MEDIA-734 | TV SSE Reconnect & State Recovery | 2 pts | ⏳ Planned | MEDIA-720, MEDIA-704 |
-| MEDIA-736 | TV Playback Error Screen | 2 pts | ⏳ Planned | MEDIA-720 |
+| MEDIA-734 | TV SSE Reconnect & State Recovery | 2 pts | ✅ Done | MEDIA-720, MEDIA-704 |
+| MEDIA-736 | TV Playback Error Screen | 2 pts | ✅ Done | MEDIA-720 |
 
 ## Epic: MEDIA-BE-MULTI — Multi-User Backend Support
 
@@ -271,7 +271,7 @@ To unlock the remaining 22 blocked stories, set up in this order:
 | MEDIA-731 | Player Crash Recovery & Auto-Reconnect | 3 pts | ⏳ Planned | MEDIA-725, MEDIA-734 |
 | MEDIA-732 | Player Log Streaming & Remote Diagnostics | 2 pts | ✅ Done | MEDIA-729 |
 | MEDIA-733 | Player Version & Update Check | 2 pts | ✅ Done | MEDIA-729 |
-| MEDIA-755 | Player Playback Timeout Detection | 2 pts | ⏳ Planned | MEDIA-720, MEDIA-724 |
+| MEDIA-755 | Player Playback Timeout Detection | 2 pts | ✅ Done | MEDIA-720, MEDIA-724 |
 | MEDIA-756 | Player Disk Usage & Cache Cleanup | 2 pts | ⏳ Planned | MEDIA-612, MEDIA-729 |
 | MEDIA-760 | Graceful Player Shutdown Handling | 2 pts | ✅ Done | MEDIA-724, MEDIA-729 |
 | MEDIA-763 | Player Network Connectivity Monitoring | 3 pts | ✅ Done | MEDIA-729, MEDIA-732 |

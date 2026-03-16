@@ -1,0 +1,26 @@
+[Unit]
+Description=CEC Remote Bridge for Media Platform
+Documentation=https://github.com/user/media-platform
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+ExecStart=/opt/media-platform/cec-bridge.sh
+Restart=always
+RestartSec=5
+Environment=MEDIA_WORKER_KEY=changeme
+Environment=MEDIA_API_BASE=http://localhost:8080/api/v1
+WorkingDirectory=/opt/media-platform
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=cec-bridge
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/tmp
+
+[Install]
+WantedBy=multi-user.target
