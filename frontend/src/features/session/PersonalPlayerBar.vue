@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Play, Pause, SkipForward, X } from "lucide-vue-next";
-import type { SessionPlaybackState, SessionQueueItem } from "./api";
+import type { SessionPlaybackState } from "./api";
 
 defineProps<{
   playback: SessionPlaybackState;

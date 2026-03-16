@@ -3,12 +3,11 @@ WORKDIR /src
 
 COPY Directory.Build.props .
 COPY NuGet.config .
-COPY MediaPlatform.slnx .
 COPY src/MediaPlatform.Domain/MediaPlatform.Domain.csproj src/MediaPlatform.Domain/
 COPY src/MediaPlatform.Application/MediaPlatform.Application.csproj src/MediaPlatform.Application/
 COPY src/MediaPlatform.Infrastructure/MediaPlatform.Infrastructure.csproj src/MediaPlatform.Infrastructure/
 COPY src/MediaPlatform.Api/MediaPlatform.Api.csproj src/MediaPlatform.Api/
-RUN dotnet restore MediaPlatform.slnx
+RUN dotnet restore src/MediaPlatform.Api/MediaPlatform.Api.csproj
 
 COPY src/ src/
 RUN dotnet publish src/MediaPlatform.Api/MediaPlatform.Api.csproj -c Release -o /app --no-restore

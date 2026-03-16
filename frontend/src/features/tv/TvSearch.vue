@@ -113,7 +113,7 @@ function navigateKeyboard(direction: "up" | "down" | "left" | "right") {
         focusRow.value = Math.max(0, focusRow.value - 1);
         focusCol.value = Math.min(
           focusCol.value,
-          layout[focusRow.value].length - 1,
+          layout[focusRow.value]!.length - 1,
         );
       }
       break;
@@ -121,7 +121,7 @@ function navigateKeyboard(direction: "up" | "down" | "left" | "right") {
       focusRow.value = Math.min(layout.length - 1, focusRow.value + 1);
       focusCol.value = Math.min(
         focusCol.value,
-        layout[focusRow.value].length - 1,
+        layout[focusRow.value]!.length - 1,
       );
       break;
     case "left":
@@ -129,7 +129,7 @@ function navigateKeyboard(direction: "up" | "down" | "left" | "right") {
       break;
     case "right":
       focusCol.value = Math.min(
-        layout[focusRow.value].length - 1,
+        layout[focusRow.value]!.length - 1,
         focusCol.value + 1,
       );
       break;
