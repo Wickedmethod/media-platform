@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5000/"
+      "url": "http://localhost:5199/"
     }
   ],
   "paths": {
@@ -23,52 +23,19 @@
         }
       }
     },
-    "/now-playing": {
+    "/events": {
       "get": {
         "tags": [
-          "Player"
+          "MediaPlatform.Api"
         ],
-        "description": "Get current playback state",
-        "operationId": "GetNowPlaying",
         "responses": {
           "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PlaybackStateResponse"
-                }
-              }
-            }
+            "description": "OK"
           }
         }
       }
     },
-    "/sync": {
-      "get": {
-        "tags": [
-          "Sync"
-        ],
-        "description": "Atomic snapshot of all client-relevant state for fast sync",
-        "operationId": "GetSyncSnapshot",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SyncSnapshot"
-                }
-              }
-            }
-          },
-          "304": {
-            "description": "Not Modified"
-          }
-        }
-      }
-    },
-    "/queue": {
+    "/api/queue": {
       "get": {
         "tags": [
           "Queue"
@@ -92,7 +59,7 @@
         }
       }
     },
-    "/queue/add": {
+    "/api/queue/add": {
       "post": {
         "tags": [
           "Queue"
@@ -153,7 +120,7 @@
         }
       }
     },
-    "/queue/{id}": {
+    "/api/queue/{id}": {
       "delete": {
         "tags": [
           "Queue"
@@ -197,7 +164,7 @@
         }
       }
     },
-    "/queue/mode": {
+    "/api/queue/mode": {
       "get": {
         "tags": [
           "Queue"
@@ -267,7 +234,51 @@
         }
       }
     },
-    "/player/heartbeat": {
+    "/api/queue/reorder": {
+      "post": {
+        "tags": [
+          "Queue"
+        ],
+        "description": "Reorder a queue item to a new position (admin only)",
+        "operationId": "ReorderQueue",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReorderQueueRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/player/heartbeat": {
       "post": {
         "tags": [
           "Player"
@@ -291,7 +302,7 @@
         }
       }
     },
-    "/player/play": {
+    "/api/player/play": {
       "post": {
         "tags": [
           "Player"
@@ -322,7 +333,7 @@
         }
       }
     },
-    "/player/pause": {
+    "/api/player/pause": {
       "post": {
         "tags": [
           "Player"
@@ -353,7 +364,7 @@
         }
       }
     },
-    "/player/skip": {
+    "/api/player/skip": {
       "post": {
         "tags": [
           "Player"
@@ -384,7 +395,7 @@
         }
       }
     },
-    "/player/stop": {
+    "/api/player/stop": {
       "post": {
         "tags": [
           "Player"
@@ -415,7 +426,7 @@
         }
       }
     },
-    "/player/position": {
+    "/api/player/position": {
       "post": {
         "tags": [
           "Player"
@@ -446,7 +457,7 @@
         }
       }
     },
-    "/player/error": {
+    "/api/player/error": {
       "post": {
         "tags": [
           "Player"
@@ -477,7 +488,52 @@
         }
       }
     },
-    "/webhooks": {
+    "/api/now-playing": {
+      "get": {
+        "tags": [
+          "Player"
+        ],
+        "description": "Get current playback state",
+        "operationId": "GetNowPlaying",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaybackStateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sync": {
+      "get": {
+        "tags": [
+          "Sync"
+        ],
+        "description": "Atomic snapshot of all client-relevant state for fast sync",
+        "operationId": "GetSyncSnapshot",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncSnapshot"
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "Not Modified"
+          }
+        }
+      }
+    },
+    "/api/webhooks": {
       "get": {
         "tags": [
           "Notifications"
@@ -530,7 +586,7 @@
         }
       }
     },
-    "/webhooks/{id}": {
+    "/api/webhooks/{id}": {
       "delete": {
         "tags": [
           "Notifications"
@@ -554,7 +610,7 @@
         }
       }
     },
-    "/analytics": {
+    "/api/analytics": {
       "get": {
         "tags": [
           "Analytics"
@@ -586,7 +642,7 @@
         }
       }
     },
-    "/analytics/export": {
+    "/api/analytics/export": {
       "get": {
         "tags": [
           "Analytics"
@@ -618,7 +674,7 @@
         }
       }
     },
-    "/admin/players": {
+    "/api/admin/players": {
       "get": {
         "tags": [
           "Admin"
@@ -642,7 +698,7 @@
         }
       }
     },
-    "/admin/players/{id}/logs": {
+    "/api/admin/players/{id}/logs": {
       "get": {
         "tags": [
           "Admin"
@@ -692,7 +748,7 @@
         }
       }
     },
-    "/admin/players/versions": {
+    "/api/admin/players/versions": {
       "get": {
         "tags": [
           "Admin"
@@ -713,7 +769,7 @@
         }
       }
     },
-    "/admin/players/expected-version": {
+    "/api/admin/players/expected-version": {
       "post": {
         "tags": [
           "Admin"
@@ -737,7 +793,7 @@
         }
       }
     },
-    "/admin/players/notify-update": {
+    "/api/admin/players/notify-update": {
       "post": {
         "tags": [
           "Admin"
@@ -761,7 +817,7 @@
         }
       }
     },
-    "/admin/kill-switch": {
+    "/api/admin/kill-switch": {
       "post": {
         "tags": [
           "Admin"
@@ -809,7 +865,7 @@
         }
       }
     },
-    "/admin/audit": {
+    "/api/admin/audit": {
       "get": {
         "tags": [
           "Admin"
@@ -837,7 +893,7 @@
         }
       }
     },
-    "/admin/anomalies": {
+    "/api/admin/anomalies": {
       "get": {
         "tags": [
           "Admin"
@@ -851,7 +907,7 @@
         }
       }
     },
-    "/admin/players/{id}/network": {
+    "/api/admin/players/{id}/network": {
       "get": {
         "tags": [
           "Admin"
@@ -882,7 +938,7 @@
         }
       }
     },
-    "/admin/alerts/config": {
+    "/api/admin/alerts/config": {
       "get": {
         "tags": [
           "Admin"
@@ -903,7 +959,7 @@
         }
       }
     },
-    "/policies": {
+    "/api/policies": {
       "get": {
         "tags": [
           "Policies"
@@ -946,7 +1002,7 @@
         }
       }
     },
-    "/policies/{id}": {
+    "/api/policies/{id}": {
       "delete": {
         "tags": [
           "Policies"
@@ -970,7 +1026,7 @@
         }
       }
     },
-    "/policies/{id}/toggle": {
+    "/api/policies/{id}/toggle": {
       "post": {
         "tags": [
           "Policies"
@@ -1004,7 +1060,7 @@
         }
       }
     },
-    "/policies/evaluate": {
+    "/api/policies/evaluate": {
       "post": {
         "tags": [
           "Policies"
@@ -1028,7 +1084,7 @@
         }
       }
     },
-    "/worker/register": {
+    "/api/worker/register": {
       "post": {
         "tags": [
           "Worker"
@@ -1059,7 +1115,7 @@
         }
       }
     },
-    "/worker/disconnect": {
+    "/api/worker/disconnect": {
       "post": {
         "tags": [
           "Worker"
@@ -1083,7 +1139,7 @@
         }
       }
     },
-    "/diagnostics/logs": {
+    "/api/diagnostics/logs": {
       "post": {
         "tags": [
           "Diagnostics"
@@ -1117,7 +1173,7 @@
         }
       }
     },
-    "/diagnostics/network": {
+    "/api/diagnostics/network": {
       "post": {
         "tags": [
           "Diagnostics"
@@ -1151,7 +1207,7 @@
         }
       }
     },
-    "/diagnostics/bandwidth-test": {
+    "/api/diagnostics/bandwidth-test": {
       "get": {
         "tags": [
           "Diagnostics"
@@ -1161,6 +1217,40 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/search/youtube": {
+      "get": {
+        "tags": [
+          "Search"
+        ],
+        "description": "Search YouTube videos (uses YouTube Data API if configured, Piped fallback otherwise)",
+        "operationId": "SearchYouTube",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/YouTubeSearchResult"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -1829,6 +1919,27 @@
               "null",
               "string"
             ]
+          },
+          "channel": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "durationSeconds": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "thumbnailUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
@@ -1868,6 +1979,26 @@
             "items": {
               "type": "string"
             }
+          }
+        }
+      },
+      "ReorderQueueRequest": {
+        "required": [
+          "itemId",
+          "newIndex"
+        ],
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "string"
+          },
+          "newIndex": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
           }
         }
       },
@@ -2188,6 +2319,42 @@
             "$ref": "#/components/schemas/WorkerConfigResponse"
           }
         }
+      },
+      "YouTubeSearchResult": {
+        "required": [
+          "videoId",
+          "title",
+          "channel",
+          "duration",
+          "thumbnailUrl",
+          "youtubeUrl"
+        ],
+        "type": "object",
+        "properties": {
+          "videoId": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "channel": {
+            "type": "string"
+          },
+          "duration": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "thumbnailUrl": {
+            "type": "string"
+          },
+          "youtubeUrl": {
+            "type": "string"
+          }
+        }
       }
     }
   },
@@ -2196,13 +2363,13 @@
       "name": "MediaPlatform.Api"
     },
     {
+      "name": "Queue"
+    },
+    {
       "name": "Player"
     },
     {
       "name": "Sync"
-    },
-    {
-      "name": "Queue"
     },
     {
       "name": "Notifications"
@@ -2221,6 +2388,9 @@
     },
     {
       "name": "Diagnostics"
+    },
+    {
+      "name": "Search"
     }
   ]
 }

@@ -1,18 +1,51 @@
 <script setup lang="ts">
+import { ref } from "vue";
 import type { QueueItemResponse } from "@/generated/models";
 import QueueItem from "./QueueItem.vue";
 import EmptyState from "@/shared/components/EmptyState.vue";
 import QueueItemSkeleton from "@/shared/components/QueueItemSkeleton.vue";
 import { ListMusic } from "lucide-vue-next";
+import { useAuthStore } from "@/stores/auth";
 
-defineProps<{
+const props = defineProps<{
   items: QueueItemResponse[];
   isLoading: boolean;
 }>();
 
 const emit = defineEmits<{
   remove: [id: string];
+  select: [item: QueueItemResponse];
+  reorder: [itemId: string, newIndex: number];
 }>();
+
+const auth = useAuthStore();
+
+// Drag-and-drop state
+const dragIndex = ref<number | null>(null);
+
+function onDragStart(idx: number) {
+  dragIndex.value = idx;
+}
+
+function onDragOver(e: DragEvent) {
+  e.preventDefault();
+}
+
+function onDrop(targetIdx: number) {
+  if (dragIndex.value === null || dragIndex.value === targetIdx) {
+    dragIndex.value = null;
+    return;
+  }
+  const item = props.items[dragIndex.value];
+  if (item) {
+    emit("reorder", item.id, targetIdx);
+  }
+  dragIndex.value = null;
+}
+
+function onDragEnd() {
+  dragIndex.value = null;
+}
 </script>
 
 <template>
@@ -32,13 +65,23 @@ const emit = defineEmits<{
 
     <!-- Items -->
     <template v-else>
-      <QueueItem
+      <div
         v-for="(item, idx) in items"
         :key="item.id"
-        :item="item"
-        :index="idx"
-        @remove="emit('remove', $event)"
-      />
+        :draggable="auth.isAdmin"
+        @dragstart="onDragStart(idx)"
+        @dragover="onDragOver"
+        @drop="onDrop(idx)"
+        @dragend="onDragEnd"
+      >
+        <QueueItem
+          :item="item"
+          :index="idx"
+          :draggable="auth.isAdmin"
+          @remove="emit('remove', $event)"
+          @select="emit('select', $event)"
+        />
+      </div>
     </template>
   </div>
 </template>

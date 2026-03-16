@@ -142,6 +142,27 @@ public static class QueueEndpoints
         .Produces<ApiError>(StatusCodes.Status409Conflict)
         .RequireAuthorization(AuthPolicies.AdminOnly)
         .WithDescription("Set queue mode (Normal, Shuffle, PlayNext)");
+
+        group.MapPost("/reorder", async (ReorderQueueRequest request, IQueueRepository repo, IEventBroadcaster events, HttpContext http, CancellationToken ct) =>
+        {
+            var conflict = await CheckVersionConflict(http, repo, ct);
+            if (conflict is not null) return conflict;
+
+            var item = await repo.GetByIdAsync(request.ItemId, ct);
+            if (item is null)
+                return Results.NotFound(new ApiError("Item not found"));
+
+            await repo.ReorderAsync(request.ItemId, request.NewIndex, ct);
+            var version = await repo.IncrementVersionAsync(ct);
+            events.Broadcast("queue-updated", new SseEvents.QueueUpdated("reorder"));
+            return Results.Ok(new { version });
+        })
+        .WithName("ReorderQueue")
+        .Produces(StatusCodes.Status200OK)
+        .Produces<ApiError>(StatusCodes.Status404NotFound)
+        .Produces<ApiError>(StatusCodes.Status409Conflict)
+        .RequireAuthorization(AuthPolicies.AdminOnly)
+        .WithDescription("Reorder a queue item to a new position (admin only)");
     }
 
     /// <summary>
@@ -164,5 +185,5 @@ public static class QueueEndpoints
 
     private static QueueItemResponse MapItem(QueueItem item) =>
         new(item.Id, item.Url.Value, item.Title, item.Status.ToString(), item.AddedAt, item.StartAtSeconds,
-            item.AddedByUserId, item.AddedByName);
+            item.AddedByUserId, item.AddedByName, item.Channel, item.DurationSeconds, item.ThumbnailUrl);
 }

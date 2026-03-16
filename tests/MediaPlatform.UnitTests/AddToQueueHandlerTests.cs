@@ -10,11 +10,12 @@ namespace MediaPlatform.UnitTests;
 public class AddToQueueHandlerTests
 {
     private readonly IQueueRepository _repository = Substitute.For<IQueueRepository>();
+    private readonly IMetadataEnricher _enricher = Substitute.For<IMetadataEnricher>();
     private readonly AddToQueueHandler _sut;
 
     public AddToQueueHandlerTests()
     {
-        _sut = new AddToQueueHandler(_repository);
+        _sut = new AddToQueueHandler(_repository, _enricher);
     }
 
     [Fact]

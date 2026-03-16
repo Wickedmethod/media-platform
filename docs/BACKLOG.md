@@ -12,7 +12,7 @@
 
 ## Summary
 
-- **48 stories done** (all tested, committed)
+- **60 stories done** (all tested, committed)
 - **273 tests** (194 unit + 79 integration), 0 failures
 - **22 stories blocked** by external dependencies
 - **44 new frontend/integration/infra stories** planned across 9 epics
@@ -177,7 +177,7 @@ The following proposed stories were merged into existing stories to avoid duplic
 | GET | `/admin/players/{id}/network` | Get player network metrics + trend |
 | GET | `/admin/alerts/config` | Get alerting configuration status |
 | GET | `/sync` | Queue snapshot (atomic state) |
-| POST | `/queue/reorder` | Reorder queue items (admin) |
+| POST | `/queue/reorder` | Reorder queue item to new position (admin) |
 | POST | `/diagnostics/logs` | Submit player log batch |
 | POST | `/diagnostics/network` | Submit network connectivity metrics |
 | GET | `/diagnostics/bandwidth-test` | Bandwidth test payload (100 KB) |
@@ -216,9 +216,9 @@ To unlock the remaining 22 blocked stories, set up in this order:
 | MEDIA-714 | Loading States & Skeleton Screens | 2 pts | ✅ Done | MEDIA-700 |
 | MEDIA-715 | E2E Testing with Playwright | 3 pts | ⏳ Planned | MEDIA-700, MEDIA-701, MEDIA-702 |
 | MEDIA-716 | Invidious Search Resilience & Failover | 2 pts | ✅ Done | MEDIA-710 |
-| MEDIA-737 | Queue Reordering — Drag & Drop | 3 pts | ⏳ Planned | MEDIA-702 |
-| MEDIA-739 | Queue Item Details Modal | 2 pts | ⏳ Planned | MEDIA-702 |
-| MEDIA-740 | User Activity Indicators ("Added By") | 2 pts | ⏳ Planned | MEDIA-711 |
+| MEDIA-737 | Queue Reordering — Drag & Drop | 3 pts | ✅ Done | MEDIA-702 |
+| MEDIA-739 | Queue Item Details Modal | 2 pts | ✅ Done | MEDIA-702 |
+| MEDIA-740 | User Activity Indicators ("Added By") | 2 pts | ✅ Done | MEDIA-711 |
 | MEDIA-748 | Player Command Rate Limiting & Debounce | 2 pts | ✅ Done | MEDIA-704, MEDIA-702 |
 | MEDIA-751 | Global Connection Status Indicator | 2 pts | ✅ Done | MEDIA-704, MEDIA-707 |
 | MEDIA-752 | Reconnect & Offline Banner for SPA | 2 pts | ✅ Done | MEDIA-704, MEDIA-751 |
@@ -247,7 +247,7 @@ To unlock the remaining 22 blocked stories, set up in this order:
 | MEDIA-711 | Track "Added By" User on Queue Items | 2 pts | ✅ Done | MEDIA-604 (JWT) |
 | MEDIA-712 | OpenAPI Spec Generation & SSE Event Contract | 2 pts | ✅ Done | — |
 | MEDIA-713 | Guest Access Model & SSE Authorization | 3 pts | ✅ Done | MEDIA-604, MEDIA-622, MEDIA-711 |
-| MEDIA-747 | Queue Item Metadata Enrichment (YouTube Fetch) | 3 pts | ⏳ Planned | MEDIA-710 |
+| MEDIA-747 | Queue Item Metadata Enrichment (YouTube Fetch) | 3 pts | ✅ Done | MEDIA-710 |
 | MEDIA-749 | Queue Item Validation & Sanitization | 2 pts | ✅ Done | — |
 | MEDIA-759 | API Versioning Strategy | 3 pts | ⏳ Planned | MEDIA-712 |
 

@@ -9,6 +9,8 @@ export interface QueueItemResponse {
   url: string;
   thumbnailUrl?: string;
   duration?: number;
+  channel?: string;
+  durationSeconds?: number;
   addedByUserId?: string;
   addedByName?: string;
   addedAt: string;

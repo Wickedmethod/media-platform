@@ -155,11 +155,53 @@ public sealed class RedisQueueRepository(IConnectionMultiplexer redis) : IQueueR
         return await Db.StringIncrementAsync(VersionKey);
     }
 
+    public async Task ReorderAsync(string itemId, int newIndex, CancellationToken ct = default)
+    {
+        var values = await Db.ListRangeAsync(QueueKey);
+        RedisValue? target = null;
+
+        foreach (var value in values)
+        {
+            var item = Deserialize(value!);
+            if (item?.Id == itemId)
+            {
+                target = value;
+                break;
+            }
+        }
+
+        if (target is null) return;
+
+        // Remove the item from its current position
+        await Db.ListRemoveAsync(QueueKey, target.Value, 1);
+
+        // Re-read the list to get current length after removal
+        var length = await Db.ListLengthAsync(QueueKey);
+        var clampedIndex = Math.Clamp(newIndex, 0, (int)length);
+
+        if (clampedIndex >= length)
+        {
+            // Append to end
+            await Db.ListRightPushAsync(QueueKey, target.Value);
+        }
+        else if (clampedIndex == 0)
+        {
+            // Prepend to beginning
+            await Db.ListLeftPushAsync(QueueKey, target.Value);
+        }
+        else
+        {
+            // Insert before the element at the target index
+            var pivot = await Db.ListGetByIndexAsync(QueueKey, clampedIndex);
+            await Db.ListInsertBeforeAsync(QueueKey, pivot, target.Value);
+        }
+    }
+
     private static string Serialize(QueueItem item)
     {
         return JsonSerializer.Serialize(new QueueItemDto(
             item.Id, item.Url.Value, item.Title, item.Status.ToString(), item.AddedAt, item.StartAtSeconds,
-            item.AddedByUserId, item.AddedByName));
+            item.AddedByUserId, item.AddedByName, item.Channel, item.DurationSeconds, item.ThumbnailUrl));
     }
 
     private static QueueItem? Deserialize(string json)
@@ -170,10 +212,11 @@ public sealed class RedisQueueRepository(IConnectionMultiplexer redis) : IQueueR
         var url = VideoUrl.Create(dto.Url);
         var status = Enum.Parse<QueueItemStatus>(dto.Status);
         return new QueueItem(dto.Id, url, dto.Title, status, dto.AddedAt, dto.StartAtSeconds,
-            dto.AddedByUserId, dto.AddedByName);
+            dto.AddedByUserId, dto.AddedByName, dto.Channel, dto.DurationSeconds, dto.ThumbnailUrl);
     }
 
     private sealed record QueueItemDto(
         string Id, string Url, string Title, string Status, DateTimeOffset AddedAt, double StartAtSeconds = 0,
-        string? AddedByUserId = null, string? AddedByName = null);
+        string? AddedByUserId = null, string? AddedByName = null,
+        string? Channel = null, int? DurationSeconds = null, string? ThumbnailUrl = null);
 }

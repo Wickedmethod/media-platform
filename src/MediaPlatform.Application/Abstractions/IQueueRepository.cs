@@ -18,4 +18,5 @@ public interface IQueueRepository
     Task SetQueueModeAsync(QueueMode mode, CancellationToken ct = default);
     Task<long> GetVersionAsync(CancellationToken ct = default);
     Task<long> IncrementVersionAsync(CancellationToken ct = default);
+    Task ReorderAsync(string itemId, int newIndex, CancellationToken ct = default);
 }

@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { ref } from "vue";
 import { useQueryClient } from "@tanstack/vue-query";
 import { onUnmounted } from "vue";
-import { useGetQueue, useAddToQueue, useRemoveFromQueue, useGetQueueMode, useSetQueueMode, getGetQueueQueryKey, getGetQueueModeQueryKey } from "@/generated/queue/queue";
-import { usePlayerStore, type QueueMode } from "@/stores/player";
+import { useGetQueue, useAddToQueue, useRemoveFromQueue, useGetQueueMode, useSetQueueMode, useReorderQueue, getGetQueueQueryKey, getGetQueueModeQueryKey } from "@/generated/queue/queue";
+import { usePlayerStore, type QueueMode, type SSEEventPayloads } from "@/stores/player";
 import { useAuthStore } from "@/stores/auth";
 import { useToast } from "@/composables/useToast";
 import { usePlayerCommands } from "@/composables/usePlayerCommands";
@@ -12,11 +13,21 @@ import QueueList from "./QueueList.vue";
 import AddToQueue from "./AddToQueue.vue";
 import PlayerControls from "./PlayerControls.vue";
 import QueueModeSelector from "./QueueModeSelector.vue";
+import QueueItemModal from "./QueueItemModal.vue";
 
 const queryClient = useQueryClient();
 const player = usePlayerStore();
 const auth = useAuthStore();
 const toast = useToast();
+
+// --- Modal state ---
+const selectedItem = ref<QueueItemResponse | null>(null);
+const modalOpen = ref(false);
+
+function handleSelect(item: QueueItemResponse) {
+  selectedItem.value = item;
+  modalOpen.value = true;
+}
 
 // --- Data fetching ---
 const { data: queueItems, isLoading: queueLoading } = useGetQueue();
@@ -51,12 +62,31 @@ const setModeMutation = useSetQueueMode({
   },
 });
 
+const reorderMutation = useReorderQueue({
+  mutation: {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: getGetQueueQueryKey() });
+    },
+    onError: () => {
+      toast.error("Failed to reorder — queue may have changed");
+      queryClient.invalidateQueries({ queryKey: getGetQueueQueryKey() });
+    },
+  },
+});
+
 const commands = usePlayerCommands();
 
-// --- SSE-driven query invalidation ---
-const unsubscribe = player.onSSEEvent((event) => {
+// --- SSE-driven query invalidation + toasts ---
+const unsubscribe = player.onSSEEvent((event, data) => {
   if (event === "queue-updated" || event === "item-added") {
     queryClient.invalidateQueries({ queryKey: getGetQueueQueryKey() });
+  }
+  if (event === "item-added") {
+    const d = data as SSEEventPayloads["item-added"];
+    toast.info(
+      `${d.addedByName ?? "Someone"} added a song`,
+      d.title,
+    );
   }
 });
 onUnmounted(unsubscribe);
@@ -72,6 +102,10 @@ function handleRemove(id: string) {
 
 function handleModeChange(mode: QueueMode) {
   setModeMutation.mutate({ data: { mode } });
+}
+
+function handleReorder(itemId: string, newIndex: number) {
+  reorderMutation.mutate({ data: { itemId, newIndex } });
 }
 </script>
 
@@ -108,7 +142,18 @@ function handleModeChange(mode: QueueMode) {
         :items="(queueItems as QueueItemResponse[] | undefined) ?? []"
         :is-loading="queueLoading"
         @remove="handleRemove"
+        @select="handleSelect"
+        @reorder="handleReorder"
       />
     </div>
+
+    <!-- Details modal -->
+    <QueueItemModal
+      v-if="selectedItem"
+      :item="selectedItem"
+      :open="modalOpen"
+      @update:open="modalOpen = $event"
+      @remove="handleRemove"
+    />
   </div>
 </template>

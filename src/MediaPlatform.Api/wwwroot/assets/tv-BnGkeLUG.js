@@ -1,0 +1,2 @@
+import{d as n,o,t as c,x as t,y as r,r as i,N as p,O as l}from"./main-NqCpCptN.js";const _={class:"flex h-screen w-screen items-center justify-center bg-black text-white"},d={class:"text-center"},m={class:"mt-4 text-lg text-white/60"},x=n({__name:"TvApp",setup(f){const a=i("Connecting…");return(u,e)=>(o(),c("div",_,[t("div",d,[e[0]||(e[0]=t("h1",{class:"text-4xl font-bold"},"Media Platform — TV",-1)),t("p",m,r(a.value),1)])]))}}),s=p(x);s.use(l());s.mount("#tv-app");
+//# sourceMappingURL=tv-BnGkeLUG.js.map

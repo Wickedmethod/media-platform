@@ -11,11 +11,12 @@ namespace MediaPlatform.UnitTests;
 public class AddedByUserTests
 {
     private readonly IQueueRepository _repository = Substitute.For<IQueueRepository>();
+    private readonly IMetadataEnricher _enricher = Substitute.For<IMetadataEnricher>();
 
     [Fact]
     public async Task Handle_WithUserFields_StoresUserInfo()
     {
-        var handler = new AddToQueueHandler(_repository);
+        var handler = new AddToQueueHandler(_repository, _enricher);
         var command = new AddToQueueCommand(
             "https://www.youtube.com/watch?v=dQw4w9WgXcQ", "Test",
             AddedByUserId: "user-123", AddedByName: "jonas");
@@ -29,7 +30,7 @@ public class AddedByUserTests
     [Fact]
     public async Task Handle_WithoutUserFields_StoresNull()
     {
-        var handler = new AddToQueueHandler(_repository);
+        var handler = new AddToQueueHandler(_repository, _enricher);
         var command = new AddToQueueCommand("https://www.youtube.com/watch?v=dQw4w9WgXcQ", "Test");
 
         var item = await handler.HandleAsync(command, TestContext.Current.CancellationToken);

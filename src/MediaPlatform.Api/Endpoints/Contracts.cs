@@ -4,7 +4,8 @@ public sealed record AddToQueueRequest(string Url, string Title, double StartAtS
 
 public sealed record QueueItemResponse(
     string Id, string Url, string Title, string Status, DateTimeOffset AddedAt, double StartAtSeconds,
-    string? AddedByUserId = null, string? AddedByName = null);
+    string? AddedByUserId = null, string? AddedByName = null,
+    string? Channel = null, int? DurationSeconds = null, string? ThumbnailUrl = null);
 
 public sealed record PlaybackStateResponse(
     string State, QueueItemResponse? CurrentItem, DateTimeOffset? StartedAt,
@@ -13,6 +14,8 @@ public sealed record PlaybackStateResponse(
 public sealed record ReportPositionRequest(double PositionSeconds);
 public sealed record ReportErrorRequest(string Reason);
 public sealed record SetQueueModeRequest(string Mode);
+
+public sealed record ReorderQueueRequest(string ItemId, int NewIndex);
 
 public sealed record QueueModeResponse(string Mode);
 

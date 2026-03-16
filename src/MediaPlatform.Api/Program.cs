@@ -10,6 +10,7 @@ using MediaPlatform.Infrastructure.Alerting;
 using MediaPlatform.Infrastructure.Analytics;
 using MediaPlatform.Infrastructure.Events;
 using MediaPlatform.Infrastructure.Metrics;
+using MediaPlatform.Infrastructure.Metadata;
 using MediaPlatform.Infrastructure.Notifications;
 using MediaPlatform.Infrastructure.Redis;
 using MediaPlatform.Infrastructure.Security;
@@ -166,6 +167,7 @@ builder.Services.AddScoped<IPlayerLogStore, RedisPlayerLogStore>();
 builder.Services.AddScoped<INetworkMetricsStore, RedisNetworkMetricsStore>();
 builder.Services.AddSingleton<IEventBroadcaster, InMemoryEventBroadcaster>();
 builder.Services.AddSingleton<INotificationService, WebhookNotificationService>();
+builder.Services.AddScoped<IMetadataEnricher, YouTubeMetadataEnricher>();
 builder.Services.AddSingleton<IAnalyticsTracker, InMemoryAnalyticsTracker>();
 builder.Services.AddSingleton<IAuditLog, InMemoryAuditLog>();
 builder.Services.AddSingleton<IKillSwitch, InMemoryKillSwitch>();
@@ -241,6 +243,13 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
+
+// Legacy redirect: old builds/service-workers may still call /events without /api prefix
+app.MapGet("/events", (HttpContext ctx) =>
+{
+    var qs = ctx.Request.QueryString;
+    return Results.Redirect($"/api/events{qs}", permanent: true);
+});
 
 var api = app.MapGroup("/api");
 api.MapQueueEndpoints();
