@@ -19,10 +19,7 @@ test.describe("Auth & Access Control", () => {
     await expect(page.locator("nav")).toBeVisible();
   });
 
-  test("app initializes without errors", async ({
-    page,
-    authenticated,
-  }) => {
+  test("app initializes without errors", async ({ page, authenticated }) => {
     const errors: string[] = [];
     page.on("pageerror", (error) => errors.push(error.message));
 
@@ -32,7 +29,10 @@ test.describe("Auth & Access Control", () => {
 
     // Filter out expected errors (like API calls to non-running backend)
     const criticalErrors = errors.filter(
-      (e) => !e.includes("fetch") && !e.includes("network") && !e.includes("ERR_CONNECTION"),
+      (e) =>
+        !e.includes("fetch") &&
+        !e.includes("network") &&
+        !e.includes("ERR_CONNECTION"),
     );
     expect(criticalErrors).toHaveLength(0);
   });

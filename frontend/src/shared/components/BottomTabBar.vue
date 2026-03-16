@@ -1,29 +1,36 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { RouterLink, useRoute } from 'vue-router'
-import { ListMusic, Search, Settings } from 'lucide-vue-next'
-import { useAuthStore } from '@/stores/auth'
+import { computed } from "vue";
+import { RouterLink, useRoute } from "vue-router";
+import { ListMusic, Search, Settings } from "lucide-vue-next";
+import { useAuthStore } from "@/stores/auth";
 
-const route = useRoute()
-const auth = useAuthStore()
+const route = useRoute();
+const auth = useAuthStore();
 
-const tabs: readonly { path: string; label: string; icon: typeof ListMusic; adminOnly?: boolean }[] = [
-  { path: '/queue', label: 'Queue', icon: ListMusic },
-  { path: '/search', label: 'Search', icon: Search },
-  { path: '/admin', label: 'Admin', icon: Settings, adminOnly: true },
-]
+const tabs: readonly {
+  path: string;
+  label: string;
+  icon: typeof ListMusic;
+  adminOnly?: boolean;
+}[] = [
+  { path: "/queue", label: "Queue", icon: ListMusic },
+  { path: "/search", label: "Search", icon: Search },
+  { path: "/admin", label: "Admin", icon: Settings, adminOnly: true },
+];
 
 const visibleTabs = computed(() =>
   tabs.filter((tab) => !tab.adminOnly || auth.isAdmin),
-)
+);
 
 function isActive(path: string) {
-  return route.path.startsWith(path)
+  return route.path.startsWith(path);
 }
 </script>
 
 <template>
-  <nav class="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card md:hidden">
+  <nav
+    class="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card md:hidden"
+  >
     <div class="flex justify-around safe-area-bottom">
       <RouterLink
         v-for="tab in visibleTabs"

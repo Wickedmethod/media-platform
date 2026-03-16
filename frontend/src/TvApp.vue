@@ -3,15 +3,21 @@ import { ref, computed, onUnmounted } from "vue";
 import { usePlayerStore } from "@/stores/player";
 import { useTvSSE } from "@/features/tv/composables/useTvSSE";
 import { useCecRemote } from "@/features/tv/composables/useCecRemote";
+import { useCrashRecovery } from "@/features/tv/composables/useCrashRecovery";
 import { config } from "@/config";
 import TvPlayer from "@/features/tv/TvPlayer.vue";
 import TvOverlay from "@/features/tv/TvOverlay.vue";
 import TvIdle from "@/features/tv/TvIdle.vue";
 import TvError from "@/features/tv/TvError.vue";
+import TvSearch from "@/features/tv/TvSearch.vue";
 
 const player = usePlayerStore();
 const overlayRef = ref<InstanceType<typeof TvOverlay>>();
 const errorRef = ref<InstanceType<typeof TvError>>();
+const showSearch = ref(false);
+
+// Crash recovery — persists state to localStorage, reconciles on mount
+useCrashRecovery();
 
 // SSE connection — TV-specific with infinite reconnect + /sync recovery
 const sse = useTvSSE();
@@ -58,12 +64,20 @@ useCecRemote({
     }).catch(() => {});
   },
   onStop: () => {
-    fetch(`${config.apiBaseUrl}/player/stop`, { method: "POST" }).catch(
-      () => {},
-    );
+    if (showSearch.value) {
+      showSearch.value = false;
+    } else {
+      fetch(`${config.apiBaseUrl}/player/stop`, { method: "POST" }).catch(
+        () => {},
+      );
+    }
   },
   onToggleOverlay: () => {
-    overlayRef.value?.toggleOverlay();
+    if (screen.value === "idle") {
+      showSearch.value = true;
+    } else {
+      overlayRef.value?.toggleOverlay();
+    }
   },
 });
 
@@ -95,7 +109,18 @@ onUnmounted(() => {
     </template>
 
     <!-- Error screen -->
-    <TvError v-else-if="screen === 'error'" ref="errorRef" @skip="player.lastError = null" />
+    <TvError
+      v-else-if="screen === 'error'"
+      ref="errorRef"
+      @skip="player.lastError = null"
+    />
+
+    <!-- Search overlay (available from idle screen) -->
+    <TvSearch
+      v-if="showSearch"
+      @close="showSearch = false"
+      @added="showSearch = false"
+    />
 
     <!-- Connection indicator -->
     <div

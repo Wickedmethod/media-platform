@@ -108,9 +108,7 @@ function handleSelectRecent(term: string) {
 
     <!-- Results -->
     <div v-else-if="results && results.length > 0" class="space-y-1">
-      <p class="text-xs text-muted-foreground">
-        {{ results.length }} results
-      </p>
+      <p class="text-xs text-muted-foreground">{{ results.length }} results</p>
       <SearchResultCard
         v-for="result in results"
         :key="result.videoId"

@@ -5,7 +5,7 @@
 **Epic:** MEDIA-FE-TV — TV Frontend  
 **Priority:** Medium  
 **Effort:** 3 points  
-**Status:** ⏳ Planned  
+**Status:** ✅ Done  
 **Depends on:** MEDIA-720 (TV frontend), MEDIA-721 (CEC remote)
 
 ---

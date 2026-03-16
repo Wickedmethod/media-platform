@@ -5,7 +5,7 @@
 **Epic:** MEDIA-MULTI — Multi-Device Audio  
 **Priority:** High  
 **Effort:** 8 points  
-**Status:** ⏳ Planned  
+**Status:** ✅ Done  
 **Depends on:** MEDIA-711 (user tracking), MEDIA-701 (auth)
 
 ---

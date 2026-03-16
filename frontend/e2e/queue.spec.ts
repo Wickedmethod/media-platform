@@ -20,7 +20,9 @@ test.describe("Queue Management", () => {
     await page.goto("/queue");
 
     // Queue should be rendered (may show empty state or items depending on backend)
-    await expect(page.locator("[data-testid='queue-list'], .queue-list, main")).toBeVisible();
+    await expect(
+      page.locator("[data-testid='queue-list'], .queue-list, main"),
+    ).toBeVisible();
   });
 
   test("queue view has add-to-queue functionality visible", async ({

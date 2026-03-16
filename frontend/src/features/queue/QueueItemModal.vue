@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/shared/components/ui/dialog";
 import { ExternalLink, Clock, User, Tv, CalendarDays } from "lucide-vue-next";
 import type { QueueItemResponse } from "@/generated/models";
 import { useAuthStore } from "@/stores/auth";
@@ -63,7 +68,9 @@ const thumbnailUrl = computed(() => {
       <!-- Title + Channel -->
       <div>
         <h3 class="text-lg font-semibold leading-tight">{{ item.title }}</h3>
-        <p v-if="item.channel" class="text-sm text-muted-foreground">{{ item.channel }}</p>
+        <p v-if="item.channel" class="text-sm text-muted-foreground">
+          {{ item.channel }}
+        </p>
       </div>
 
       <!-- Metadata -->
@@ -97,13 +104,19 @@ const thumbnailUrl = computed(() => {
       <div v-if="auth.isAdmin" class="flex gap-2 pt-2">
         <button
           class="flex-1 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-          @click="emit('playNext', item.id); emit('update:open', false)"
+          @click="
+            emit('playNext', item.id);
+            emit('update:open', false);
+          "
         >
           Play Next
         </button>
         <button
           class="flex-1 rounded-md bg-destructive px-3 py-2 text-sm font-medium text-destructive-foreground hover:bg-destructive/90 transition-colors"
-          @click="emit('remove', item.id); emit('update:open', false)"
+          @click="
+            emit('remove', item.id);
+            emit('update:open', false);
+          "
         >
           Remove
         </button>

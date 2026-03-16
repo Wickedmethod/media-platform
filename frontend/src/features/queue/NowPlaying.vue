@@ -76,17 +76,16 @@ function formatTime(seconds: number): string {
               :style="{ width: `${player.progress}%` }"
             />
           </div>
-          <div class="flex justify-between text-[10px] tabular-nums text-muted-foreground">
+          <div
+            class="flex justify-between text-[10px] tabular-nums text-muted-foreground"
+          >
             <span>{{ formattedPosition }}</span>
             <span>{{ formattedDuration }}</span>
           </div>
         </div>
 
         <!-- Error -->
-        <p
-          v-if="player.lastError"
-          class="text-xs text-destructive"
-        >
+        <p v-if="player.lastError" class="text-xs text-destructive">
           {{ player.lastError }}
         </p>
       </div>

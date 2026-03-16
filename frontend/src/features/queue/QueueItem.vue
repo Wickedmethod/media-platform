@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { GripVertical, Music, Trash2, User, Tv, Clock } from "lucide-vue-next";
+import { GripVertical, Music, Trash2, User, Tv, Clock, Headphones } from "lucide-vue-next";
 import type { QueueItemResponse } from "@/generated/models";
 import { useAuthStore } from "@/stores/auth";
 
@@ -8,11 +8,13 @@ const props = defineProps<{
   item: QueueItemResponse;
   index: number;
   draggable?: boolean;
+  showCopyAction?: boolean;
 }>();
 
 const emit = defineEmits<{
   remove: [id: string];
   select: [item: QueueItemResponse];
+  copy: [item: QueueItemResponse];
 }>();
 
 const auth = useAuthStore();
@@ -62,7 +64,9 @@ function formatDuration(seconds?: number | string | null): string {
     </span>
 
     <!-- Thumbnail -->
-    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-muted overflow-hidden">
+    <div
+      class="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-muted overflow-hidden"
+    >
       <img
         v-if="item.thumbnailUrl"
         :src="item.thumbnailUrl"
@@ -77,7 +81,10 @@ function formatDuration(seconds?: number | string | null): string {
       <p class="truncate text-sm font-medium">{{ item.title }}</p>
       <div class="flex items-center gap-2 text-xs text-muted-foreground">
         <span v-if="item.channel" class="truncate">{{ item.channel }}</span>
-        <span v-if="formatDuration(item.durationSeconds)" class="flex items-center gap-0.5">
+        <span
+          v-if="formatDuration(item.durationSeconds)"
+          class="flex items-center gap-0.5"
+        >
           <Clock class="h-3 w-3" />
           {{ formatDuration(item.durationSeconds) }}
         </span>
@@ -90,6 +97,16 @@ function formatDuration(seconds?: number | string | null): string {
         <span>{{ addedAgo }}</span>
       </div>
     </div>
+
+    <!-- Copy to personal queue -->
+    <button
+      v-if="showCopyAction"
+      class="rounded-md p-1.5 text-muted-foreground opacity-0 transition-all hover:bg-primary/10 hover:text-primary group-hover:opacity-100"
+      aria-label="Copy to my queue"
+      @click.stop="emit('copy', item)"
+    >
+      <Headphones class="h-4 w-4" />
+    </button>
 
     <!-- Remove button -->
     <button

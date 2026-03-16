@@ -53,11 +53,10 @@ onUnmounted(() => {
     </div>
 
     <!-- Queue preview -->
-    <div
-      v-if="queuePreview.length > 0"
-      class="mt-12 w-full max-w-md px-6"
-    >
-      <p class="mb-3 text-sm font-medium uppercase tracking-wider text-white/40">
+    <div v-if="queuePreview.length > 0" class="mt-12 w-full max-w-md px-6">
+      <p
+        class="mb-3 text-sm font-medium uppercase tracking-wider text-white/40"
+      >
         Next up
       </p>
       <div class="space-y-2">
@@ -83,10 +82,7 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <p
-      v-else
-      class="mt-12 text-sm text-white/30"
-    >
+    <p v-else class="mt-12 text-sm text-white/30">
       Add songs from your phone or press OK to search.
     </p>
 

@@ -154,3 +154,18 @@ public sealed record NetworkTrendDto(
 
 public sealed record AlertConfigResponse(
     bool Enabled, int CooldownMinutes, int ChannelCount);
+
+// ── MEDIA-730: Multi-Device Audio (Personal Sessions) ──────
+
+public sealed record CreateSessionRequest(string DeviceId);
+
+public sealed record SessionResponse(
+    string SessionId, string? UserId, string? DeviceId, string Type,
+    DateTimeOffset CreatedAt, DateTimeOffset LastActivityAt);
+
+public sealed record SessionSnapshotResponse(
+    SessionResponse Session,
+    IEnumerable<QueueItemResponse> Queue,
+    PlaybackStateResponse Playback);
+
+public sealed record AddToSessionQueueRequest(string Url, string Title, double StartAtSeconds = 0);

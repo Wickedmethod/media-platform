@@ -75,9 +75,7 @@ function skipToNext() {
   clearTimers();
   retryCount.value = 0;
   emit("skip");
-  fetch(`${config.apiBaseUrl}/player/skip`, { method: "POST" }).catch(
-    () => {},
-  );
+  fetch(`${config.apiBaseUrl}/player/skip`, { method: "POST" }).catch(() => {});
 }
 
 function handleError() {

@@ -183,7 +183,7 @@ public static class QueueEndpoints
         return null;
     }
 
-    private static QueueItemResponse MapItem(QueueItem item) =>
+    internal static QueueItemResponse MapItem(QueueItem item) =>
         new(item.Id, item.Url.Value, item.Title, item.Status.ToString(), item.AddedAt, item.StartAtSeconds,
             item.AddedByUserId, item.AddedByName, item.Channel, item.DurationSeconds, item.ThumbnailUrl);
 }

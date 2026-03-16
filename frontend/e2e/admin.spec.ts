@@ -24,10 +24,7 @@ test.describe("Admin Dashboard", () => {
     await expect(page.locator("main")).toBeVisible();
   });
 
-  test("admin flags page is accessible", async ({
-    page,
-    authenticated,
-  }) => {
+  test("admin flags page is accessible", async ({ page, authenticated }) => {
     await authenticated();
     await page.goto("/admin/flags");
 

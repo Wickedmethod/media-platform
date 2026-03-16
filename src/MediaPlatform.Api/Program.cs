@@ -15,6 +15,7 @@ using MediaPlatform.Infrastructure.Metadata;
 using MediaPlatform.Infrastructure.Notifications;
 using MediaPlatform.Infrastructure.Redis;
 using MediaPlatform.Infrastructure.Security;
+using MediaPlatform.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Prometheus;
@@ -167,6 +168,8 @@ builder.Services.AddScoped<IPlayerRegistry, RedisPlayerRegistry>();
 builder.Services.AddScoped<IPlayerLogStore, RedisPlayerLogStore>();
 builder.Services.AddScoped<INetworkMetricsStore, RedisNetworkMetricsStore>();
 builder.Services.AddSingleton<IEventBroadcaster, InMemoryEventBroadcaster>();
+builder.Services.AddSingleton<ISessionEventBroadcaster, InMemorySessionEventBroadcaster>();
+builder.Services.AddScoped<ISessionRepository, RedisSessionRepository>();
 builder.Services.AddSingleton<INotificationService, WebhookNotificationService>();
 builder.Services.AddScoped<IMetadataEnricher, YouTubeMetadataEnricher>();
 builder.Services.AddSingleton<IAnalyticsTracker, InMemoryAnalyticsTracker>();
@@ -218,6 +221,14 @@ builder.Services.AddScoped<GetPlaybackStateHandler>();
 builder.Services.AddScoped<ReportPositionHandler>();
 builder.Services.AddScoped<ReportErrorHandler>();
 builder.Services.AddScoped<SetQueueModeHandler>();
+builder.Services.AddScoped<CreatePersonalSessionHandler>();
+builder.Services.AddScoped<EndSessionHandler>();
+builder.Services.AddScoped<AddToSessionQueueHandler>();
+builder.Services.AddScoped<SessionPlayerCommandHandler>();
+builder.Services.AddScoped<GetMySessionHandler>();
+
+// Session cleanup background service
+builder.Services.AddHostedService<SessionCleanupService>();
 
 var app = builder.Build();
 
@@ -281,6 +292,7 @@ v1.MapPolicyEndpoints();
 v1.MapWorkerEndpoints();
 v1.MapDiagnosticsEndpoints();
 v1.MapSearchEndpoints();
+v1.MapSessionEndpoints();
 
 // Unversioned endpoints — /api/* (stable contracts)
 api.MapEventStreamEndpoints();

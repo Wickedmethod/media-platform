@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { Play, Pause, SkipForward } from 'lucide-vue-next'
-import { usePlayerStore } from '@/stores/player'
+import { computed } from "vue";
+import { Play, Pause, SkipForward } from "lucide-vue-next";
+import { usePlayerStore } from "@/stores/player";
 
-const player = usePlayerStore()
+const player = usePlayerStore();
 
-const formattedPosition = computed(() => formatTime(player.position))
-const formattedDuration = computed(() => formatTime(player.duration))
+const formattedPosition = computed(() => formatTime(player.position));
+const formattedDuration = computed(() => formatTime(player.duration));
 
 function formatTime(seconds: number): string {
-  const m = Math.floor(seconds / 60)
-  const s = Math.floor(seconds % 60)
-  return `${m}:${s.toString().padStart(2, '0')}`
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${s.toString().padStart(2, "0")}`;
 }
 </script>
 
@@ -28,7 +28,9 @@ function formatTime(seconds: number): string {
     <div class="flex items-center gap-3 px-4 py-2">
       <!-- Track info -->
       <div class="min-w-0 flex-1">
-        <p class="truncate text-sm font-medium">{{ player.currentItem.title }}</p>
+        <p class="truncate text-sm font-medium">
+          {{ player.currentItem.title }}
+        </p>
         <p class="text-xs text-muted-foreground">
           {{ formattedPosition }} / {{ formattedDuration }}
         </p>

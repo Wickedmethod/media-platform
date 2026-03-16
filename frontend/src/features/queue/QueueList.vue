@@ -10,12 +10,14 @@ import { useAuthStore } from "@/stores/auth";
 const props = defineProps<{
   items: QueueItemResponse[];
   isLoading: boolean;
+  showCopyAction?: boolean;
 }>();
 
 const emit = defineEmits<{
   remove: [id: string];
   select: [item: QueueItemResponse];
   reorder: [itemId: string, newIndex: number];
+  copy: [item: QueueItemResponse];
 }>();
 
 const auth = useAuthStore();
@@ -78,8 +80,10 @@ function onDragEnd() {
           :item="item"
           :index="idx"
           :draggable="auth.isAdmin"
+          :show-copy-action="showCopyAction"
           @remove="emit('remove', $event)"
           @select="emit('select', $event)"
+          @copy="emit('copy', $event)"
         />
       </div>
     </template>

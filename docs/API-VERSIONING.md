@@ -14,18 +14,18 @@ All API routes use a version prefix in the URL:
 
 These endpoints have a stable contract and are not versioned:
 
-| Endpoint       | Reason                                           |
-| -------------- | ------------------------------------------------ |
-| `/api/events`  | SSE stream — event schema includes `version`     |
-| `/health/*`    | Standard health checks, no API contract          |
-| `/metrics`     | Prometheus scrape target, stable format           |
-| `/openapi/*`   | OpenAPI spec generation                          |
+| Endpoint      | Reason                                       |
+| ------------- | -------------------------------------------- |
+| `/api/events` | SSE stream — event schema includes `version` |
+| `/health/*`   | Standard health checks, no API contract      |
+| `/metrics`    | Prometheus scrape target, stable format      |
+| `/openapi/*`  | OpenAPI spec generation                      |
 
 ## Current Versions
 
-| Version | Status | Route Prefix  |
-| ------- | ------ | ------------- |
-| v1      | Active | `/api/v1/`    |
+| Version | Status | Route Prefix |
+| ------- | ------ | ------------ |
+| v1      | Active | `/api/v1/`   |
 
 ## Deprecation Policy
 
@@ -74,13 +74,16 @@ Sunset: Sat, 01 Mar 2027 00:00:00 GMT
 ## Migrating from v1 to v2
 
 ### Breaking Changes
+
 - `POST /api/v1/queue/add` → `POST /api/v2/queue` (simplified path)
 - `QueueItemResponse.videoId` → `QueueItemResponse.mediaId` (renamed field)
 
 ### New Features in v2
+
 - Batch add support: `POST /api/v2/queue/batch`
 
 ### Timeline
+
 - v1 deprecated: YYYY-MM-DD
 - v1 removed: YYYY-MM-DD (3 months after deprecation)
 ```

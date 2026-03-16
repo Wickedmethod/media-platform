@@ -54,10 +54,7 @@ test.describe("Mobile Navigation", () => {
     await expect(page.locator("nav")).toBeVisible();
   });
 
-  test("mobile navigation between views", async ({
-    page,
-    authenticated,
-  }) => {
+  test("mobile navigation between views", async ({ page, authenticated }) => {
     await authenticated();
     await page.goto("/queue");
 
