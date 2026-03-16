@@ -1,0 +1,101 @@
+# Media Platform — Caddy Reverse Proxy
+# Routes: /api/* → API, /events → SSE, /* → Frontend SPA
+{
+	# Use HTTP locally; override with HTTPS domain in production
+	auto_https off
+}
+
+(security_headers) {
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		X-XSS-Protection "1; mode=block"
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+}
+
+:80 {
+	import security_headers
+
+	encode gzip zstd
+
+	# SSE endpoint — disable buffering for real-time streaming
+	handle /events {
+		reverse_proxy media-platform-api:8080 {
+			flush_interval -1
+			transport http {
+				read_timeout 0
+			}
+		}
+	}
+
+	# API routes (strip /api prefix)
+	handle /api/* {
+		uri strip_prefix /api
+		reverse_proxy media-platform-api:8080
+	}
+
+	# Health endpoints (direct passthrough)
+	handle /health/* {
+		reverse_proxy media-platform-api:8080
+	}
+	handle /health {
+		reverse_proxy media-platform-api:8080
+	}
+
+	# Metrics — restrict to internal/private networks
+	@internal remote_ip 192.168.0.0/16 172.16.0.0/12 10.0.0.0/8
+	handle /metrics {
+		reverse_proxy @internal media-platform-api:8080
+		respond 403
+	}
+
+	# Queue sync, diagnostics, admin, webhooks, policies, analytics  — API passthrough
+	handle_path /sync {
+		reverse_proxy media-platform-api:8080
+	}
+	handle /diagnostics/* {
+		reverse_proxy media-platform-api:8080
+	}
+	handle /admin/* {
+		reverse_proxy media-platform-api:8080
+	}
+	handle /webhooks* {
+		reverse_proxy media-platform-api:8080
+	}
+	handle /policies* {
+		reverse_proxy media-platform-api:8080
+	}
+	handle /analytics* {
+		reverse_proxy media-platform-api:8080
+	}
+	handle /now-playing {
+		reverse_proxy media-platform-api:8080
+	}
+	handle /player/* {
+		reverse_proxy media-platform-api:8080
+	}
+	handle /worker/* {
+		reverse_proxy media-platform-api:8080
+	}
+	handle /queue/* {
+		reverse_proxy media-platform-api:8080
+	}
+	handle /queue {
+		reverse_proxy media-platform-api:8080
+	}
+
+	# OpenAPI docs
+	handle /openapi/* {
+		reverse_proxy media-platform-api:8080
+	}
+	handle /scalar/* {
+		reverse_proxy media-platform-api:8080
+	}
+
+	# Frontend SPA (catch-all)
+	handle {
+		reverse_proxy media-platform-web:80
+	}
+}

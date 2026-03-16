@@ -9,7 +9,10 @@
     "preview": "vite preview",
     "generate:api": "orval",
     "lint": "eslint .",
-    "type-check": "vue-tsc --noEmit"
+    "type-check": "vue-tsc --noEmit",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:mobile": "playwright test --project=mobile"
   },
   "dependencies": {
     "@radix-icons/vue": "^1.0.0",
@@ -27,6 +30,7 @@
     "vue-router": "^4.5.2"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@tailwindcss/vite": "^4.1.17",
     "@types/node": "^22.15.21",
     "@vitejs/plugin-vue": "^5.2.4",

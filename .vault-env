@@ -3,3 +3,5 @@
 # Resolved by Arcane Vault Bridge → written to .env → used by docker-compose
 
 Worker__ApiKey=vault:secret/data/media-platform/worker-key#value
+YouTube__ApiKey=vault:secret/data/media-platform/youtube-api-key#value
+Alerting__Discord__WebhookUrl=vault:secret/data/media-platform/discord-webhook#url

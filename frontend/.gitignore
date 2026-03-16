@@ -6,3 +6,8 @@ dist/
 
 # Generated API client (orval)
 src/generated/
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/

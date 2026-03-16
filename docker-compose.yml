@@ -43,8 +43,27 @@ services:
       - media-platform
     restart: unless-stopped
 
+  caddy:
+    image: caddy:2-alpine
+    container_name: media-platform-caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - media-platform-api
+      - media-platform-web
+    networks:
+      - media-platform
+    restart: unless-stopped
+
 volumes:
   redis-data:
+  caddy-data:
+  caddy-config:
 
 networks:
   media-platform:

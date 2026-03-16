@@ -12,7 +12,7 @@
 
 ## Summary
 
-- **60 stories done** (all tested, committed)
+- **64 stories done** (all tested, committed)
 - **273 tests** (194 unit + 79 integration), 0 failures
 - **22 stories blocked** by external dependencies
 - **44 new frontend/integration/infra stories** planned across 9 epics
@@ -214,7 +214,7 @@ To unlock the remaining 22 blocked stories, set up in this order:
 | MEDIA-709 | Error Handling & Toast Notification System | 2 pts | ✅ Done | MEDIA-700 |
 | MEDIA-710 | YouTube Search Integration (Invidious) | 3 pts | ✅ Done | MEDIA-700, MEDIA-701 |
 | MEDIA-714 | Loading States & Skeleton Screens | 2 pts | ✅ Done | MEDIA-700 |
-| MEDIA-715 | E2E Testing with Playwright | 3 pts | ⏳ Planned | MEDIA-700, MEDIA-701, MEDIA-702 |
+| MEDIA-715 | E2E Testing with Playwright | 3 pts | ✅ Done | MEDIA-700, MEDIA-701, MEDIA-702 |
 | MEDIA-716 | Invidious Search Resilience & Failover | 2 pts | ✅ Done | MEDIA-710 |
 | MEDIA-737 | Queue Reordering — Drag & Drop | 3 pts | ✅ Done | MEDIA-702 |
 | MEDIA-739 | Queue Item Details Modal | 2 pts | ✅ Done | MEDIA-702 |
@@ -293,9 +293,9 @@ To unlock the remaining 22 blocked stories, set up in this order:
 
 | Story | Title | Effort | Status | Depends on |
 |-------|-------|--------|--------|------------|
-| MEDIA-744 | Docker Compose Stack for Full Platform | 3 pts | ⏳ Planned | MEDIA-706 |
-| MEDIA-745 | Environment Configuration Management | 2 pts | ⏳ Planned | MEDIA-744 |
-| MEDIA-746 | Production Reverse Proxy Configuration | 2 pts | ⏳ Planned | MEDIA-744, MEDIA-706 |
+| MEDIA-744 | Docker Compose Stack for Full Platform | 3 pts | ✅ Done | MEDIA-706 |
+| MEDIA-745 | Environment Configuration Management | 2 pts | ✅ Done | MEDIA-744 |
+| MEDIA-746 | Production Reverse Proxy Configuration | 2 pts | ✅ Done | MEDIA-744, MEDIA-706 |
 | MEDIA-765 | Platform Upgrade & Migration Strategy | 3 pts | ⏳ Planned | MEDIA-744, MEDIA-606 |
 
 ## Epic: MEDIA-MULTI — Multi-Device Audio (v2)

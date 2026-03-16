@@ -55,3 +55,18 @@ services:
       options:
         max-size: "5m"
         max-file: "3"
+
+  caddy:
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+          cpus: "0.25"
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+    labels:
+      - "arcane.managed=true"
+      - "arcane.stack=media-platform"
