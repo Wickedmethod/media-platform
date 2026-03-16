@@ -12,7 +12,7 @@
 
 ## Summary
 
-- **64 stories done** (all tested, committed)
+- **67 stories done** (all tested, committed)
 - **273 tests** (194 unit + 79 integration), 0 failures
 - **22 stories blocked** by external dependencies
 - **44 new frontend/integration/infra stories** planned across 9 epics
@@ -231,7 +231,7 @@ To unlock the remaining 22 blocked stories, set up in this order:
 
 | Story | Title | Effort | Status | Depends on |
 |-------|-------|--------|--------|------------|
-| MEDIA-720 | TV Frontend — Pi Kiosk Application (Vue) | 5 pts | ⏳ Planned | MEDIA-700, MEDIA-704 |
+| MEDIA-720 | TV Frontend — Pi Kiosk Application (Vue) | 5 pts | ✅ Done | MEDIA-700, MEDIA-704 |
 | MEDIA-721 | CEC Remote Control Integration | 3 pts | ⏳ Planned | MEDIA-720 |
 | MEDIA-722 | TV On-Screen Keyboard & Search (Vue) | 3 pts | ⏳ Planned | MEDIA-720, MEDIA-721, MEDIA-710 |
 | MEDIA-723 | Pi Provisioning & Setup Automation | 3 pts | ⏳ Planned | MEDIA-720, MEDIA-721 |
@@ -249,7 +249,7 @@ To unlock the remaining 22 blocked stories, set up in this order:
 | MEDIA-713 | Guest Access Model & SSE Authorization | 3 pts | ✅ Done | MEDIA-604, MEDIA-622, MEDIA-711 |
 | MEDIA-747 | Queue Item Metadata Enrichment (YouTube Fetch) | 3 pts | ✅ Done | MEDIA-710 |
 | MEDIA-749 | Queue Item Validation & Sanitization | 2 pts | ✅ Done | — |
-| MEDIA-759 | API Versioning Strategy | 3 pts | ⏳ Planned | MEDIA-712 |
+| MEDIA-759 | API Versioning Strategy | 3 pts | ✅ Done | MEDIA-712 |
 
 ## Epic: MEDIA-BE-RESILIENCE — Backend Resilience & Consistency
 
@@ -296,7 +296,7 @@ To unlock the remaining 22 blocked stories, set up in this order:
 | MEDIA-744 | Docker Compose Stack for Full Platform | 3 pts | ✅ Done | MEDIA-706 |
 | MEDIA-745 | Environment Configuration Management | 2 pts | ✅ Done | MEDIA-744 |
 | MEDIA-746 | Production Reverse Proxy Configuration | 2 pts | ✅ Done | MEDIA-744, MEDIA-706 |
-| MEDIA-765 | Platform Upgrade & Migration Strategy | 3 pts | ⏳ Planned | MEDIA-744, MEDIA-606 |
+| MEDIA-765 | Platform Upgrade & Migration Strategy | 3 pts | ✅ Done | MEDIA-744, MEDIA-606 |
 
 ## Epic: MEDIA-MULTI — Multi-Device Audio (v2)
 

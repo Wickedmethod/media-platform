@@ -3,7 +3,7 @@ import { defineConfig } from "orval";
 export default defineConfig({
   mediaPlatform: {
     input: {
-      target: "http://localhost:5000/openapi/v1.json",
+      target: "http://localhost:5199/openapi/v1.json",
     },
     output: {
       mode: "tags-split",

@@ -5,7 +5,7 @@
 **Epic:** MEDIA-DEPLOY — Deployment & Configuration  
 **Priority:** Medium  
 **Effort:** 3 points  
-**Status:** ⏳ Planned  
+**Status:** ✅ Done  
 **Depends on:** MEDIA-744 (Docker Compose Stack), MEDIA-606 (Redis Persistence)
 
 ---

@@ -1,4 +1,5 @@
 using System.Threading.RateLimiting;
+using Asp.Versioning;
 using Microsoft.AspNetCore.RateLimiting;
 using MediaPlatform.Api.Authorization;
 using MediaPlatform.Api.Endpoints;
@@ -184,6 +185,15 @@ builder.Services.Configure<AlertingOptions>(builder.Configuration.GetSection("Al
 builder.Services.AddSingleton<IAlertDispatcher, AlertDispatcher>();
 builder.Services.AddHostedService<AnomalyAlertService>();
 
+// API Versioning (MEDIA-759)
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true;
+    options.ApiVersionReader = new UrlSegmentApiVersionReader();
+});
+
 // OpenAPI spec generation
 builder.Services.AddOpenApi(options =>
 {
@@ -252,18 +262,44 @@ app.MapGet("/events", (HttpContext ctx) =>
 });
 
 var api = app.MapGroup("/api");
-api.MapQueueEndpoints();
-api.MapPlayerEndpoints();
-api.MapSyncEndpoints();
+
+// Versioned endpoints — /api/v1/* (MEDIA-759)
+var versionSet = app.NewApiVersionSet()
+    .HasApiVersion(new ApiVersion(1, 0))
+    .Build();
+var v1 = api.MapGroup("/v1")
+    .WithApiVersionSet(versionSet)
+    .MapToApiVersion(new ApiVersion(1, 0));
+
+v1.MapQueueEndpoints();
+v1.MapPlayerEndpoints();
+v1.MapSyncEndpoints();
+v1.MapNotificationEndpoints();
+v1.MapAnalyticsEndpoints();
+v1.MapAdminEndpoints();
+v1.MapPolicyEndpoints();
+v1.MapWorkerEndpoints();
+v1.MapDiagnosticsEndpoints();
+v1.MapSearchEndpoints();
+
+// Unversioned endpoints — /api/* (stable contracts)
 api.MapEventStreamEndpoints();
-api.MapNotificationEndpoints();
-api.MapAnalyticsEndpoints();
-api.MapAdminEndpoints();
-api.MapPolicyEndpoints();
-api.MapWorkerEndpoints();
-api.MapDiagnosticsEndpoints();
-api.MapSearchEndpoints();
+
 app.MapMetrics();
+
+// Run Redis migrations if --migrate flag is present (MEDIA-765)
+if (args.Contains("--migrate"))
+{
+    using var scope = app.Services.CreateScope();
+    var redis = scope.ServiceProvider.GetRequiredService<IConnectionMultiplexer>();
+    var loggerFactory = scope.ServiceProvider.GetRequiredService<ILoggerFactory>();
+    var runner = new MediaPlatform.Infrastructure.Redis.MigrationRunner(
+        redis, loggerFactory.CreateLogger<MediaPlatform.Infrastructure.Redis.MigrationRunner>());
+    var migrationsPath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "migrations");
+    if (!Directory.Exists(migrationsPath))
+        migrationsPath = Path.Combine(AppContext.BaseDirectory, "migrations");
+    await runner.RunMigrationsAsync(migrationsPath);
+}
 
 app.Run();
 

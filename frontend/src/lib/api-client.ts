@@ -1,9 +1,8 @@
 import { ApiError } from '@/lib/api-error'
 import { useAuthStore } from '@/stores/auth'
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '/api'
-
-/** Custom fetch mutator for Orval-generated API clients */
+/** Custom fetch mutator for Orval-generated API clients.
+ *  Orval URLs already include the full path from the OpenAPI spec (e.g. /api/v1/queue). */
 export const apiClient = async <T>(config: {
   url: string
   method: string
@@ -24,7 +23,7 @@ export const apiClient = async <T>(config: {
     headers.set('Content-Type', 'application/json')
   }
 
-  const url = new URL(`${API_BASE}${config.url}`, window.location.origin)
+  const url = new URL(config.url, window.location.origin)
   if (config.params) {
     for (const [key, value] of Object.entries(config.params)) {
       if (value != null) url.searchParams.set(key, String(value))

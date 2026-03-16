@@ -1,5 +1,5 @@
 # Media Platform — Caddy Reverse Proxy
-# Routes: /api/* → API, /events → SSE, /* → Frontend SPA
+# Routes: /api/v1/* → API (versioned), /api/events → SSE, /* → Frontend SPA
 {
 	# Use HTTP locally; override with HTTPS domain in production
 	auto_https off
@@ -21,7 +21,7 @@
 	encode gzip zstd
 
 	# SSE endpoint — disable buffering for real-time streaming
-	handle /events {
+	handle /api/events {
 		reverse_proxy media-platform-api:8080 {
 			flush_interval -1
 			transport http {
@@ -30,13 +30,17 @@
 		}
 	}
 
-	# API routes (strip /api prefix)
-	handle /api/* {
-		uri strip_prefix /api
+	# Legacy SSE redirect (/events → /api/events)
+	handle /events {
 		reverse_proxy media-platform-api:8080
 	}
 
-	# Health endpoints (direct passthrough)
+	# All API routes (versioned /api/v1/* and unversioned /api/events)
+	handle /api/* {
+		reverse_proxy media-platform-api:8080
+	}
+
+	# Health endpoints (no auth required)
 	handle /health/* {
 		reverse_proxy media-platform-api:8080
 	}
@@ -49,41 +53,6 @@
 	handle /metrics {
 		reverse_proxy @internal media-platform-api:8080
 		respond 403
-	}
-
-	# Queue sync, diagnostics, admin, webhooks, policies, analytics  — API passthrough
-	handle_path /sync {
-		reverse_proxy media-platform-api:8080
-	}
-	handle /diagnostics/* {
-		reverse_proxy media-platform-api:8080
-	}
-	handle /admin/* {
-		reverse_proxy media-platform-api:8080
-	}
-	handle /webhooks* {
-		reverse_proxy media-platform-api:8080
-	}
-	handle /policies* {
-		reverse_proxy media-platform-api:8080
-	}
-	handle /analytics* {
-		reverse_proxy media-platform-api:8080
-	}
-	handle /now-playing {
-		reverse_proxy media-platform-api:8080
-	}
-	handle /player/* {
-		reverse_proxy media-platform-api:8080
-	}
-	handle /worker/* {
-		reverse_proxy media-platform-api:8080
-	}
-	handle /queue/* {
-		reverse_proxy media-platform-api:8080
-	}
-	handle /queue {
-		reverse_proxy media-platform-api:8080
 	}
 
 	# OpenAPI docs

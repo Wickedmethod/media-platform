@@ -16,7 +16,7 @@ const player = usePlayerStore();
 
 // Global SSE connection — pipes events to player store
 const sse = useSSE({
-  url: `${config.apiBaseUrl}/events`,
+  url: config.apiEventsUrl,
   withCredentials: true,
   onEvent: (event, data) => {
     player.handleSSEEvent(event, data);

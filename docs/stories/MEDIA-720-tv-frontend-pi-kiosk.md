@@ -5,7 +5,7 @@
 **Epic:** MEDIA-FE-TV — TV Frontend  
 **Priority:** High  
 **Effort:** 5 points  
-**Status:** ⏳ Planned  
+**Status:** ✅ Done  
 **Depends on:** MEDIA-704 (SSE composable, pattern reference)
 
 ---

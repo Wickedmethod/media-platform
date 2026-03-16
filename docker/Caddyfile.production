@@ -16,7 +16,7 @@ media.homelab.local {
 	encode gzip zstd
 
 	# SSE endpoint — disable buffering
-	handle /events {
+	handle /api/events {
 		reverse_proxy media-platform-api:8080 {
 			flush_interval -1
 			transport http {
@@ -25,9 +25,13 @@ media.homelab.local {
 		}
 	}
 
-	# API routes (strip /api prefix)
+	# Legacy SSE redirect (/events → /api/events)
+	handle /events {
+		reverse_proxy media-platform-api:8080
+	}
+
+	# All API routes (versioned /api/v1/* and unversioned /api/events)
 	handle /api/* {
-		uri strip_prefix /api
 		reverse_proxy media-platform-api:8080
 	}
 
@@ -46,40 +50,7 @@ media.homelab.local {
 		respond 403
 	}
 
-	# API passthrough routes
-	handle /sync {
-		reverse_proxy media-platform-api:8080
-	}
-	handle /diagnostics/* {
-		reverse_proxy media-platform-api:8080
-	}
-	handle /admin/* {
-		reverse_proxy media-platform-api:8080
-	}
-	handle /webhooks* {
-		reverse_proxy media-platform-api:8080
-	}
-	handle /policies* {
-		reverse_proxy media-platform-api:8080
-	}
-	handle /analytics* {
-		reverse_proxy media-platform-api:8080
-	}
-	handle /now-playing {
-		reverse_proxy media-platform-api:8080
-	}
-	handle /player/* {
-		reverse_proxy media-platform-api:8080
-	}
-	handle /worker/* {
-		reverse_proxy media-platform-api:8080
-	}
-	handle /queue/* {
-		reverse_proxy media-platform-api:8080
-	}
-	handle /queue {
-		reverse_proxy media-platform-api:8080
-	}
+	# OpenAPI docs
 	handle /openapi/* {
 		reverse_proxy media-platform-api:8080
 	}
