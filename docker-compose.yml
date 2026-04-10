@@ -11,13 +11,20 @@ services:
         condition: service_healthy
     networks:
       - media-platform
-      - keycloak-public
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
     restart: unless-stopped
 
   media-platform-web:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        VITE_AUTH_BYPASS: "true"
     container_name: media-platform-web
     ports:
       - "3000:80"
@@ -43,30 +50,9 @@ services:
       - media-platform
     restart: unless-stopped
 
-  caddy:
-    image: caddy:2-alpine
-    container_name: media-platform-caddy
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy-data:/data
-      - caddy-config:/config
-    depends_on:
-      - media-platform-api
-      - media-platform-web
-    networks:
-      - media-platform
-    restart: unless-stopped
-
 volumes:
   redis-data:
-  caddy-data:
-  caddy-config:
 
 networks:
   media-platform:
     driver: bridge
-  keycloak-public:
-    external: true

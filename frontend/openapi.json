@@ -35,7 +35,7 @@
         }
       }
     },
-    "/api/queue": {
+    "/api/v1/queue": {
       "get": {
         "tags": [
           "Queue"
@@ -59,7 +59,7 @@
         }
       }
     },
-    "/api/queue/add": {
+    "/api/v1/queue/add": {
       "post": {
         "tags": [
           "Queue"
@@ -120,7 +120,7 @@
         }
       }
     },
-    "/api/queue/{id}": {
+    "/api/v1/queue/{id}": {
       "delete": {
         "tags": [
           "Queue"
@@ -164,7 +164,7 @@
         }
       }
     },
-    "/api/queue/mode": {
+    "/api/v1/queue/mode": {
       "get": {
         "tags": [
           "Queue"
@@ -234,7 +234,7 @@
         }
       }
     },
-    "/api/queue/reorder": {
+    "/api/v1/queue/reorder": {
       "post": {
         "tags": [
           "Queue"
@@ -278,7 +278,7 @@
         }
       }
     },
-    "/api/player/heartbeat": {
+    "/api/v1/player/heartbeat": {
       "post": {
         "tags": [
           "Player"
@@ -302,7 +302,7 @@
         }
       }
     },
-    "/api/player/play": {
+    "/api/v1/player/play": {
       "post": {
         "tags": [
           "Player"
@@ -333,7 +333,7 @@
         }
       }
     },
-    "/api/player/pause": {
+    "/api/v1/player/pause": {
       "post": {
         "tags": [
           "Player"
@@ -364,7 +364,7 @@
         }
       }
     },
-    "/api/player/skip": {
+    "/api/v1/player/skip": {
       "post": {
         "tags": [
           "Player"
@@ -395,7 +395,7 @@
         }
       }
     },
-    "/api/player/stop": {
+    "/api/v1/player/stop": {
       "post": {
         "tags": [
           "Player"
@@ -426,7 +426,7 @@
         }
       }
     },
-    "/api/player/position": {
+    "/api/v1/player/position": {
       "post": {
         "tags": [
           "Player"
@@ -457,7 +457,7 @@
         }
       }
     },
-    "/api/player/error": {
+    "/api/v1/player/error": {
       "post": {
         "tags": [
           "Player"
@@ -488,7 +488,7 @@
         }
       }
     },
-    "/api/now-playing": {
+    "/api/v1/now-playing": {
       "get": {
         "tags": [
           "Player"
@@ -509,7 +509,7 @@
         }
       }
     },
-    "/api/sync": {
+    "/api/v1/sync": {
       "get": {
         "tags": [
           "Sync"
@@ -533,7 +533,7 @@
         }
       }
     },
-    "/api/webhooks": {
+    "/api/v1/webhooks": {
       "get": {
         "tags": [
           "Notifications"
@@ -586,7 +586,7 @@
         }
       }
     },
-    "/api/webhooks/{id}": {
+    "/api/v1/webhooks/{id}": {
       "delete": {
         "tags": [
           "Notifications"
@@ -610,7 +610,7 @@
         }
       }
     },
-    "/api/analytics": {
+    "/api/v1/analytics": {
       "get": {
         "tags": [
           "Analytics"
@@ -642,7 +642,7 @@
         }
       }
     },
-    "/api/analytics/export": {
+    "/api/v1/analytics/export": {
       "get": {
         "tags": [
           "Analytics"
@@ -674,7 +674,7 @@
         }
       }
     },
-    "/api/admin/players": {
+    "/api/v1/admin/players": {
       "get": {
         "tags": [
           "Admin"
@@ -698,7 +698,7 @@
         }
       }
     },
-    "/api/admin/players/{id}/logs": {
+    "/api/v1/admin/players/{id}/logs": {
       "get": {
         "tags": [
           "Admin"
@@ -748,7 +748,7 @@
         }
       }
     },
-    "/api/admin/players/versions": {
+    "/api/v1/admin/players/versions": {
       "get": {
         "tags": [
           "Admin"
@@ -769,7 +769,7 @@
         }
       }
     },
-    "/api/admin/players/expected-version": {
+    "/api/v1/admin/players/expected-version": {
       "post": {
         "tags": [
           "Admin"
@@ -793,7 +793,7 @@
         }
       }
     },
-    "/api/admin/players/notify-update": {
+    "/api/v1/admin/players/notify-update": {
       "post": {
         "tags": [
           "Admin"
@@ -817,7 +817,7 @@
         }
       }
     },
-    "/api/admin/kill-switch": {
+    "/api/v1/admin/kill-switch": {
       "post": {
         "tags": [
           "Admin"
@@ -865,7 +865,7 @@
         }
       }
     },
-    "/api/admin/audit": {
+    "/api/v1/admin/audit": {
       "get": {
         "tags": [
           "Admin"
@@ -893,7 +893,7 @@
         }
       }
     },
-    "/api/admin/anomalies": {
+    "/api/v1/admin/anomalies": {
       "get": {
         "tags": [
           "Admin"
@@ -907,7 +907,7 @@
         }
       }
     },
-    "/api/admin/players/{id}/network": {
+    "/api/v1/admin/players/{id}/network": {
       "get": {
         "tags": [
           "Admin"
@@ -938,7 +938,7 @@
         }
       }
     },
-    "/api/admin/alerts/config": {
+    "/api/v1/admin/alerts/config": {
       "get": {
         "tags": [
           "Admin"
@@ -959,7 +959,7 @@
         }
       }
     },
-    "/api/policies": {
+    "/api/v1/policies": {
       "get": {
         "tags": [
           "Policies"
@@ -1002,7 +1002,7 @@
         }
       }
     },
-    "/api/policies/{id}": {
+    "/api/v1/policies/{id}": {
       "delete": {
         "tags": [
           "Policies"
@@ -1026,7 +1026,7 @@
         }
       }
     },
-    "/api/policies/{id}/toggle": {
+    "/api/v1/policies/{id}/toggle": {
       "post": {
         "tags": [
           "Policies"
@@ -1060,7 +1060,7 @@
         }
       }
     },
-    "/api/policies/evaluate": {
+    "/api/v1/policies/evaluate": {
       "post": {
         "tags": [
           "Policies"
@@ -1084,7 +1084,7 @@
         }
       }
     },
-    "/api/worker/register": {
+    "/api/v1/worker/register": {
       "post": {
         "tags": [
           "Worker"
@@ -1115,7 +1115,7 @@
         }
       }
     },
-    "/api/worker/disconnect": {
+    "/api/v1/worker/disconnect": {
       "post": {
         "tags": [
           "Worker"
@@ -1139,7 +1139,7 @@
         }
       }
     },
-    "/api/diagnostics/logs": {
+    "/api/v1/diagnostics/logs": {
       "post": {
         "tags": [
           "Diagnostics"
@@ -1173,7 +1173,7 @@
         }
       }
     },
-    "/api/diagnostics/network": {
+    "/api/v1/diagnostics/network": {
       "post": {
         "tags": [
           "Diagnostics"
@@ -1207,7 +1207,7 @@
         }
       }
     },
-    "/api/diagnostics/bandwidth-test": {
+    "/api/v1/diagnostics/bandwidth-test": {
       "get": {
         "tags": [
           "Diagnostics"
@@ -1221,7 +1221,7 @@
         }
       }
     },
-    "/api/search/youtube": {
+    "/api/v1/search/youtube": {
       "get": {
         "tags": [
           "Search"
@@ -1248,6 +1248,222 @@
                   "items": {
                     "$ref": "#/components/schemas/YouTubeSearchResult"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sessions/personal": {
+      "post": {
+        "tags": [
+          "Sessions"
+        ],
+        "description": "Create or resume a personal audio session",
+        "operationId": "CreatePersonalSession",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSessionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sessions/mine": {
+      "get": {
+        "tags": [
+          "Sessions"
+        ],
+        "description": "Get the current user's personal session with queue and playback state",
+        "operationId": "GetMySession",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionSnapshotResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sessions/{sessionId}/queue/add": {
+      "post": {
+        "tags": [
+          "Sessions"
+        ],
+        "description": "Add an item to a session's queue",
+        "operationId": "AddToSessionQueue",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddToSessionQueueRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueItemResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sessions/{sessionId}/player/{action}": {
+      "post": {
+        "tags": [
+          "Sessions"
+        ],
+        "description": "Control session playback (play, pause, skip, stop)",
+        "operationId": "SessionPlayerCommand",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "action",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaybackStateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sessions/{sessionId}": {
+      "delete": {
+        "tags": [
+          "Sessions"
+        ],
+        "description": "End a personal session",
+        "operationId": "EndSession",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
                 }
               }
             }
@@ -1282,6 +1498,30 @@
         }
       },
       "AddToQueueRequest": {
+        "required": [
+          "url",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "startAtSeconds": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double",
+            "default": 0
+          }
+        }
+      },
+      "AddToSessionQueueRequest": {
         "required": [
           "url",
           "title"
@@ -1367,6 +1607,17 @@
             "format": "double"
           },
           "measuredAt": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateSessionRequest": {
+        "required": [
+          "deviceId"
+        ],
+        "type": "object",
+        "properties": {
+          "deviceId": {
             "type": "string"
           }
         }
@@ -2029,6 +2280,67 @@
           }
         }
       },
+      "SessionResponse": {
+        "required": [
+          "sessionId",
+          "userId",
+          "deviceId",
+          "type",
+          "createdAt",
+          "lastActivityAt"
+        ],
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string"
+          },
+          "userId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "deviceId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "type": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastActivityAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SessionSnapshotResponse": {
+        "required": [
+          "session",
+          "queue",
+          "playback"
+        ],
+        "type": "object",
+        "properties": {
+          "session": {
+            "$ref": "#/components/schemas/SessionResponse"
+          },
+          "queue": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QueueItemResponse"
+            }
+          },
+          "playback": {
+            "$ref": "#/components/schemas/PlaybackStateResponse"
+          }
+        }
+      },
       "SetExpectedVersionRequest": {
         "required": [
           "version"
@@ -2391,6 +2703,9 @@
     },
     {
       "name": "Search"
+    },
+    {
+      "name": "Sessions"
     }
   ]
 }

@@ -14,6 +14,7 @@ public static class EventStreamEndpoints
             ctx.Response.Headers.ContentType = "text/event-stream";
             ctx.Response.Headers.CacheControl = "no-cache";
             ctx.Response.Headers.Connection = "keep-alive";
+            ctx.Response.Headers["X-Accel-Buffering"] = "no";
 
             await ctx.Response.WriteAsync("retry: 3000\n\n", ct);
             await ctx.Response.Body.FlushAsync(ct);

@@ -88,9 +88,10 @@ public static class PlayerEndpoints
         .RequireAuthorization(AuthPolicies.AdminOnly)
         .WithDescription("Stop playback");
 
-        group.MapPost("/position", async (ReportPositionRequest request, ReportPositionHandler handler, CancellationToken ct) =>
+        group.MapPost("/position", async (ReportPositionRequest request, ReportPositionHandler handler, IEventBroadcaster events, CancellationToken ct) =>
         {
             var state = await handler.HandleAsync(new ReportPositionCommand(request.PositionSeconds), ct);
+            events.Broadcast("position-updated", new SseEvents.PositionUpdated(state.PositionSeconds, 0));
             return Results.Ok(MapState(state));
         })
         .WithName("ReportPosition")
@@ -102,7 +103,10 @@ public static class PlayerEndpoints
         {
             var state = await handler.HandleAsync(new ReportErrorCommand(request.Reason), ct);
             analytics.RecordError(request.Reason ?? "unknown");
-            events.Broadcast("playback-error", MapState(state));
+            events.Broadcast("playback-error", new SseEvents.PlaybackError(
+                request.Reason ?? "unknown",
+                state.CurrentItem?.Url.Value ?? "",
+                state.RetryCount));
             _ = notifications.NotifyAsync("playback-error", new { reason = request.Reason, state = state.State.ToString() }, ct);
             return Results.Ok(MapState(state));
         })
@@ -134,7 +138,18 @@ public static class PlayerEndpoints
             sw.Stop();
             analytics.RecordCommand(command.ToString(), sw.Elapsed.TotalMilliseconds);
             var response = MapState(state);
-            events.Broadcast("playback-state", response);
+
+            // Broadcast granular SSE events the frontend expects
+            events.Broadcast("state-changed", new SseEvents.StateChanged(state.State.ToString()));
+            if (state.CurrentItem is not null)
+                events.Broadcast("track-changed", new SseEvents.TrackChanged(
+                    new QueueItemResponse(
+                        state.CurrentItem.Id, state.CurrentItem.Url.Value, state.CurrentItem.Title,
+                        state.CurrentItem.Status.ToString(), state.CurrentItem.AddedAt,
+                        state.CurrentItem.StartAtSeconds, state.CurrentItem.AddedByUserId,
+                        state.CurrentItem.AddedByName),
+                    state.PositionSeconds));
+
             _ = notifications.NotifyAsync("playback-state", response, ct);
             return Results.Ok(response);
         }

@@ -6,12 +6,17 @@ namespace MediaPlatform.Infrastructure.Events;
 
 public sealed class InMemoryEventBroadcaster : IEventBroadcaster
 {
+    private static readonly JsonSerializerOptions CamelCase = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
+
     private readonly List<Channel<(string, string)>> _subscribers = [];
     private readonly Lock _lock = new();
 
     public void Broadcast(string eventType, object data)
     {
-        var json = JsonSerializer.Serialize(data);
+        var json = JsonSerializer.Serialize(data, CamelCase);
         lock (_lock)
         {
             _subscribers.RemoveAll(ch => ch.Reader.Completion.IsCompleted);

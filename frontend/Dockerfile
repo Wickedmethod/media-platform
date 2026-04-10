@@ -1,6 +1,9 @@
 # Build stage
 FROM node:22-alpine AS build
 
+ARG VITE_AUTH_BYPASS=false
+ENV VITE_AUTH_BYPASS=$VITE_AUTH_BYPASS
+
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
 WORKDIR /app
