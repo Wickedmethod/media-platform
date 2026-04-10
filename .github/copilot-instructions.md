@@ -24,6 +24,8 @@ These instructions are meant to be followed automatically by Copilot/agents when
 | ------------ | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
 | **context7** | Up-to-date library docs and code examples  | **ALWAYS** before implementing anything that depends on external library APIs (.NET, Redis, etc.)             |
 | **serena**   | Semantic code exploration + safe refactors | **ALWAYS** before reading large files or refactoring. Use for symbol search, references, targeted reads/edits |
+| **context-mode** | Context window optimization | **ALWAYS** use `mcp_context-mode_ctx_batch_execute` instead of `run_in_terminal` when output may exceed 20 lines (builds, test runs, logs, grep results) |
+| **obsidian** | Obsidian vault note management | **ALWAYS** use `mcp_obsidian_add-tags` after creating or editing any note to maintain consistent tagging |
 
 **MANDATORY Rules:**
 

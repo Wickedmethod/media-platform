@@ -132,3 +132,18 @@ pnpm build        # Production build
 pnpm preview      # Preview production build
 pnpm generate:api # Regenerate API client from OpenAPI
 ```
+
+---
+
+## Mandatory MCP Tool Usage (CRITICAL)
+
+### Context Mode — Always sandbox large output
+
+- **ALWAYS** use `mcp_context-mode_ctx_batch_execute` instead of `run_in_terminal` when output may exceed 20 lines (builds, test runs, log tailing, grep results, file listings).
+- Use `ctx_execute` for data analysis, file processing, and code analysis — only stdout enters context.
+- Use `ctx_fetch_and_index` + `ctx_search` for web pages — raw HTML never enters context.
+
+### Obsidian — Always tag notes
+
+- **ALWAYS** use `mcp_obsidian_add-tags` after creating or editing any note to maintain consistent tagging and discoverability.
+- Tag conventions: use project names (`nexus`, `caddyadmin`, `media-platform`), content type (`story`, `meeting`, `decision`, `bug`), and status (`in-progress`, `done`, `blocked`).
